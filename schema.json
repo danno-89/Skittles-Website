@@ -1,0 +1,184 @@
+{
+    "collections": {
+      "teams": {
+        "label": "Teams",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "label": "Team Name",
+            "type": "string"
+          },
+          {
+            "fieldPath": "status",
+            "label": "Status",
+            "type": "string"
+          }
+        ]
+      },
+      "players_public": {
+        "label": "Players (Public)",
+        "fields": [
+          {
+            "fieldPath": "firstName",
+            "label": "First Name",
+            "type": "string"
+          },
+          {
+            "fieldPath": "lastName",
+            "label": "Last Name",
+            "type": "string"
+          },
+          {
+            "fieldPath": "role",
+            "label": "Role",
+            "type": "string"
+          },
+          {
+            "fieldPath": "division",
+            "label": "Division",
+            "type": "string"
+          },
+          {
+            "fieldPath": "teamId",
+            "label": "Team",
+            "type": "reference",
+            "collectionId": "teams"
+          },
+          {
+            "fieldPath": "registerDate",
+            "label": "Registration Date",
+            "type": "string"
+          },
+          {
+            "fieldPath": "registerExpiry",
+            "label": "Registration Expiry",
+            "type": "string"
+          }
+        ]
+      },
+      "players_private": {
+        "label": "Players (Private)",
+        "fields": [
+          {
+            "fieldPath": "email",
+            "label": "Email",
+            "type": "string"
+          },
+          {
+            "fieldPath": "mobileNo",
+            "label": "Mobile No.",
+            "type": "string"
+          },
+          {
+            "fieldPath": "homeNo",
+            "label": "Home No.",
+            "type": "string"
+          },
+          {
+            "fieldPath": "dob",
+            "label": "Date of Birth",
+            "type": "string"
+          },
+          {
+            "fieldPath": "address",
+            "label": "Address",
+            "type": "map",
+            "fields": [
+              {
+                "fieldPath": "line1",
+                "label": "Line 1",
+                "type": "string"
+              },
+              {
+                "fieldPath": "line2",
+                "label": "Line 2",
+                "type": "string"
+              },
+              {
+                "fieldPath": "parish",
+                "label": "Parish",
+                "type": "string"
+              },
+              {
+                "fieldPath": "postCode",
+                "label": "Post Code",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      "league_tables": {
+        "label": "League Tables",
+        "fields": [
+          {
+            "fieldPath": "premier_division",
+            "label": "Premier Division",
+            "type": "map",
+            "description": "Standings and data for the Premier Division.",
+            "fields": [
+              {
+                "fieldPath": "leagueName",
+                "label": "League Name",
+                "type": "string"
+              },
+              {
+                "fieldPath": "standings",
+                "label": "Standings",
+                "type": "array",
+                "description": "An array of teams and their points.",
+                "fields": [
+                  {
+                    "fieldPath": "teamId",
+                    "label": "Team",
+                    "type": "reference",
+                    "collectionId": "teams"
+                  },
+                  {
+                    "fieldPath": "teamName",
+                    "label": "Team Name",
+                    "type": "string"
+                  },
+                  {
+                    "fieldPath": "played",
+                    "label": "Played",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "won",
+                    "label": "Won",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "drawn",
+                    "label": "Drawn",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "lost",
+                    "label": "Lost",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "points",
+                    "label": "Points",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "pinsFor",
+                    "label": "Pins For",
+                    "type": "number"
+                  },
+                  {
+                    "fieldPath": "pinsAgainst",
+                    "label": "Pins Against",
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
