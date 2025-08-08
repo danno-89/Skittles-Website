@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Players Register</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="players_register.js" type="module"></script>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<nav class="main-nav">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="league_tables.html">League Tables</a></li>
+    <li><a href="fixtures_results.html">Fixtures / Results</a></li>
+    <li><a href="player_statistics.html">Player Statistics</a></li>
+    <li><a href="players_register.html">Players Register</a></li>
+    <li><a href="committee.html">Committee</a></li>
+    <li><a href="rules.html">Rules</a></li>
+    <li><a href="documents.html">Documents</a></li>
+    <li><a href="other_competitions.html">Other Competitions</a></li>
+    <li><a href="hall_of_fame.html">Hall of Fame</a></li>
+  </ul>
+</nav>
+
+    <h1>Players Register</h1>
+
+    <div id="filters-container" style="margin-bottom: 20px;">
+        <label for="team-filter">Filter by Team:</label>
+        <select id="team-filter">
+            <option value="">All Teams</option>
+        </select>
+
+        <span style="margin-left: 20px;">
+            <input type="checkbox" id="exclude-expired-filter">
+            <label for="exclude-expired-filter">Exclude Expired</label>
+        </span>
+        
+        <span style="margin-left: 20px;">
+            <input type="checkbox" id="expiring-soon-filter">
+            <label for="expiring-soon-filter">Expiring in 30 days</label>
+        </span>
+    </div>
+
+    <div id="players-table-container"></div>
+    
+</body>
+</html>

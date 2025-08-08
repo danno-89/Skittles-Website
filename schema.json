@@ -179,6 +179,41 @@
             ]
           }
         ]
+      },
+      "match_results": {
+        "label": "Match Results",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "label": "Date",
+            "type": "string"
+          },
+          {
+            "fieldPath": "homeTeam",
+            "label": "Home Team",
+            "type": "string"
+          },
+          {
+            "fieldPath": "awayTeam",
+            "label": "Away Team",
+            "type": "string"
+          },
+          {
+            "fieldPath": "homeScore",
+            "label": "Home Score",
+            "type": "number"
+          },
+          {
+            "fieldPath": "awayScore",
+            "label": "Away Score",
+            "type": "number"
+          },
+          {
+            "fieldPath": "division",
+            "label": "Division",
+            "type": "string"
+          }
+        ]
       }
     }
   }

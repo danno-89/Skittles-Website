@@ -1,1 +1,64 @@
-/* Add styles here */
+/* General Table Styles */
+table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+thead { background-color: #f2f2f2; }
+
+/* --- League Standings Table Specific Styles --- */
+.league-standings-table { table-layout: fixed; width: 100%; }
+.league-standings-table th:nth-child(1), .league-standings-table td:nth-child(1) { width: 5%; }  /* Pos */
+.league-standings-table th:nth-child(2), .league-standings-table td:nth-child(2) { width: 25%; } /* Team */
+.league-standings-table th:nth-child(3), .league-standings-table td:nth-child(3) { width: 7%; }  /* Pld */
+.league-standings-table th:nth-child(4), .league-standings-table td:nth-child(4) { width: 7%; }  /* W */
+.league-standings-table th:nth-child(5), .league-standings-table td:nth-child(5) { width: 7%; }  /* D */
+.league-standings-table th:nth-child(6), .league-standings-table td:nth-child(6) { width: 7%; }  /* L */
+.league-standings-table th:nth-child(7), .league-standings-table td:nth-child(7) { width: 7%; }  /* Pts */
+.league-standings-table th:nth-child(8), .league-standings-table td:nth-child(8) { width: 10%; } /* F */
+.league-standings-table th:nth-child(9), .league-standings-table td:nth-child(9) { width: 10%; } /* A */
+.league-standings-table th:nth-child(10), .league-standings-table td:nth-child(10){ width: 8%; }  /* Win% */
+.league-standings-table th:nth-child(11), .league-standings-table td:nth-child(11){ width: 7%; }  /* Ave */
+.league-standings-table td:not(:nth-child(2)) { text-align: center; }
+
+/* Sortable Table Header Styles */
+th[data-sort-key] { cursor: pointer; position: relative; padding-right: 20px; }
+th[data-sort-key]::after { content: ''; position: absolute; right: 8px; top: 50%; border: 4px solid transparent; opacity: 0.3; }
+th[data-sort-key].asc::after { content: ''; transform: translateY(-80%); border-top-color: #333; opacity: 1; }
+th[data-sort-key].desc::after { content: ''; transform: translateY(-20%); border-bottom-color: #333; opacity: 1; }
+
+/* Filter Styles */
+#filters-container { font-family: sans-serif; }
+
+/* --- Fixtures / Results Page Styles --- */
+.date-group-heading {
+    margin-top: 20px;      /* Reduced from 30px */
+    padding-bottom: 5px;   /* Reduced from 10px */
+    border-bottom: 1px solid #ccc; /* Thinner border */
+    font-family: sans-serif;
+    color: #333;
+    font-size: 1.1em;      /* Smaller font size */
+    font-weight: bold;
+}
+.result-card { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee; font-family: sans-serif; }
+.result-card:last-child { border-bottom: none; }
+.result-time { font-weight: bold; font-size: 0.9em; width: 80px; }
+.team-name { flex: 1; }
+.home-team { text-align: right; margin-right: 10px; }
+.away-team { text-align: left; margin-left: 10px; }
+.score { font-weight: bold; background-color: #f2f2f2; padding: 4px 10px; border-radius: 4px; }
+.result-division { width: 150px; text-align: right; font-size: 0.8em; color: #555; font-style: italic; }
+.postponed-team { color: #d9534f; font-weight: bold; }
+.status-postponed { color: #d9534f; font-weight: bold; }
+
+/* Hall of Fame Styles */
+.competition-section { margin-bottom: 24px; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
+.competition-heading { margin-top: 0; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; }
+.winners-list { list-style: none; padding: 0; }
+.winners-list li { padding: 8px 0; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
+.winners-list li:last-child { border-bottom: none; }
+.season { font-weight: bold; color: #555; }
+.winner { color: #0056b3; }
+
+/* Multi-Division Table Styles */
+.multi-division-table { width: 100%; margin-top: 16px; border-collapse: collapse; }
+.multi-division-table th, .multi-division-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+.multi-division-table th { background-color: #e9ecef; }
+.multi-division-table td:first-child { font-weight: bold; text-align: left; }

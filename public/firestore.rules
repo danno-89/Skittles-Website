@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Rules for existing collections
+    match /league_tables/{document=**} { allow read: if true; allow write: if false; }
+    match /players_public/{document=**} { allow read: if true; allow write: if false; }
+    match /teams/{document=**} { allow read: if true; allow write: if false; }
+    match /match_results/{document=**} { allow read: if true; allow write: if false; }
+    match /competitions/{document=**} { allow read: if true; allow write: if false; }
+
+    // Correct rule for the top-level 'winners' collection
+    match /winners/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Default deny rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
