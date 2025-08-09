@@ -1,32 +1,73 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+admin.initializeApp();
+const db = admin.firestore();
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+exports.getCommitteeMembers = functions.https.onCall(async (data, context) => {
+  // Optional: Add authentication check if you want to restrict access
+  // if (!context.auth) {
+  //   throw new functions.https.HttpsError(
+  //     "unauthenticated",
+  //     "The function must be called while authenticated."
+  //   );
+  // }
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+  try {
+    // 1. Fetch all teams for an efficient lookup
+    const teamsSnapshot = await db.collection("teams").get();
+    const teamsMap = new Map();
+    teamsSnapshot.forEach((doc) => {
+      teamsMap.set(doc.id, doc.data().name);
+    });
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    // 2. Fetch all public player data for committee members
+    const publicPlayersSnapshot = await db
+      .collection("players_public")
+      .where("committee", "!=", "")
+      .get();
+      
+    const committeeMembersPromises = [];
+
+    publicPlayersSnapshot.forEach((publicDoc) => {
+      const playerData = publicDoc.data();
+      const playerId = publicDoc.id;
+
+      // Create a promise to fetch all related data for this member
+      const memberPromise = async () => {
+        // 3. Securely fetch the corresponding private data for contact details
+        const privateDocRef = db.collection("players_private").doc(playerId);
+        const privateDocSnap = await privateDocRef.get();
+        const privateData = privateDocSnap.exists() ? privateDocSnap.data() : {};
+
+        // 4. Look up the team name from the map
+        const teamRef = playerData.team;
+        const teamName =
+          teamRef && teamsMap.has(teamRef.id) ?
+            teamsMap.get(teamRef.id) :
+            "N/A";
+
+        // 5. Return a combined object with all necessary data
+        return {
+          id: playerId,
+          name: `${playerData.firstName || ""} ${playerData.lastName || ""}`.trim(),
+          role: playerData.committee,
+          team: teamName,
+          mobileNo: privateData.mobileNo || null,
+        };
+      };
+      committeeMembersPromises.push(memberPromise());
+    });
+
+    // Wait for all the data to be fetched and combined
+    const committeeMembers = await Promise.all(committeeMembersPromises);
+    
+    return committeeMembers;
+  } catch (error) {
+    console.error("Error fetching committee members:", error);
+    throw new functions.https.HttpsError(
+      "internal",
+      "An error occurred while fetching committee data."
+    );
+  }
+});

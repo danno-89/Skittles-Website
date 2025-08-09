@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calendar</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="./firebase.config.js" type="module"></script>
+    <script src="calendar.js" type="module"></script>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<nav class="main-nav">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="league_tables.html">League Tables</a></li>
+    <li><a href="fixtures_results.html">Fixtures / Results</a></li>
+    <li><a href="player_statistics.html">Player Statistics</a></li>
+    <li><a href="players_register.html">Players Register</a></li>
+    <li><a href="committee.html">Committee</a></li>
+    <li><a href="rules.html">Rules</a></li>
+    <li><a href="documents.html">Documents</a></li>
+    <li><a href="other_competitions.html">Other Competitions</a></li>
+    <li><a href="hall_of_fame.html">Hall of Fame</a></li>
+  </ul>
+</nav>
+
+    <h1>Calendar</h1>
+
+    <div id="calendar-controls" style="text-align: center; margin-bottom: 20px; font-family: sans-serif;">
+        <button id="prev-month">Previous</button>
+        <span id="current-month-year" style="font-size: 1.2em; font-weight: bold; margin: 0 15px;"></span>
+        <button id="next-month">Next</button>
+    </div>
+
+    <div id="calendar-grid-container">
+        <div class="day-name">Sun</div>
+        <div class="day-name">Mon</div>
+        <div class="day-name">Tue</div>
+        <div class="day-name">Wed</div>
+        <div class="day-name">Thu</div>
+        <div class="day-name">Fri</div>
+        <div class="day-name">Sat</div>
+        <!-- Calendar day cells will be dynamically loaded here -->
+    </div>
+    
+</body>
+</html>

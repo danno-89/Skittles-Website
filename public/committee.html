@@ -3,27 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Committee</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Committee - My Club</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<nav class="main-nav">
-  <ul>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="league_tables.html">League Tables</a></li>
-    <li><a href="fixtures_results.html">Fixtures / Results</a></li>
-    <li><a href="player_statistics.html">Player Statistics</a></li>
-    <li><a href="players_register.html">Players Register</a></li>
-    <li><a href="committee.html">Committee</a></li>
-    <li><a href="rules.html">Rules</a></li>
-    <li><a href="documents.html">Documents</a></li>
-    <li><a href="other_competitions.html">Other Competitions</a></li>
-    <li><a href="hall_of_fame.html">Hall of Fame</a></li>
-  </ul>
-</nav>
-
-    <h1>Committee</h1>
-    <p>This is the Committee page.</p>
+    <header>
+        <h1>Club Committee</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/fixtures_results.html">Fixtures & Results</a></li>
+                <li><a href="/league_tables.html">League Tables</a></li>
+                <li><a href="/players_register.html">Player Registration</a></li>
+                <li><a href="/committee.html" class="active">Committee</a></li>
+                <li><a href="/documents.html">Documents</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="committee-members" class="section-center">
+            <h2>Our Committee</h2>
+            <div id="committee-list">
+                <p>Loading committee members...</p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 My Club. All rights reserved.</p>
+    </footer>
+    <script type="module" src="committee.js"></script>
 </body>
 </html>

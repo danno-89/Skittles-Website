@@ -7,6 +7,7 @@ service cloud.firestore {
     match /teams/{document=**} { allow read: if true; allow write: if false; }
     match /match_results/{document=**} { allow read: if true; allow write: if false; }
     match /competitions/{document=**} { allow read: if true; allow write: if false; }
+    match /events/{document=**} { allow read: if true; allow write: if false; }
 
     // Correct rule for the top-level 'winners' collection
     match /winners/{document=**} {
@@ -14,8 +15,10 @@ service cloud.firestore {
       allow write: if false;
     }
     
-    // Default deny rule
-    match /{document=**} {
+    // This collection contains sensitive data and should not be publicly readable.
+    // Access to this data should be managed through secure backend environments
+    // like Cloud Functions, which can enforce proper authentication and authorization.
+    match /players_private/{document=**} {
       allow read, write: if false;
     }
   }
