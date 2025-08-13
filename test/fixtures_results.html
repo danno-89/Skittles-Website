@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sarnia Skittles Club - Fixtures / Results</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main>
+    <div class="page-header">
+        <h1>Fixtures / Results</h1>
+        <div class="filter-group">
+            <label for="season-filter">Select Season:</label>
+            <select id="season-filter" class="form-select"></select>
+        </div>
+    </div>
+
+    <div id="filters-container">
+        <div class="filter-group">
+            <label for="team-filter">Filter by Team:</label>
+            <select id="team-filter" class="form-select">
+                <option value="">All Teams</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="competition-filter">Filter by Competition:</label>
+            <select id="competition-filter" class="form-select">
+                <option value="">All Competitions</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Filter by Status:</label>
+            <div class="checkbox-group">
+                <span>
+                    <input type="checkbox" id="exclude-postponed-filter">
+                    <label for="exclude-postponed-filter">Hide Postponed</label>
+                </span>
+                <span>
+                    <input type="checkbox" id="only-postponed-filter">
+                    <label for="only-postponed-filter">Show Only Postponed</label>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-container">
+        <!-- Match results will be dynamically loaded here -->
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+<script src="firebase.config.js" type="module"></script>
+<script src="fixtures_results.js" type="module"></script>
+    
+</body>
+</html>

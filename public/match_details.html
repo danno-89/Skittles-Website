@@ -3,23 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Match Details</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Sarnia Skittles Club - Match Details</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Match Details</h1>
-    </header>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+    <div w3-include-html="navigation.html"></div>
+
     <main>
-        <div id="match-details-container">
-            <!-- Match details will be loaded here -->
+        <div class="page-header">
+            <h1>Match Details</h1>
+            <a href="fixtures_results.html" class="btn btn-primary">← Back to Fixtures</a>
         </div>
-        <div id="player-scores-container">
-            <!-- Player scores will be loaded here -->
+        <div id="match-details-container">
+            <!-- Match header card will be loaded here -->
+        </div>
+
+        <div id="match-tabs-container" class="tab-container">
+            <div class="tabs main-tabs">
+                <button class="tab-link active" data-tab="scoreboard">Scoreboard</button>
+                <button class="tab-link" data-tab="statistics">Statistics</button>
+                <button class="tab-link" data-tab="previous-results">Previous Results</button>
+            </div>
+        </div>
+
+        <div id="tab-content-container">
+            <div id="scoreboard-content" class="tab-pane active">
+                 <div id="player-scores-container">
+                    <!-- Player scores will be loaded here -->
+                </div>
+            </div>
+            <div id="statistics-content" class="tab-pane">
+                <p>Statistics for this match will be available soon.</p>
+            </div>
+            <div id="previous-results-content" class="tab-pane">
+                <p>A list of previous results between these two teams will be shown here.</p>
+            </div>
         </div>
     </main>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="main.js" defer></script>
+    <script src="firebase.config.js" type="module"></script>
     <script src="match_details.js" type="module"></script>
 </body>
 </html>

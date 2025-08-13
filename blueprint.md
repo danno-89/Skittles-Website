@@ -2,13 +2,13 @@
 
 ## Overview
 
-This project is a simple, framework-less web application that demonstrates the use of modern web technologies, including Web Components, modern CSS, and ES Modules. It's designed to be a template for building modern, scalable, and maintainable web applications.
+This project is a modern, framework-less web application for the Sarnia Skittles Club. It provides up-to-date information about fixtures, results, league tables, and club news. The site uses a consistent and responsive layout across all pages and is deployed via Firebase Hosting.
 
 ## Style Guide
 
 ### Typography
 
-*   **Font:** Outfit (from Google Fonts)
+*   **Font:** 'Outfit' (from Google Fonts) is the primary font for its clean and modern look.
 
 ### Color Palette
 
@@ -17,48 +17,47 @@ This project is a simple, framework-less web application that demonstrates the u
     *   Club Yellow: `#F9DD16`
     *   Pure White: `#FFFFFF`
 *   **Neutral Colours:**
-    *   Off White: `#F8F9FA`
-    *   Light Grey: `#E9ECEF`
-    *   Medium Grey: `#6C757D`
-    *   Charcoal: `#212529`
-*   **Tints & Shades:**
-    *   Light Green (Tint): `#1e8449`
-    *   Darker Green (Shade): `#004d00`
-    *   Darker Yellow (Shade): `#D7B804`
-*   **System (Semantic) Colours:**
-    *   Success: `#198754`
-    *   Danger / Error: `#DC3545`
-    *   Warning: `#F9DD16`
-    *   Info: `#0D6EFD`
-
-### 60/30/10 Principle
-
-*   **60% (Dominant):**
-    *   Background: Pure White (`#FFFFFF`)
-    *   Section Backgrounds: Off White (`#F8F9FA`)
-*   **30% (Secondary):**
-    *   Body Text: Charcoal (`#212529`)
-    *   Headings: Club Green (`#006400`)
-    *   Footer Background: Club Green (`#006400`) with Pure White (`#FFFFFF`) text.
-*   **10% (Accent):**
-    *   "Join Now" / "Donate" Buttons: Club Yellow (`#F9DD16`) with Charcoal (`#212529`) text.
-    *   Links: Club Green (`#006400`), which turn Club Yellow (`#F9DD16`) on hover.
+    *   Off White: `#F8F9FA` (used for page backgrounds)
+    *   Light Grey: `#E9ECEF` (used for borders and table headers)
+    *   Charcoal: `#212529` (used for main text)
 
 ## Project Structure
 
-*   `index.html`: The main entry point of the application.
-*   `style.css`: The main stylesheet for the application.
-*   `main.js`: The main JavaScript file, containing the application logic and web component definitions.
-*   `test.css`: A separate stylesheet for testing new styles in isolation.
-*   `blueprint.md`: This file, which documents the project and the development plan.
+*   `public/`: Contains all live website files.
+    *   `index.html`: Main landing page.
+    *   `style.css`: Single stylesheet for the entire application.
+    *   `main.js`: Global script for shared functionality (like HTML includes).
+    *   `firebase.config.js`: Firebase configuration module.
+    *   `fixtures_results.html`: Page to display match fixtures and results.
+    *   `fixtures_results.js`: Script to fetch and render data for the fixtures page.
+    *   *(Other HTML pages like `calendar.html`, `rules.html`, etc.)*
+*   `firebase.json`: Configuration for Firebase services (Hosting).
+*   `public/firestore.rules`: Security rules for the Firestore database.
+*   `blueprint.md`: This documentation file.
 
-## Current Plan
+---
 
-The current plan is to incorporate the "Outfit" font and restructure the page to include a consistent header and a left-hand navigation menu.
+## Current Task: Fix Firestore Permissions
 
-### Steps:
+### Objective
+The `fixtures_results.html` page was getting a "Missing or insufficient permissions" error because the Firestore rules did not allow public read access to the `match_results` collection.
 
-1.  **Update `index.html`:** Restructured the `index.html` file to include a new persistent header, a side navigation bar, and a main content area.
-2.  **Update `test.css`:** Imported the 'Outfit' font from Google Fonts and applied it. Added new styles for the header, side navigation, and the overall page layout using CSS Grid.
-3.  **Update `blueprint.md`:** Documented the new font and the layout changes in the project blueprint.
-4.  **Inform User:** Inform the user about the changes and how to proceed.
+### Implementation Steps
+
+1.  **Update `public/firestore.rules`:**
+    *   Added a new `match` block to the Firestore rules to allow public read access to the `match_results` collection.
+
+    ```
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        // ... other rules
+        match /match_results/{matchId} {
+          allow read: if true;
+        }
+      }
+    }
+    ```
+
+### Current Status
+The Firestore rules have been updated, and the permissions error is resolved. The fixtures and results page should now load data correctly.

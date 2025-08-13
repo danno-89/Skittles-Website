@@ -1,4 +1,4 @@
-import { firebaseConfig } from './firebase.config.js'; // Corrected path
+import { firebaseConfig } from './firebase.config.js';
 
 try {
   firebase.initializeApp(firebaseConfig);
@@ -18,6 +18,60 @@ if (playersPageContainer) {
     const teamFilter = document.getElementById('team-filter');
     const excludeExpiredFilter = document.getElementById('exclude-expired-filter');
     const expiringSoonFilter = document.getElementById('expiring-soon-filter');
+
+    const parseDate = (dateInput) => {
+        if (!dateInput) return null;
+    
+        // Firestore timestamp
+        if (dateInput.seconds) {
+            return new Date(dateInput.seconds * 1000);
+        }
+    
+        // dd/mm/yyyy string
+        if (typeof dateInput === 'string') {
+            const parts = dateInput.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                const year = parseInt(parts[2], 10);
+                if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                     const fullYear = year < 100 ? 2000 + year : year;
+                     return new Date(fullYear, month, day);
+                }
+            }
+        }
+        
+        // Fallback for other string formats (e.g., ISO) or numbers
+        const d = new Date(dateInput);
+        if (d instanceof Date && !isNaN(d.getTime())) {
+            return d;
+        }
+    
+        return null; // Return null if parsing fails
+    };
+
+    const formatDate = (dateInput) => {
+        const date = parseDate(dateInput);
+        if (!date) return 'N/A';
+
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }).replace(/ /g, ' ');
+    };
+
+    const calculateExpiry = (expiryDateStr) => {
+        if (!expiryDateStr) return { daysUntilExpiry: Infinity, expiryStatus: 'N/A' };
+        
+        const expiryDate = parseDate(expiryDateStr);
+        if (!expiryDate) return { daysUntilExpiry: Infinity, expiryStatus: 'Invalid Date' };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const timeDiff = expiryDate.getTime() - today.getTime();
+        const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const status = days < 0 ? 'Expired' : 'Active';
+        
+        return { daysUntilExpiry: days, expiryStatus: status };
+    };
 
     const fetchPlayersAndTeams = async () => {
         try {
@@ -65,23 +119,6 @@ if (playersPageContainer) {
         });
     };
 
-    const calculateExpiry = (expiryDateStr) => {
-        if (!expiryDateStr) return { daysUntilExpiry: Infinity, expiryStatus: 'N/A' };
-        const expiryDate = new Date(expiryDateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        if (isNaN(expiryDate.getTime())) return { daysUntilExpiry: Infinity, expiryStatus: 'Invalid Date' };
-
-        if (expiryDate < today) {
-            return { daysUntilExpiry: -1, expiryStatus: 'Expired' };
-        }
-        
-        const timeDiff = expiryDate.getTime() - today.getTime();
-        const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        return { daysUntilExpiry: days, expiryStatus: 'Active' };
-    };
-
     const renderTable = () => {
         let filteredPlayers = [...allPlayers];
 
@@ -99,7 +136,11 @@ if (playersPageContainer) {
             const valA = a[sortState.column] ?? '';
             const valB = b[sortState.column] ?? '';
             let comparison = 0;
-            if (typeof valA === 'number' && typeof valB === 'number') {
+            if (sortState.column === 'daysUntilExpiry') {
+                const numA = (valA === Infinity || valA === null) ? Number.MAX_SAFE_INTEGER : valA;
+                const numB = (valB === Infinity || valB === null) ? Number.MAX_SAFE_INTEGER : valB;
+                comparison = numA - numB;
+            } else if (typeof valA === 'number' && typeof valB === 'number') {
                 comparison = valA - valB;
             } else {
                 comparison = String(valA).localeCompare(String(valB), undefined, { numeric: true });
@@ -113,7 +154,6 @@ if (playersPageContainer) {
           <thead>
             <tr>
               <th data-sort-key="fullName">Player Name</th>
-              <th data-sort-key="role">Role</th>
               <th data-sort-key="teamName">Team</th>
               <th data-sort-key="registerDate">Registration Date</th>
               <th data-sort-key="recentFixture">Recent Fixture</th>
@@ -126,18 +166,21 @@ if (playersPageContainer) {
         const tbody = table.querySelector('tbody');
 
         if (filteredPlayers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7">No players match the current filters.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6">No players match the current filters.</td></tr>';
         } else {
             filteredPlayers.forEach(player => {
+                const isExpired = player.expiryStatus === 'Expired';
+                const rowClass = isExpired ? 'class="expired-player"' : '';
+                const daysCell = isExpired ? 'Expired' : (player.daysUntilExpiry === Infinity ? 'N/A' : player.daysUntilExpiry);
+
                 const row = `
-                  <tr>
+                  <tr ${rowClass}>
                     <td>${player.fullName}</td>
-                    <td>${player.role || 'N/A'}</td>
                     <td>${player.teamName}</td>
-                    <td>${player.registerDate || 'N/A'}</td>
-                    <td>${player.recentFixture || 'N/A'}</td>
-                    <td>${player.registerExpiry || 'N/A'}</td>
-                    <td>${player.expiryStatus === 'Expired' ? 'Expired' : (player.daysUntilExpiry === Infinity ? 'N/A' : player.daysUntilExpiry)}</td>
+                    <td>${formatDate(player.registerDate)}</td>
+                    <td>${formatDate(player.recentFixture)}</td>
+                    <td>${formatDate(player.registerExpiry)}</td>
+                    <td>${daysCell}</td>
                   </tr>
                 `;
                 tbody.innerHTML += row;
