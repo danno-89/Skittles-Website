@@ -1,0 +1,76 @@
+/* --- Rules Page Specific Styles --- */
+
+.rules-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-top: var(--spacing-lg);
+}
+
+.rules-container h1 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 4px solid var(--club-yellow);
+    padding-bottom: 10px;
+}
+
+.rules-section {
+    background-color: var(--off-white);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-elevation-low);
+    transition: box-shadow var(--transition-speed);
+}
+
+.rules-section:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rules-section summary {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: var(--spacing-md);
+    cursor: pointer;
+    list-style: none; /* Hide default triangle */
+    color: var(--club-green);
+    position: relative;
+    user-select: none;
+}
+
+.rules-section summary::marker {
+    display: none;
+}
+
+.rules-section summary::before {
+    content: '►';
+    position: absolute;
+    left: var(--spacing-md);
+    font-size: 1rem;
+    transition: transform var(--transition-speed);
+}
+
+.rules-section[open] summary::before {
+    content: '▼';
+}
+
+.rules-content {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+    border-top: 1px solid var(--light-grey);
+}
+
+.rules-content h2 {
+    color: var(--darker-green);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1rem;
+}
+
+.rules-content ul, ol {
+    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-lg);
+    color: var(--medium-grey);
+}
+
+.rules-content li {
+    margin-bottom: var(--spacing-xs);
+}

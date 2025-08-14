@@ -1,0 +1,118 @@
+/* --- Login Page Specific Styles --- */
+.auth-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-card {
+    background-color: var(--pure-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+    border: 1px solid var(--light-grey);
+    text-align: center;
+}
+
+.auth-card h2 {
+    color: var(--darker-green);
+    margin-bottom: var(--spacing-sm);
+}
+
+.auth-card p {
+    color: var(--medium-grey);
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+}
+
+.auth-actions {
+    margin-top: var(--spacing-lg);
+}
+
+.auth-actions .btn {
+    width: 100%;
+    padding: 0.8rem;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+    color: var(--medium-grey);
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--light-grey);
+}
+
+.separator:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.separator:not(:empty)::after {
+    margin-left: .5em;
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--pure-white);
+    color: var(--charcoal);
+    border: 1px solid var(--light-grey);
+    width: 100%;
+    box-shadow: var(--shadow-elevation-low);
+}
+
+.btn-google:hover {
+    background-color: var(--off-white);
+}
+
+.btn-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.8rem;
+}
+
+.new-player-section {
+    background-color: var(--off-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+    text-align: center;
+}
+
+.new-player-section h2 {
+    color: var(--darker-green);
+    margin-bottom: var(--spacing-sm);
+}
+
+.new-player-section p {
+    color: var(--medium-grey);
+    margin-bottom: var(--spacing-lg);
+}

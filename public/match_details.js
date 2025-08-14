@@ -162,13 +162,6 @@ const renderStatistics = (homeStats, awayStats, homeTeamName, awayTeamName) => {
     if (!homeStats || !awayStats) {
         return '<p>Statistics cannot be generated as score data is incomplete.</p>';
     }
-    
-    let homeHandsWon = 0;
-    let awayHandsWon = 0;
-    if (homeStats.totalHands === awayStats.totalHands) {
-        if (homeStats.teamScore > awayStats.teamScore) homeHandsWon = 'Win';
-        if (awayStats.teamScore > homeStats.teamScore) awayHandsWon = 'Win';
-    }
 
     const metrics = [
         { label: 'Team Score', home: homeStats.teamScore, away: awayStats.teamScore },
@@ -189,40 +182,32 @@ const renderStatistics = (homeStats, awayStats, homeTeamName, awayTeamName) => {
         let homeWinner = false;
         let awayWinner = false;
         let tie = false;
+        const crownIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="winner-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>`;
 
-        // Special handling for 'Best Player' as it's a string
         if (m.label === 'Best Player') {
             const homePlayerScore = homeStats.bestPlayer.score;
             const awayPlayerScore = awayStats.bestPlayer.score;
-            if (homePlayerScore > awayPlayerScore) {
-                homeWinner = true;
-            } else if (awayPlayerScore > homePlayerScore) {
-                awayWinner = true;
-            } else if (homePlayerScore === awayPlayerScore && homePlayerScore > 0){
-                tie = true;
-            }
+            if (homePlayerScore > awayPlayerScore) homeWinner = true;
+            else if (awayPlayerScore > homePlayerScore) awayWinner = true;
+            else if (homePlayerScore === awayPlayerScore && homePlayerScore > 0) tie = true;
         } else {
-             const homeVal = parseFloat(m.home);
+            const homeVal = parseFloat(m.home);
             const awayVal = parseFloat(m.away);
-            if (homeVal > awayVal) {
-                homeWinner = true;
-            } else if (awayVal > homeVal) {
-                awayWinner = true;
-            } else if (homeVal === awayVal && homeVal > 0){
-                 tie = true;
-            }
+            if (homeVal > awayVal) homeWinner = true;
+            else if (awayVal > homeVal) awayWinner = true;
+            else if (homeVal === awayVal && homeVal > 0) tie = true;
         }
-        
-        const homeValue = homeWinner ? `<strong>${m.home} 🏆</strong>` : (tie ? `<strong>${m.home}</strong>` : m.home);
-        const awayValue = awayWinner ? `<strong>${m.away} 🏆</strong>` : (tie ? `<strong>${m.away}</strong>` : m.away);
+
+        const homeContent = homeWinner ? `${m.home} ${crownIcon}` : m.home;
+        const awayContent = awayWinner ? `${m.away} ${crownIcon}` : m.away;
 
         return `
-        <tr>
-            <td class="stat-value home-value ${homeWinner ? 'winner' : ''} ${tie ? 'tie' : ''}">${homeValue}</td>
-            <td class="stat-label">${m.label}</td>
-            <td class="stat-value away-value ${awayWinner ? 'winner' : ''} ${tie ? 'tie' : ''}">${awayValue}</td>
-        </tr>
-    `;
+            <tr>
+                <td class="stat-value home-value ${homeWinner ? 'winner' : ''} ${tie ? 'tie' : ''}">${homeContent}</td>
+                <td class="stat-label">${m.label}</td>
+                <td class="stat-value away-value ${awayWinner ? 'winner' : ''} ${tie ? 'tie' : ''}">${awayContent}</td>
+            </tr>
+        `;
     }).join('');
 
     return `

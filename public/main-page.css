@@ -1,0 +1,56 @@
+/* --- Index/Main Page Specific Styles --- */
+.main-grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+}
+
+#hero {
+    margin-bottom: var(--spacing-lg);
+}
+
+#hero h1 {
+    font-size: 1.5rem;
+}
+
+.action-box {
+    padding: var(--spacing-lg);
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* This makes the buttons the same width */
+    text-align: center;
+}
+
+.action-box .btn {
+    /* No longer full width */
+}
+
+.action-box p {
+    margin: 0.5rem 0;
+}
+
+.separator {
+    width: 80%;
+    align-self: center; /* Center the separator line */
+    height: 1px;
+    background-color: var(--light-grey);
+    margin: 1rem 0;
+}
+
+/* Responsive styles for the main page layout */
+@media (max-width: 992px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+    .main-content {
+        order: 2;
+    }
+    .sidebar-right {
+        order: 1;
+        margin-top: 0;
+    }
+}

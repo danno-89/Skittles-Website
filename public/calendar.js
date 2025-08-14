@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dateElement = document.createElement('div');
             dateElement.className = 'schedule-day-date';
-            dateElement.innerHTML = `${currentDay.toLocaleDateString('en-US', { weekday: 'short' })}<br>${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
+            dateElement.textContent = `${currentDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
             
             const eventsElement = document.createElement('div');
             eventsElement.className = 'schedule-day-events';

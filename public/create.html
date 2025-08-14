@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Shirehampton Cricket Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="create-page.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main class="container">
+        <h1>Create Your Account</h1>
+        <div class="form-container">
+            <form id="create-account-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            <p id="error-message" class="error-message"></p>
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            <button id="google-signin-btn" class="btn google-btn">
+                <img src="google_logo.png" alt="Google logo">
+                Sign in with Google
+            </button>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="firebase.config.js" type="module"></script>
+    <script src="create.js" type="module"></script>
+    <script src="script.js"></script> 
+</body>
+</html>

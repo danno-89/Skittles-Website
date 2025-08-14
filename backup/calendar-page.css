@@ -1,0 +1,112 @@
+/* --- Calendar/Schedule Specific Styles --- */
+
+#calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#current-month-year {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--club-green);
+    min-width: 120px;
+    text-align: center;
+}
+
+#schedule-container {
+    display: grid;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+}
+
+.schedule-day {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+    align-items: center;
+}
+
+.schedule-day-date {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--darker-green);
+    border-inline-end: 2px solid var(--light-grey);
+    padding-inline-end: var(--spacing-md);
+    text-align: right;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.schedule-day-events {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-inline-end: 2px solid var(--light-grey);
+}
+
+.schedule-day-availability {
+    padding: var(--spacing-sm);
+    text-align: center;
+}
+
+.schedule-event {
+    margin-block-end: 0.25rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.schedule-event strong {
+    color: var(--darker-yellow);
+    text-shadow: 1px 1px 1px hsl(0 0% 100% / 0.5);
+}
+
+.availability-count {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--success);
+    cursor: pointer;
+    transition: color var(--transition-speed);
+    display: block;
+}
+
+.availability-count:hover {
+    color: var(--light-green);
+    text-decoration: underline;
+}
+
+.no-availability {
+    color: var(--medium-grey);
+    font-style: italic;
+}
+
+/* Reduced table row height and font size for the calendar page */
+#schedule-container th,
+#schedule-container td {
+    padding: 0.2rem 0.25rem;
+    font-size: 0.45rem;
+}
+
+/* Responsive styles for the calendar */
+@media (max-width: 850px) {
+    .schedule-day {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    .schedule-day-date, .schedule-day-events {
+        border-inline-end: none;
+        border-block-end: 2px solid var(--light-grey);
+        padding-inline-end: 0;
+        padding-block-end: var(--spacing-sm);
+        text-align: left;
+        justify-content: flex-start;
+    }
+    .schedule-day-availability {
+        text-align: left;
+        padding-top: var(--spacing-sm);
+    }
+}

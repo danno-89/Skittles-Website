@@ -1,0 +1,104 @@
+/* --- Fixtures/Results Page Specific Styles --- */
+#filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.filter-group-right {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-end;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-xs);
+}
+
+.checkbox-group span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin: 0;
+    width: 1rem;
+    height: 1rem;
+}
+
+#results-container {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.results-table th, .results-table td {
+    white-space: nowrap;
+}
+
+.week-header {
+    cursor: pointer;
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    font-weight: bold;
+}
+
+.week-header .arrow {
+    display: inline-block;
+    width: 1.5em;
+    transition: transform 0.2s;
+}
+
+.week-header:hover {
+    background-color: var(--darker-yellow);
+}
+
+.score, .status-cell {
+    text-align: center;
+}
+
+.btn-details {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--club-green);
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--club-green);
+    background-color: var(--pure-white);
+    text-align: center;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.btn-details:hover {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    text-decoration: none;
+}
+
+.status-postponed {
+    color: var(--danger);
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-container {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}

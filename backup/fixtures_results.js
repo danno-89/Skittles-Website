@@ -4,6 +4,7 @@ import { firebaseConfig } from './firebase.config.js';
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const competitionCache = new Map();
+const teamCache = new Map();
 let allFixtures = [];
 
 // --- Helper Functions ---
@@ -30,14 +31,14 @@ async function populateCompetitionCache() {
     }
 }
 
-async function getTeamName(teamId) {
-    if (!teamId) return "N/A";
+async function populateTeamCache() {
     try {
-        const teamDoc = await db.collection("teams").doc(teamId).get();
-        return teamDoc.exists ? teamDoc.data().name : "Unknown Team";
+        const snapshot = await db.collection("teams").get();
+        snapshot.forEach(doc => {
+            teamCache.set(doc.id, doc.data());
+        });
     } catch (error) {
-        console.error(`Error getting team name for ID ${teamId}:`, error);
-        return "Error";
+        console.error("Error populating team cache:", error);
     }
 }
 
@@ -118,10 +119,8 @@ async function displayMatchResults() {
 
         for (const match of group.matches) {
             const awayTeamId = match.awayTeamId || match.awayTeamis;
-            const [homeTeamName, awayTeamName] = await Promise.all([
-                getTeamName(match.homeTeamId),
-                getTeamName(awayTeamId)
-            ]);
+            const homeTeamName = teamCache.get(match.homeTeamId)?.name || "Unknown Team";
+            const awayTeamName = teamCache.get(awayTeamId)?.name || "Unknown Team";
 
             const hasResult = match.homeScore != null && match.awayScore != null;
             const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
@@ -175,8 +174,8 @@ async function displayMatchResults() {
                     <th>Time</th>
                     <th>Home Team</th>
                     <th>Away Team</th>
-                    <th>Score</th>
-                    <th>Status</th>
+                    <th class="centered-header">Score</th>
+                    <th class="centered-header">Status</th>
                     <th>Competition</th>
                 </tr>
             </thead>
@@ -187,23 +186,21 @@ async function displayMatchResults() {
 
 // --- Filter Population ---
 
-async function populateTeamFilter() {
+function populateTeamFilter() {
     const teamFilterSelect = document.getElementById('team-filter');
     if (!teamFilterSelect) return;
-    try {
-        const snapshot = await db.collection("teams").orderBy("name").get();
-        snapshot.forEach(doc => {
-            const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = doc.data().name;
-            teamFilterSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error populating team filter:", error);
-    }
+    
+    const sortedTeams = [...teamCache.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name));
+
+    sortedTeams.forEach(([id, team]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = team.name;
+        teamFilterSelect.appendChild(option);
+    });
 }
 
-async function populateCompetitionFilter() {
+function populateCompetitionFilter() {
     const competitionFilterSelect = document.getElementById('competition-filter');
     if (!competitionFilterSelect) return;
     competitionCache.forEach((competition, id) => {
@@ -317,12 +314,18 @@ function setupEventListeners() {
 }
 
 async function initializePage() {
-    await populateCompetitionCache();
-    await populateTeamFilter();
-    await populateCompetitionFilter();
+    await Promise.all([
+        populateCompetitionCache(),
+        populateTeamCache()
+    ]);
+    
+    populateTeamFilter();
+    populateCompetitionFilter();
+    
     await fetchAllFixtures();
     await populateSeasonFilter();
     await displayMatchResults();
+    
     setupEventListeners();
 }
 
