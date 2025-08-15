@@ -1,57 +1,84 @@
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-const auth = getAuth();
-const createAccountForm = document.getElementById('create-account-form');
-const googleSignInBtn = document.getElementById('google-signin-btn');
-const errorMessage = document.getElementById('error-message');
+import { auth, db } from './firebase.config.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-createAccountForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    const createAccountForm = document.getElementById('createAccountForm');
+    const loginForm = document.getElementById('loginForm');
+    const createMessageContainer = document.getElementById('create-message-container');
+    const loginMessageContainer = document.getElementById('login-message-container');
+    const showCreateBtn = document.getElementById('showCreate');
+    const showLoginBtn = document.getElementById('showLogin');
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
+    showCreateBtn.addEventListener('click', () => {
+        createAccountForm.style.display = 'block';
+        loginForm.style.display = 'none';
+        showCreateBtn.classList.add('active');
+        showLoginBtn.classList.remove('active');
+    });
 
-    if (password !== confirmPassword) {
-        errorMessage.textContent = "Passwords do not match.";
-        return;
+    showLoginBtn.addEventListener('click', () => {
+        createAccountForm.style.display = 'none';
+        loginForm.style.display = 'block';
+        showCreateBtn.classList.remove('active');
+        showLoginBtn.classList.add('active');
+    });
+
+    if (createAccountForm) {
+        createAccountForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstname = e.target.firstname.value;
+            const lastname = e.target.lastname.value;
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            const confirmPassword = e.target.confirmPassword.value;
+
+            if (password !== confirmPassword) {
+                createMessageContainer.textContent = "Passwords do not match.";
+                createMessageContainer.style.color = 'red';
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await setDoc(doc(db, "users", user.uid), {
+                    firstname: firstname,
+                    lastname: lastname,
+                    email: email
+                });
+        
+                window.location.href = `link.html?email=${encodeURIComponent(email)}`;
+    
+            } catch (error) {
+                console.error('Error creating account:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    createMessageContainer.textContent = 'An account with this email already exists. Please log in.';
+                } else {
+                    createMessageContainer.textContent = `Error: ${error.message}`;
+                }
+                createMessageContainer.style.color = 'red';
+            }
+        });
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // Signed in 
-            const user = userCredential.user;
-            console.log('User created:', user);
-            window.location.href = 'link.html';
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessageText = error.message;
-            errorMessage.textContent = errorMessageText;
-            console.error(errorCode, errorMessageText);
-        });
-});
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
 
-googleSignInBtn.addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential.accessToken;
-            // The signed-in user info.
-            const user = result.user;
-            console.log('User signed in with Google:', user);
-            window.location.href = 'link.html';
-        }).catch((error) => {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessageText = error.message;
-            // The email of the user's account used.
-            const email = error.email;
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            errorMessage.textContent = errorMessageText;
-            console.error(errorCode, errorMessageText);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'profile.html';
+            } catch (error) {
+                console.error('Error logging in:', error);
+                loginMessageContainer.textContent = `Error: ${error.message}`;
+                loginMessageContainer.style.color = 'red';
+            }
         });
+    }
 });

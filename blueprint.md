@@ -10,7 +10,7 @@ The project is a web application built using HTML, CSS, and JavaScript, with Fir
 
 -   **`public/`**: The root directory for all static assets and web pages.
     -   **`index.html`**: The main landing page.
-    -   **`*.html`**: Various pages for different features (e.g., `login.html`, `profile.html`, `fixtures_results.html`).
+    -   **`*.html`**: Various pages for different features (e.g., `profile.html`, `fixtures_results.html`).
     -   **`*.css`**: Stylesheets for different pages.
     -   **`*.js`**: JavaScript files for application logic.
     -   **`firebase.config.js`**: Firebase configuration.
@@ -32,25 +32,21 @@ The project is a web application built using HTML, CSS, and JavaScript, with Fir
 
 -   **League Tables:** View the current league standings.
 -   **Fixtures & Results:** See upcoming matches and the results of past matches.
---   **Player Statistics:** View detailed statistics for each player.
+-   **Player Statistics:** View detailed statistics for each player.
 -   **Committee Information:** A page dedicated to the club's committee members.
 -   **Hall of Fame:** A page showcasing past champions and notable players.
 -   **Rules & Regulations:** A page outlining the rules of the league.
+-   **Calendar:** A calendar view of matches and events.
+-   **Documents:** A page for important club documents.
+-   **GDPR:** A page explaining the club's GDPR policy.
 
 ## Design and Styling
 
--   **Layout:** The website uses a consistent header and footer across all pages. The main content is displayed in a central container.
+-   **Layout:** The website uses a consistent header, footer, and navigation across all pages. The main content is displayed in a central container.
 -   **Styling:** The styling is defined in separate CSS files for each page, with a main `style.css` for common styles.
 -   **Responsiveness:** The layout is designed to be responsive and work on different screen sizes.
+-   **Branding:** The website uses the "SSC Logo.png" for branding in the header.
 
-## Current Task: Fix Login Page Errors
+## Current State
 
-The user is reporting three errors on the login page. The investigation will focus on the following:
-
-1.  **Review Firebase Configuration:** Check `public/firebase.config.js` for any issues, especially with `authDomain`.
-2.  **Analyze Login Logic:** Examine `public/login.js` to understand how both email/password and Google Sign-In are handled.
-3.  **Implement Robust Error Handling:** Add a dedicated error message container in `public/login.html` and update `public/login.js` to display clear error messages from Firebase Authentication. This will address issues like `auth/invalid-password` and other potential login failures.
-4.  **Fix Google Sign-In Redirect:** Ensure the Google Sign-In flow correctly handles the redirect and captures the authentication result. This likely involves fixing the `authDomain` and ensuring `getRedirectResult` is properly called.
-5.  **Clean up unused files:** Delete `public/blueprint.md`.
-
-This plan aims to resolve all login-related issues and improve the user experience by providing clear feedback.
+The project is in a relatively complete state, with most of the core features implemented. The focus is now on refining the existing features, fixing any remaining bugs, and improving the overall user experience.

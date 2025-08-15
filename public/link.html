@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Account - Shirehampton Cricket Club</title>
+    <title>Link Account - Sarnia Skittles Club</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="link-page.css">
+    <link rel="stylesheet" href="main-page.css">
 </head>
 <body>
-    <div id="header-placeholder"></div>
 
-    <main class="container">
-        <h1>Account Linking</h1>
-        <div id="user-info">
-            <p><strong>Authorisation ID:</strong> <span id="auth-id"></span></p>
-            <p><strong>Email:</strong> <span id="email-address"></span></p>
-        </div>
-    </main>
+    <div w3-include-html="header.html"></div>
 
-    <div id="footer-placeholder"></div>
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
 
+        <main class="main-content">
+            <div class="content-section">
+                <h1>Link Your Account</h1>
+                <p>To access all the features of the website, you need to link your account to your player profile.</p>
+
+                <div id="user-info">
+                    <h2>Your Account Details</h2>
+                    <p><strong>Auth ID:</strong> <span id="authId"></span></p>
+                    <p><strong>Email:</strong> <span id="email"></span></p>
+                </div>
+                <div id="player-document-status">
+                    <h2>Player Document Status</h2>
+                    <p><span id="player-document-message">Searching for player profile...</span></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
     <script src="firebase.config.js" type="module"></script>
     <script src="link.js" type="module"></script>
-    <script src="script.js"></script>
-
+    <script src="main.js" defer></script>
 </body>
 </html>
