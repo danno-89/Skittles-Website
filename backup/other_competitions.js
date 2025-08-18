@@ -141,7 +141,13 @@ const renderWinners = (history, competitionName) => {
     history.forEach(entry => {
         if(entry.season && entry.winner){
             const listItem = document.createElement('li');
-            listItem.innerHTML = `<span class="season">${entry.season}</span><span class="winner">${entry.winner}</span>`;
+            let winnerText;
+            if (typeof entry.winner === 'object' && entry.winner.male && entry.winner.female) {
+                winnerText = `${entry.winner.female} & ${entry.winner.male}`;
+            } else {
+                winnerText = entry.winner;
+            }
+            listItem.innerHTML = `<span class="season">${entry.season}</span><span class="winner">${winnerText}</span>`;
             winnersList.appendChild(listItem);
         }
     });

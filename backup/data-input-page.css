@@ -1,0 +1,44 @@
+#data-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+#fixture-selection-container {
+    margin-bottom: 20px;
+}
+
+#score-input-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+    width: 400px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+#submit-scores-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#submit-scores-btn:hover {
+    background-color: #45a049;
+}

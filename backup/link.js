@@ -1,73 +1,97 @@
+
 import { auth, db } from './firebase.config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-const linkAccountForm = document.getElementById('link-account-form');
-const errorMessage = document.getElementById('error-message');
+document.addEventListener('DOMContentLoaded', () => {
+    const authIdSpan = document.getElementById('authId');
+    const emailSpan = document.getElementById('email');
+    const playerDocumentMessageSpan = document.getElementById('player-document-message');
+    let currentUser = null;
 
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        // If no user is logged in, redirect to the login page.
-        window.location.href = 'login.html';
-    }
-});
-
-linkAccountForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorMessage.style.display = 'none';
-
-    const user = auth.currentUser;
-    if (!user) {
-        errorMessage.textContent = 'You must be logged in to link an account.';
-        errorMessage.style.display = 'block';
-        return;
-    }
-
-    const firstName = linkAccountForm['first-name'].value.trim().toLowerCase();
-    const lastName = linkAccountForm['last-name'].value.trim().toLowerCase();
-    const dob = linkAccountForm['dob'].value;
-    const postCode = linkAccountForm['post-code'].value.trim().toLowerCase();
-    const mobileNo = linkAccountForm['mobile-no'].value.trim();
-    const homeNo = linkAccountForm['home-no'].value.trim();
-
-    if (!dob && !postCode && !mobileNo && !homeNo) {
-        errorMessage.textContent = 'Please provide at least one piece of verification information.';
-        errorMessage.style.display = 'block';
-        return;
-    }
-
-    try {
-        const playersRef = collection(db, 'players_private');
-        let q = query(playersRef, 
-            where("firstName", "==", firstName), 
-            where("lastName", "==", lastName)
-        );
-
-        if (dob) q = query(q, where("dob", "==", dob));
-        if (postCode) q = query(q, where("postCode", "==", postCode));
-        if (mobileNo) q = query(q, where("mobileNo", "==", mobileNo));
-        if (homeNo) q = query(q, where("homeNo", "==", homeNo));
-
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            errorMessage.textContent = "We couldn't find a matching player record. Please double-check your details or contact the club secretary.";
-            errorMessage.style.display = 'block';
-        } else if (querySnapshot.docs.length > 1) {
-            errorMessage.textContent = "Multiple records found. Please contact the club secretary for assistance.";
-            errorMessage.style.display = 'block';
-        } else {
-            const playerDoc = querySnapshot.docs[0];
-            await updateDoc(doc(db, 'players_private', playerDoc.id), {
-                authId: user.uid
-            });
-
-            alert('Your account has been successfully linked!');
-            window.location.href = 'profile.html';
+    const formatDateToDDMMYYYY = (isoDate) => {
+        if (!isoDate) return '';
+        const parts = isoDate.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
-    } catch (error) {
-        console.error("Error linking account:", error);
-        errorMessage.textContent = 'An error occurred while trying to link your account. Please try again later.';
-        errorMessage.style.display = 'block';
+        return isoDate;
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            authIdSpan.textContent = user.uid;
+            emailSpan.textContent = user.email;
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromQuery = urlParams.get('email');
+
+            if (emailFromQuery) {
+                findPlayerByEmail(emailFromQuery);
+            }
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+
+    async function findPlayerByEmail(email) {
+        const playersRef = collection(db, "players_private");
+        const q = query(playersRef, where("email", "==", email));
+        
+        try {
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                playerDocumentMessageSpan.textContent = "No player profile found with this email.";
+            } else {
+                const playerDoc = querySnapshot.docs[0];
+                playerDocumentMessageSpan.innerHTML = `
+                    <p>Player profile found. Please enter your date of birth to verify your identity.</p>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    <button id="verifyAndLink" class="btn btn-primary">Verify and Link</button>
+                `;
+                
+                document.getElementById('verifyAndLink').addEventListener('click', async () => {
+                    const dobInputRaw = document.getElementById('dob').value;
+                    const dobInputFormatted = formatDateToDDMMYYYY(dobInputRaw);
+                    const playerDob = playerDoc.data().dob;
+
+                    if (dobInputFormatted === playerDob) {
+                        
+                        // --- NEW DIAGNOSTIC LOG ---
+                        console.log("Verification successful. Preparing to update Firestore document.");
+                        console.log("Data from Firestore (resource.data):", playerDoc.data());
+                        console.log("This is the object the security rules will evaluate.");
+                        // --- END DIAGNOSTIC LOG ---
+
+                        try {
+                            await updateDoc(doc(db, "players_private", playerDoc.id), {
+                                authId: currentUser.uid
+                            });
+
+                            playerDocumentMessageSpan.textContent = "Account linked successfully! Redirecting...";
+                            playerDocumentMessageSpan.style.color = 'green';
+                            setTimeout(() => {
+                                window.location.href = 'profile.html';
+                            }, 3000);
+
+                        } catch (error) {
+                            console.error("Firestore Update Error:", error);
+                            playerDocumentMessageSpan.textContent = "Verification succeeded, but the final update failed. Check the console for a 'Firestore Update Error'.";
+                            playerDocumentMessageSpan.style.color = 'red';
+                        }
+                    } else {
+                        playerDocumentMessageSpan.textContent = "Date of birth does not match. Please try again.";
+                        playerDocumentMessageSpan.style.color = 'red';
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Error Finding Player:", error);
+        }
     }
 });

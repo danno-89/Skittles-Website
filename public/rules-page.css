@@ -35,21 +35,24 @@
     color: var(--club-green);
     position: relative;
     user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .rules-section summary::marker {
     display: none;
 }
 
-.rules-section summary::before {
+.rules-section summary::after {
     content: '►';
-    position: absolute;
-    left: var(--spacing-md);
     font-size: 1rem;
     transition: transform var(--transition-speed);
+    position: absolute;
+    right: var(--spacing-md);
 }
 
-.rules-section[open] summary::before {
+.rules-section[open] summary::after {
     content: '▼';
 }
 

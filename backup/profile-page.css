@@ -1,92 +1,151 @@
-/* Profile Page Specific Styles */
-
-/* Profile Container */
-.profile-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.profile-header {
-    text-align: center;
+/* Grid layout for profile data */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 2rem;
     margin-bottom: 2rem;
 }
 
-.profile-header h1 {
-    font-size: 2.5rem;
-    color: #333;
+/* Styling for each section (Public, Private, etc.) */
+.profile-section {
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
 }
 
-/* Profile Card */
-.profile-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.profile-section h2 {
+    color: var(--club-green);
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.8em;
 }
 
-.profile-avatar img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Styling for individual data fields */
+.profile-field {
+    margin-bottom: 1rem;
 }
 
-.profile-info {
-    text-align: center;
-    margin-top: 1rem;
-}
-
-.profile-info h2 {
-    margin: 0;
-    font-size: 1.8rem;
-}
-
-.profile-info p {
-    margin-top: 0.5rem;
-    color: #777;
-}
-
-/* Profile Stats */
-.profile-stats {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.stat {
-    text-align: center;
-}
-
-.stat h3 {
-    margin: 0;
-    font-size: 1rem;
+.profile-field label {
+    display: block;
+    font-weight: bold;
     color: #555;
+    margin-bottom: 0.3rem;
+    font-size: 1.1em;
 }
 
-.stat p {
-    margin-top: 0.5rem;
-    font-size: 1.5rem;
+.profile-field p {
+    margin: 0;
+    padding: 0.8rem;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    color: #333;
+    min-height: 1.5em;
+}
+
+.profile-field .expired {
+    color: var(--danger);
     font-weight: bold;
 }
 
-/* Profile Actions */
-.profile-actions {
+/* Horizontal layout for DOB and Age */
+.profile-field-horizontal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Consent Section */
+.consent-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    background-color: var(--off-white);
+}
+
+.consent-section .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.consent-section .checkbox-group input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.consent-section .checkbox-group label {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.consent-section .explanation {
+    font-size: 0.9rem;
+    color: var(--medium-grey);
+    margin: 0;
+    padding-left: 2.3rem;
+}
+
+/* Team Management Tab Styles */
+.team-player-list {
     margin-top: 2rem;
 }
 
-.btn-danger {
-    background-color: #d9534f;
-    color: #fff;
+.team-player-list h2 {
+    color: var(--club-green);
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.btn-danger:hover {
-    background-color: #c9302c;
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--light-grey);
+    transition: background-color 0.2s;
+}
+
+.player-item:hover {
+    background-color: var(--off-white);
+}
+
+.player-item.expired {
+    color: var(--danger);
+}
+
+.player-item .expiry-date {
+    font-size: 0.9em;
+    color: var(--medium-grey);
+}
+
+.player-item.expired .expiry-date {
+    color: var(--danger);
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .profile-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-field-horizontal {
+        grid-template-columns: 1fr;
+    }
 }

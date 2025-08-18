@@ -3,90 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Your Player Account - SSC</title>
+    <title>Link Account - Sarnia Skittles Club</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="link-page.css">
+    <link rel="stylesheet" href="main-page.css">
 </head>
 <body>
-    <header id="header-container"></header>
+
+    <div w3-include-html="header.html"></div>
 
     <div class="container">
-        <nav class="main-nav" id="nav-container"></nav>
-        <main>
-            <div class="link-account-container">
-                <div class="page-header">
-                    <h1>Link Your Player Account</h1>
+        <div w3-include-html="navigation.html"></div>
+
+        <main class="main-content">
+            <div class="content-section">
+                <h1>Link Your Account</h1>
+                <p>To access all the features of the website, you need to link your account to your player profile.</p>
+
+                <div id="user-info">
+                    <h2>Your Account Details</h2>
+                    <p><strong>Auth ID:</strong> <span id="authId"></span></p>
+                    <p><strong>Email:</strong> <span id="email"></span></p>
                 </div>
-                <div class="card-no-hover">
-                    <p>To access your player profile, we need to link your online account with your official player registration. Please provide the following details to find your record.</p>
-                    
-                    <form id="link-account-form" class="form-grid">
-                        <!-- Personal Details -->
-                        <div class="form-group">
-                            <label for="first-name" class="form-label">First Name</label>
-                            <input type="text" id="first-name" required class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="last-name" class="form-label">Last Name</label>
-                            <input type="text" id="last-name" required class="form-control">
-                        </div>
-
-                        <!-- Verification Section -->
-                        <div class="verification-section">
-                            <p class="form-label">Verification</p>
-                            <p class="explanation">Please provide ONE of the following to verify your identity.</p>
-                            
-                            <div class="form-group">
-                                <label for="dob" class="form-label">Date of Birth</label>
-                                <input type="date" id="dob" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="post-code" class="form-label">Post Code</label>
-                                <input type="text" id="post-code" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="mobile-no" class="form-label">Mobile Number</label>
-                                <input type="tel" id="mobile-no" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="home-no" class="form-label">Home Number</label>
-                                <input type="tel" id="home-no" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Find & Link My Account</button>
-                        </div>
-                    </form>
-                    <div id="error-message" class="error-message" style="display: none;"></div>
+                <div id="player-document-status">
+                    <h2>Player Document Status</h2>
+                    <p><span id="player-document-message">Searching for player profile...</span></p>
                 </div>
             </div>
         </main>
     </div>
 
-    <footer id="footer-container"></footer>
-
-    <script type="module" src="firebase.config.js"></script>
-    <script type="module" src="link.js"></script>
-    <script type="module" src="auth-listener.js"></script>
-    <script>
-        // Load reusable components
-        const loadComponent = (url, containerId) => {
-            return fetch(url)
-                .then(response => response.text())
-                .then(data => {
-                    if (document.getElementById(containerId)) {
-                        document.getElementById(containerId).innerHTML = data;
-                    }
-                })
-                .catch(error => console.error(`Failed to load ${url}:`, error));
-        };
-
-        Promise.all([
-            loadComponent('header.html', 'header-container'),
-            loadComponent('navigation.html', 'nav-container'),
-            loadComponent('footer.html', 'footer-container')
-        ]);
-    </script>
+    <div w3-include-html="footer.html"></div>
+    <script src="firebase.config.js" type="module"></script>
+    <script src="link.js" type="module"></script>
+    <script src="main.js" defer></script>
+    <script type="module" src="navigation-auth.js"></script>
 </body>
 </html>

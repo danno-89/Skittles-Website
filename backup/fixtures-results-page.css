@@ -51,19 +51,28 @@
 
 .week-header {
     cursor: pointer;
+    background-color: var(--club-green);
+    color: var(--club-yellow);
+    font-weight: bold;
+}
+
+.week-header.is-cup-week {
     background-color: var(--club-yellow);
     color: var(--club-green);
-    font-weight: bold;
+}
+
+.week-header:hover {
+    background-color: var(--darker-green);
+}
+
+.week-header.is-cup-week:hover {
+    background-color: var(--darker-yellow);
 }
 
 .week-header .arrow {
     display: inline-block;
     width: 1.5em;
     transition: transform 0.2s;
-}
-
-.week-header:hover {
-    background-color: var(--darker-yellow);
 }
 
 .score, .status-cell {
