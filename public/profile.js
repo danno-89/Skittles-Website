@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const publicProfileData = document.getElementById('public-profile-data');
     const privateProfileData = document.getElementById('private-profile-data');
     const privateInfoCard = document.getElementById('private-info-card');
+    const dataInputLinkContainer = document.getElementById('data-input-link-container');
 
     const createDetailItem = (label, value) => { /* ... (helper function) ... */ };
     const parseDate = (dateStr) => { /* ... (helper function) ... */ };
@@ -60,7 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const publicDocSnap = await getDoc(publicDocRef);
 
             if (publicDocSnap.exists()) {
-                populatePublicCard(publicDocSnap.data());
+                const publicData = publicDocSnap.data();
+                populatePublicCard(publicData);
+                if (publicData.committee) {
+                    dataInputLinkContainer.innerHTML = `<a href="data_input.html" class="committee-link">Data Input</a>`;
+                }
             }
             populatePrivateCard(privateData);
             if (privateInfoCard) privateInfoCard.style.display = 'block';

@@ -1,52 +1,29 @@
-# Blueprint
+# SSC Fixtures & Results Blueprint
 
-## Overview
+## Project Overview
 
-This document outlines the structure, features, and implementation details of the Snooker Club Website. The website is a comprehensive platform for managing and viewing snooker league information, including fixtures, results, league tables, and player statistics. It also includes user authentication and profile management features.
+This project is a web application for managing and displaying snooker league information, including fixtures, results, league tables, and player statistics. It is built using HTML, CSS, and JavaScript, with Firebase as the backend for data storage and authentication.
 
-## Project Structure
+## Implemented Features & Design
 
-The project is a web application built using HTML, CSS, and JavaScript, with Firebase for backend services.
+### Core Features
 
--   **`public/`**: The root directory for all static assets and web pages.
-    -   **`index.html`**: The main landing page.
-    -   **`*.html`**: Various pages for different features (e.g., `profile.html`, `fixtures_results.html`).
-    -   **`*.css`**: Stylesheets for different pages.
-    -   **`*.js`**: JavaScript files for application logic.
-    -   **`firebase.config.js`**: Firebase configuration.
--   **`functions/`**: Cloud Functions for Firebase.
--   **`firestore.rules`**: Security rules for Firestore.
--   **`database.rules.json`**: Security rules for the Realtime Database.
--   **`storage.rules`**: Security rules for Cloud Storage.
+*   **Fixtures & Results:** Displays a list of all matches, filterable by season, team, and competition. Results are updated in real-time.
+*   **League Tables:** Shows the current standings for each division, with points, wins, losses, and other relevant statistics.
+*   **Player Statistics:** Provides detailed statistics for each player, including win/loss record, high breaks, and other performance metrics.
+*   **User Authentication:** Allows users to register and log in to access protected features, such as submitting results or managing their profile.
+*   **Data Input:** Provides an interface for authorized users to input match results and other data.
 
-## Implemented Features
+### Design
 
-### User Authentication
+*   **Modern & Responsive:** The application is designed to be visually appealing and easy to use on both desktop and mobile devices.
+*   **Intuitive Navigation:** A clear and consistent navigation menu allows users to easily find the information they are looking for.
+*   **Interactive Elements:** The use of interactive elements, such as filters and sortable tables, enhances the user experience.
 
--   **Login/Register:** Users can register and log in using email/password or their Google account.
--   **Profile Management:** Logged-in users can view and update their profile information.
--   **Account Linking:** Users can link their authenticated account with their player data in the system.
--   **Session Management:** The application maintains user sessions and protected routes.
+## Current Change: Date Format Update
 
-### Main Application Features
+### Plan
 
--   **League Tables:** View the current league standings.
--   **Fixtures & Results:** See upcoming matches and the results of past matches.
--   **Player Statistics:** View detailed statistics for each player.
--   **Committee Information:** A page dedicated to the club's committee members.
--   **Hall of Fame:** A page showcasing past champions and notable players.
--   **Rules & Regulations:** A page outlining the rules of the league.
--   **Calendar:** A calendar view of matches and events.
--   **Documents:** A page for important club documents.
--   **GDPR:** A page explaining the club's GDPR policy.
-
-## Design and Styling
-
--   **Layout:** The website uses a consistent header, footer, and navigation across all pages. The main content is displayed in a central container.
--   **Styling:** The styling is defined in separate CSS files for each page, with a main `style.css` for common styles.
--   **Responsiveness:** The layout is designed to be responsive and work on different screen sizes.
--   **Branding:** The website uses the "SSC Logo.png" for branding in the header.
-
-## Current State
-
-The project is in a relatively complete state, with most of the core features implemented. The focus is now on refining the existing features, fixing any remaining bugs, and improving the overall user experience.
+1.  **Update `fixtures_results.js`:** Modify the `fetchAllFixtures` function to handle Firestore timestamps for the `scheduledDate` field. This will involve converting the timestamps to JavaScript `Date` objects.
+2.  **Update Display Logic:** Modify the `displayMatchResults` function to use the `Date` objects directly, ensuring that the dates and times are displayed correctly.
+3.  **Test:** Verify that the fixtures and results are displayed correctly and that the filtering and sorting functionality still works as expected.

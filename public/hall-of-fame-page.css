@@ -1,9 +1,13 @@
 /* --- Hall of Fame Page Specific Styles --- */
-.hof-layout {
+.hall-of-fame-layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: var(--spacing-xl);
     align-items: flex-start;
+}
+
+#competition-tabs-container {
+    margin-bottom: var(--spacing-lg);
 }
 
 #hall-of-fame-container {
@@ -169,7 +173,7 @@
 
 /* --- Responsive adjustment for hall of fame --- */
 @media (max-width: 992px) {
-    .hof-layout {
+    .hall-of-fame-layout {
         grid-template-columns: 1fr;
     }
     .sidebar {

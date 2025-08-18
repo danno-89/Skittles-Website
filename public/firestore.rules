@@ -8,7 +8,8 @@ service cloud.firestore {
     }
 
     // --- Public Collections ---
-    match /league_tables/{doc=**} { allow read: if true; }
+    match /committee/{doc=**} { allow read; }
+    match /league_tables/{doc=**} { allow read; }
     match /fixtures/{doc=**} { allow read: if true; }
     match /events/{doc=**} { allow read: if true; }
     match /teams/{doc=**} { allow read: if true; }

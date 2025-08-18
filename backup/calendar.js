@@ -22,26 +22,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentDate = new Date();
 
-    const fetchFixtures = async (startDate, endDate) => {
+    const fetchMatchResults = async (startDate, endDate) => {
         try {
-            const snapshot = await db.collection('fixtures')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .orderBy('date')
+            const snapshot = await db.collection('match_results')
+                .where('scheduledDate', '>=', startDate)
+                .where('scheduledDate', '<=', endDate)
+                .orderBy('scheduledDate')
                 .get();
             
-            const fixturesByDate = {};
+            const matchesByDate = {};
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const fixtureDate = data.date.toDate().toISOString().split('T')[0];
-                if (!fixturesByDate[fixtureDate]) {
-                    fixturesByDate[fixtureDate] = [];
+                const matchDate = data.scheduledDate.toDate();
+                const dateStr = `${matchDate.getUTCFullYear()}-${String(matchDate.getUTCMonth() + 1).padStart(2, '0')}-${String(matchDate.getUTCDate()).padStart(2, '0')}`;
+                if (!matchesByDate[dateStr]) {
+                    matchesByDate[dateStr] = [];
                 }
-                fixturesByDate[fixtureDate].push({ ...data, type: 'fixture' });
+                matchesByDate[dateStr].push({ 
+                    ...data, 
+                    type: 'fixture',
+                    time: matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' })
+                });
             });
-            return fixturesByDate;
+            return matchesByDate;
         } catch (error) {
-            console.error("Error fetching fixtures:", error);
+            console.error("Error fetching match results:", error);
             return {};
         }
     };
@@ -58,14 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const eventDate = data.date.toDate();
-                const dateStr = eventDate.toISOString().split('T')[0];
+                const dateStr = `${eventDate.getUTCFullYear()}-${String(eventDate.getUTCMonth() + 1).padStart(2, '0')}-${String(eventDate.getUTCDate()).padStart(2, '0')}`;
                 if (!eventsByDate[dateStr]) {
                     eventsByDate[dateStr] = [];
                 }
                 eventsByDate[dateStr].push({
                     type: 'event',
                     name: data.name,
-                    time: eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                    time: eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' })
                 });
             });
             return eventsByDate;
@@ -79,33 +84,33 @@ document.addEventListener('DOMContentLoaded', () => {
         scheduleContainer.innerHTML = 'Loading...';
         monthYearDisplay.textContent = currentDate.toLocaleDateString('en-US', {
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'
         });
 
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+        const year = currentDate.getUTCFullYear();
+        const month = currentDate.getUTCMonth();
 
-        const firstDayOfMonth = new Date(year, month, 1);
-        const lastDayOfMonth = new Date(year, month + 1, 0);
+        const firstDayOfMonth = new Date(Date.UTC(year, month, 1));
+        const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0));
 
-        const [fixturesByDate, eventsByDate] = await Promise.all([
-            fetchFixtures(firstDayOfMonth, lastDayOfMonth),
+        const [matchesByDate, eventsByDate] = await Promise.all([
+            fetchMatchResults(firstDayOfMonth, lastDayOfMonth),
             fetchEvents(firstDayOfMonth, lastDayOfMonth)
         ]);
 
         scheduleContainer.innerHTML = ''; 
 
-        for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
-            const currentDay = new Date(year, month, day);
-            const dateStr = currentDay.toISOString().split('T')[0];
-            const dayOfWeek = currentDay.getDay();
-
-            const dayFixtures = fixturesByDate[dateStr] || [];
+        for (let day = 1; day <= lastDayOfMonth.getUTCDate(); day++) {
+            const currentDay = new Date(Date.UTC(year, month, day));
+            const dateStr = `${currentDay.getUTCFullYear()}-${String(currentDay.getUTCMonth() + 1).padStart(2, '0')}-${String(currentDay.getUTCDate()).padStart(2, '0')}`;
+            
+            const dayMatches = matchesByDate[dateStr] || [];
             const dayEvents = eventsByDate[dateStr] || [];
-            const allItems = [...dayFixtures, ...dayEvents];
-
-            // Helper to parse different time formats for sorting
+            const allItems = [...dayMatches, ...dayEvents];
+            
             const parseTime = (timeStr) => {
+                if (!timeStr) return 0;
                 const lowerTime = timeStr.toLowerCase().replace(/\s/g, '');
                 let [time, modifier] = lowerTime.split(/(am|pm)/);
                 let [hours, minutes] = time.split(':').map(Number);
@@ -121,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dateElement = document.createElement('div');
             dateElement.className = 'schedule-day-date';
-            dateElement.textContent = `${currentDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
+            dateElement.textContent = `${currentDay.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })}, ${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' })}`;
             
             const eventsElement = document.createElement('div');
             eventsElement.className = 'schedule-day-events';
@@ -131,36 +136,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     const detailElement = document.createElement('div');
                     detailElement.className = 'schedule-event';
                     if (item.type === 'fixture') {
-                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.homeTeam} vs ${item.awayTeam} <em>(${item.division})</em>`;
+                        const homeTeamName = item.homeTeamName || (item.homeTeam ? item.homeTeam.name : 'TBC');
+                        const awayTeamName = item.awayTeamName || (item.awayTeam ? item.awayTeam.name : 'TBC');
+                        const divisionName = item.divisionName || (item.division ? item.division.name : 'N/A');
+                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${homeTeamName} vs ${awayTeamName} <em>(${divisionName})</em>`;
                     } else {
                         detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.name}`;
                     }
                     eventsElement.appendChild(detailElement);
                 });
             } else {
-                eventsElement.textContent = 'No fixtures or events scheduled.';
+                eventsElement.textContent = '';
             }
 
             const availabilityElement = document.createElement('div');
             availabilityElement.className = 'schedule-day-availability';
 
-            const isWeekdayWithSlots = dayOfWeek >= 1 && dayOfWeek <= 4;
-            if (isWeekdayWithSlots) {
-                const allPossibleSlots = ['7:00pm', '8:00pm', '9:00pm'];
-                const usedFixtureTimes = dayFixtures.map(f => f.time);
-                const availableSlots = allPossibleSlots.filter(slot => !usedFixtureTimes.includes(slot));
-                
-                if (availableSlots.length > 0) {
-                    const availabilityCount = document.createElement('a');
-                    availabilityCount.className = 'availability-count';
-                    availabilityCount.textContent = `${availableSlots.length} spare slot${availableSlots.length > 1 ? 's' : ''}: ${availableSlots.join(', ')}`;
-                    availabilityCount.href = `mailto:contact@sarniaskittles.com?subject=Fixture Slot Enquiry for ${dateStr}`;
-                    availabilityElement.appendChild(availabilityCount);
+            if (dayMatches.length > 0) {
+                const dayOfWeek = currentDay.getUTCDay();
+                const isWeekdayWithSlots = dayOfWeek >= 1 && dayOfWeek <= 4;
+
+                if (isWeekdayWithSlots) {
+                    const allPossibleSlots = ['7:00 PM', '8:00 PM', '9:00 PM'];
+                    const usedFixtureTimes = dayMatches.map(f => f.time);
+                    const availableSlots = allPossibleSlots.filter(slot => !usedFixtureTimes.includes(slot));
+                    
+                    if (availableSlots.length > 0) {
+                        const availabilityCount = document.createElement('a');
+                        availabilityCount.className = 'availability-count';
+                        availabilityCount.textContent = `${availableSlots.length} spare slot${availableSlots.length > 1 ? 's' : ''}: ${availableSlots.join(', ')}`;
+                        availabilityCount.href = `mailto:contact@sarniaskittles.com?subject=Fixture Slot Enquiry for ${dateStr}`;
+                        availabilityElement.appendChild(availabilityCount);
+                    } else {
+                        availabilityElement.innerHTML = '<span class="no-availability">Fully booked</span>';
+                    }
                 } else {
-                    availabilityElement.innerHTML = '<span class="no-availability">Fully booked</span>';
+                    availabilityElement.innerHTML = '<span class="no-availability">No slots available</span>';
                 }
-            } else {
-                availabilityElement.innerHTML = '<span class="no-availability">No slots available</span>';
             }
             
             dayElement.appendChild(dateElement);
@@ -171,12 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     prevMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
+        currentDate.setUTCMonth(currentDate.getUTCMonth() - 1);
         renderSchedule();
     });
 
     nextMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
+        currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
         renderSchedule();
     });
 

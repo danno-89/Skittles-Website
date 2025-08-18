@@ -10,175 +10,203 @@ try {
 const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
-    const scheduleContainer = document.getElementById('schedule-container');
-    const monthYearDisplay = document.getElementById('current-month-year');
-    const prevMonthBtn = document.getElementById('prev-month');
-    const nextMonthBtn = document.getElementById('next-month');
+    const calendarContainer = document.getElementById('calendar-container');
+    const monthTabsContainer = document.getElementById('month-tabs-container');
+    const seasonFilter = document.getElementById('season-filter');
 
-    if (!scheduleContainer || !monthYearDisplay || !prevMonthBtn || !nextMonthBtn) {
+    if (!calendarContainer || !monthTabsContainer || !seasonFilter) {
         console.error("Calendar elements not found.");
         return;
     }
 
-    let currentDate = new Date();
+    let selectedMonthIndex = new Date().getMonth();
 
-    const fetchFixtures = async (startDate, endDate) => {
+    const fetchCalendarData = async (startDate, endDate) => {
+        const calendarData = {};
+        const startString = startDate.toISOString();
+        const endString = endDate.toISOString();
+
+        const ensureDateEntry = (dateStr) => {
+            if (!calendarData[dateStr]) {
+                calendarData[dateStr] = { events: [], fixtures: {} };
+            }
+        };
+
         try {
-            const snapshot = await db.collection('fixtures')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .orderBy('date')
+            const matchesSnapshot = await db.collection('match_results')
+                .where('scheduledDate', '>=', startString)
+                .where('scheduledDate', '<=', endString)
                 .get();
             
-            const fixturesByDate = {};
-            snapshot.forEach(doc => {
+            matchesSnapshot.forEach(doc => {
                 const data = doc.data();
-                const fixtureDate = data.date.toDate().toISOString().split('T')[0];
-                if (!fixturesByDate[fixtureDate]) {
-                    fixturesByDate[fixtureDate] = [];
-                }
-                fixturesByDate[fixtureDate].push({ ...data, type: 'fixture' });
+                if (data.status !== 'scheduled') return;
+
+                const fixtureDate = new Date(data.scheduledDate);
+                const dateStr = `${fixtureDate.getUTCFullYear()}-${String(fixtureDate.getUTCMonth() + 1).padStart(2, '0')}-${String(fixtureDate.getUTCDate()).padStart(2, '0')}`;
+                ensureDateEntry(dateStr);
+                
+                const time = fixtureDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
+                const homeTeam = data.homeTeamName || 'TBC';
+                const awayTeam = data.awayTeamName || 'TBC';
+                calendarData[dateStr].fixtures[time] = `${homeTeam} vs ${awayTeam}`;
             });
-            return fixturesByDate;
         } catch (error) {
-            console.error("Error fetching fixtures:", error);
-            return {};
+            console.error("Error fetching match_results:", error);
         }
-    };
-    
-    const fetchEvents = async (startDate, endDate) => {
+
         try {
-            const snapshot = await db.collection('events')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .orderBy('date')
+            const eventsSnapshot = await db.collection('events')
+                .where('date', '>=', new Date(startString))
+                .where('date', '<=', new Date(endString))
                 .get();
-            
-            const eventsByDate = {};
-            snapshot.forEach(doc => {
+
+            eventsSnapshot.forEach(doc => {
                 const data = doc.data();
                 const eventDate = data.date.toDate();
-                const dateStr = eventDate.toISOString().split('T')[0];
-                if (!eventsByDate[dateStr]) {
-                    eventsByDate[dateStr] = [];
-                }
-                eventsByDate[dateStr].push({
-                    type: 'event',
-                    name: data.name,
-                    time: eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-                });
+                const dateStr = `${eventDate.getUTCFullYear()}-${String(eventDate.getUTCMonth() + 1).padStart(2, '0')}-${String(eventDate.getUTCDate()).padStart(2, '0')}`;
+                ensureDateEntry(dateStr);
+                calendarData[dateStr].events.push({ type: 'general', description: data.name });
             });
-            return eventsByDate;
         } catch (error) {
             console.error("Error fetching events:", error);
-            return {};
         }
+        
+        return calendarData;
     };
 
-    const renderSchedule = async () => {
-        scheduleContainer.innerHTML = 'Loading...';
-        monthYearDisplay.textContent = currentDate.toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric'
+    const renderMonthTabs = () => {
+        monthTabsContainer.innerHTML = '';
+        monthTabsContainer.className = 'tabs-main';
+        const seasonMonths = [
+            { name: "Jul", index: 6 }, { name: "Aug", index: 7 }, { name: "Sep", index: 8 },
+            { name: "Oct", index: 9 }, { name: "Nov", index: 10 }, { name: "Dec", index: 11 },
+            { name: "Jan", index: 0 }, { name: "Feb", index: 1 }, { name: "Mar", index: 2 },
+            { name: "Apr", index: 3 }, { name: "May", index: 4 }, { name: "Jun", index: 5 }
+        ];
+        seasonMonths.forEach(month => {
+            const tab = document.createElement('button');
+            tab.className = 'tab-link';
+            tab.textContent = month.name;
+            tab.dataset.month = month.index;
+            if (month.index === selectedMonthIndex) tab.classList.add('active');
+            tab.addEventListener('click', () => {
+                selectedMonthIndex = month.index;
+                renderCalendar();
+            });
+            monthTabsContainer.appendChild(tab);
+        });
+    };
+
+    const renderCalendar = async () => {
+        renderMonthTabs();
+        calendarContainer.innerHTML = 'Loading...';
+        const season = seasonFilter.value;
+        if (!season) return;
+
+        const startYear = parseInt(season.split('-')[0]);
+        const year = (selectedMonthIndex >= 6) ? startYear : startYear + 1;
+        const firstDayOfMonth = new Date(Date.UTC(year, selectedMonthIndex, 1));
+        const lastDayOfMonth = new Date(Date.UTC(year, selectedMonthIndex + 1, 0));
+        
+        const calendarData = await fetchCalendarData(
+             new Date(Date.UTC(year, selectedMonthIndex, 1 - (firstDayOfMonth.getUTCDay() + 6) % 7)),
+             new Date(Date.UTC(year, selectedMonthIndex, lastDayOfMonth.getUTCDate() + (7 - lastDayOfMonth.getUTCDay()) % 7))
+        );
+
+        calendarContainer.innerHTML = ''; 
+        const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        weekdays.forEach(day => {
+            const headerCell = document.createElement('div');
+            headerCell.className = 'calendar-header';
+            headerCell.textContent = day;
+            calendarContainer.appendChild(headerCell);
         });
 
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+        const startDate = new Date(firstDayOfMonth);
+        const dayOfWeek = (firstDayOfMonth.getUTCDay() + 6) % 7;
+        startDate.setUTCDate(startDate.getUTCDate() - dayOfWeek);
 
-        const firstDayOfMonth = new Date(year, month, 1);
-        const lastDayOfMonth = new Date(year, month + 1, 0);
-
-        const [fixturesByDate, eventsByDate] = await Promise.all([
-            fetchFixtures(firstDayOfMonth, lastDayOfMonth),
-            fetchEvents(firstDayOfMonth, lastDayOfMonth)
-        ]);
-
-        scheduleContainer.innerHTML = ''; 
-
-        for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
-            const currentDay = new Date(year, month, day);
-            const dateStr = currentDay.toISOString().split('T')[0];
-            const dayOfWeek = currentDay.getDay();
-
-            const dayFixtures = fixturesByDate[dateStr] || [];
-            const dayEvents = eventsByDate[dateStr] || [];
-            const allItems = [...dayFixtures, ...dayEvents];
-
-            // Helper to parse different time formats for sorting
-            const parseTime = (timeStr) => {
-                const lowerTime = timeStr.toLowerCase().replace(/\s/g, '');
-                let [time, modifier] = lowerTime.split(/(am|pm)/);
-                let [hours, minutes] = time.split(':').map(Number);
-                if (modifier === 'pm' && hours < 12) hours += 12;
-                if (modifier === 'am' && hours === 12) hours = 0;
-                return hours * 60 + (minutes || 0);
-            };
-            
-            allItems.sort((a, b) => parseTime(a.time) - parseTime(b.time));
-
+        for (let i = 0; i < 42; i++) {
+            const day = new Date(startDate);
+            day.setUTCDate(day.getUTCDate() + i);
             const dayElement = document.createElement('div');
-            dayElement.className = 'schedule-day';
+            dayElement.className = 'calendar-day';
+            if (day.getUTCMonth() !== selectedMonthIndex) dayElement.classList.add('other-month');
+            
+            const today = new Date();
+            if (day.getUTCFullYear() === today.getFullYear() && day.getUTCMonth() === today.getMonth() && day.getUTCDate() === today.getDate()) {
+                dayElement.classList.add('today');
+            }
 
-            const dateElement = document.createElement('div');
-            dateElement.className = 'schedule-day-date';
-            dateElement.textContent = `${currentDay.toLocaleDateString('en-US', { weekday: 'short' })}, ${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
-            
-            const eventsElement = document.createElement('div');
-            eventsElement.className = 'schedule-day-events';
-            
-            if (allItems.length > 0) {
-                allItems.forEach(item => {
-                    const detailElement = document.createElement('div');
-                    detailElement.className = 'schedule-event';
-                    if (item.type === 'fixture') {
-                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.homeTeam} vs ${item.awayTeam} <em>(${item.division})</em>`;
-                    } else {
-                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.name}`;
-                    }
-                    eventsElement.appendChild(detailElement);
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header';
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day.getUTCDate();
+            dayHeader.appendChild(dayNumber);
+            dayElement.appendChild(dayHeader);
+
+            const dateStr = `${day.getUTCFullYear()}-${String(day.getUTCMonth() + 1).padStart(2, '0')}-${String(day.getUTCDate()).padStart(2, '0')}`;
+            const dataForDay = calendarData[dateStr];
+
+            const eventsList = document.createElement('div');
+            eventsList.className = 'events-list';
+            if (dataForDay?.events.length > 0) {
+                dataForDay.events.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = `event-item event-general`;
+                    eventElement.textContent = event.description;
+                    eventsList.appendChild(eventElement);
                 });
-            } else {
-                eventsElement.textContent = 'No fixtures or events scheduled.';
             }
+            dayElement.appendChild(eventsList);
 
-            const availabilityElement = document.createElement('div');
-            availabilityElement.className = 'schedule-day-availability';
+            const fixtureSlotsContainer = document.createElement('div');
+            fixtureSlotsContainer.className = 'fixture-slots';
+            const allPossibleSlots = ['7:00 PM', '8:00 PM', '9:00 PM'];
+            const dayFixtures = dataForDay ? dataForDay.fixtures : {};
 
-            const isWeekdayWithSlots = dayOfWeek >= 1 && dayOfWeek <= 4;
-            if (isWeekdayWithSlots) {
-                const allPossibleSlots = ['7:00pm', '8:00pm', '9:00pm'];
-                const usedFixtureTimes = dayFixtures.map(f => f.time);
-                const availableSlots = allPossibleSlots.filter(slot => !usedFixtureTimes.includes(slot));
+            allPossibleSlots.forEach(slotTime => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'fixture-slot';
+                slotElement.textContent = slotTime.replace(':00 PM', 'pm');
                 
-                if (availableSlots.length > 0) {
-                    const availabilityCount = document.createElement('a');
-                    availabilityCount.className = 'availability-count';
-                    availabilityCount.textContent = `${availableSlots.length} spare slot${availableSlots.length > 1 ? 's' : ''}: ${availableSlots.join(', ')}`;
-                    availabilityCount.href = `mailto:contact@sarniaskittles.com?subject=Fixture Slot Enquiry for ${dateStr}`;
-                    availabilityElement.appendChild(availabilityCount);
+                if (dayFixtures[slotTime]) {
+                    slotElement.classList.add('fixture-occupied');
+                    slotElement.title = dayFixtures[slotTime];
                 } else {
-                    availabilityElement.innerHTML = '<span class="no-availability">Fully booked</span>';
+                    slotElement.classList.add('fixture-free');
                 }
-            } else {
-                availabilityElement.innerHTML = '<span class="no-availability">No slots available</span>';
+                fixtureSlotsContainer.appendChild(slotElement);
+            });
+
+            const dayOfWeekIndex = day.getUTCDay();
+            if (day.getUTCMonth() === selectedMonthIndex && dayOfWeekIndex >= 1 && dayOfWeekIndex <= 4) { // Mon to Thu
+                dayElement.appendChild(fixtureSlotsContainer);
             }
-            
-            dayElement.appendChild(dateElement);
-            dayElement.appendChild(eventsElement);
-            dayElement.appendChild(availabilityElement);
-            scheduleContainer.appendChild(dayElement);
+
+            calendarContainer.appendChild(dayElement);
         }
     };
 
-    prevMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderSchedule();
-    });
+    const initializePage = async () => {
+        try {
+            const seasonsSnapshot = await db.collection('seasons').orderBy('name', 'desc').get();
+            seasonsSnapshot.forEach(doc => {
+                const season = doc.data();
+                const option = document.createElement('option');
+                option.value = season.name;
+                option.textContent = season.name;
+                if (season.status === 'current') option.selected = true;
+                seasonFilter.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error fetching seasons:", error);
+        }
+        seasonFilter.addEventListener('change', renderCalendar);
+        renderCalendar();
+    };
 
-    nextMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderSchedule();
-    });
-
-    renderSchedule();
+    initializePage();
 });

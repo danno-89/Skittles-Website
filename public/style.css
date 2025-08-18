@@ -199,6 +199,30 @@ header h1 {
     background-color: hsl(54 90% 95%);
 }
 
+/* Navigation Grouping Styles */
+.nav-group {
+ margin-bottom: 15px;
+ padding-bottom: 10px;
+ border-bottom: 1px solid #eee; /* Faint border */
+}
+
+.nav-group h3 {
+ font-size: 1em;
+ margin-top: 0;
+ margin-bottom: 5px;
+ color: #555; /* Slightly muted color for header */
+}
+
+.nav-group ul {
+ list-style: none;
+ padding: 0;
+ margin: 0;
+}
+
+.nav-group li {
+ margin-bottom: 5px;
+}
+
 /* --- Footer --- */
 footer {
     background-color: var(--club-green);
@@ -444,57 +468,34 @@ footer a:hover {
 }
 
 /* --- Tab Navigation --- */
-.tabs {
+.tabs-main {
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 2px solid var(--light-grey);
-}
-
-.tabs-sub {
-    border-bottom: none;
-    padding-top: var(--spacing-sm);
-    background-color: var(--off-white);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-bottom: 2px solid var(--club-green);
+    margin-bottom: var(--spacing-lg);
 }
 
 .tab-link {
-    padding: 0.7rem 1.2rem;
-    border: none;
-    background: none;
+    padding: 0.8rem 1.5rem;
     cursor: pointer;
-    font-size: 1rem;
+    border: none;
+    background-color: transparent;
     font-family: 'Outfit', sans-serif;
-    color: var(--medium-grey);
-    border-bottom: 2px solid transparent;
-    transition: color var(--transition-speed), border-color var(--transition-speed), background-color var(--transition-speed);
-}
-
-.tabs-main .tab-link {
     font-size: 1.1rem;
-    margin-bottom: -2px;
-}
-
-.tabs-sub .tab-link {
-    font-size: 0.95rem;
-    padding: 0.6rem 1rem;
-    border-radius: var(--border-radius);
-    margin: 0.2rem;
-}
-
-.tab-link:hover {
-    color: var(--club-green);
-}
-
-.tabs-main .tab-link.active {
-    color: var(--club-green);
     font-weight: bold;
-    border-color: var(--club-yellow);
+    color: var(--medium-grey);
+    border-bottom: 3px solid transparent;
+    transition: color 0.3s ease, border-bottom-color 0.3s ease, background-color 0.3s ease;
 }
 
-.tabs-sub .tab-link.active {
-    background-color: var(--club-green);
-    color: var(--pure-white);
-    font-weight: bold;
+.tab-link.active {
+    color: var(--club-green);
+    border-bottom-color: var(--club-yellow);
+}
+
+.tab-link:hover:not(.active) {
+    color: var(--dark-grey);
+    background-color: var(--off-white);
 }
 
 .tab-pane {
@@ -603,7 +604,7 @@ th, td {
         max-width: 100%;
         overflow-x: auto;
     }
-    .tabs {
+    .tabs-main {
         flex-direction: column;
     }
 }
