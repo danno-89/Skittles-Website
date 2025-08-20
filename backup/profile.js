@@ -71,35 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (publicDocSnap.exists()) {
                         const publicData = publicDocSnap.data();
                         let teamName = 'N/A';
-                        let teamId = null;
-
+                        
                         if (publicData.teamId) {
-                            teamId = publicData.teamId;
-                            const teamDocRef = doc(db, "teams", teamId);
+                            const teamDocRef = doc(db, "teams", publicData.teamId);
                             const teamDocSnap = await getDoc(teamDocRef);
                             if (teamDocSnap.exists()) {
                                 teamName = teamDocSnap.data().name || 'N/A';
                             }
-                        }
-                        
-                        if (teamId && (publicData.role === 'Captain' || publicData.role === 'Vice Captain')) {
-                            const tabsContainer = document.querySelector('.tabs-main');
-                            const contentContainer = document.getElementById('tab-content-container');
-                            const teamTabId = 'team-management';
-
-                            const teamTab = document.createElement('button');
-                            teamTab.className = 'tab-link';
-                            teamTab.dataset.tab = teamTabId;
-                            teamTab.textContent = teamName;
-                            tabsContainer.appendChild(teamTab);
-
-                            const teamPane = document.createElement('div');
-                            teamPane.id = `${teamTabId}-content`;
-                            teamPane.className = 'tab-pane';
-                            teamPane.innerHTML = `<h3>Loading team players...</h3>`;
-                            contentContainer.appendChild(teamPane);
-                            
-                            populateTeamManagementTab(teamId, teamPane);
                         }
 
                         setupTabs();
@@ -123,56 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-async function populateTeamManagementTab(teamId, container) {
-    const playersRef = collection(db, "players_public");
-    const q = query(playersRef, where("teamId", "==", teamId));
-    const querySnapshot = await getDocs(q);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let registeredPlayers = [];
-    let expiredPlayers = [];
-
-    querySnapshot.forEach(doc => {
-        const playerData = doc.data();
-        const player = {
-            name: `${playerData.firstName} ${playerData.lastName}`,
-            expiryDate: playerData.registerExpiry ? playerData.registerExpiry.toDate() : null
-        };
-
-        if (player.expiryDate && player.expiryDate >= today) {
-            registeredPlayers.push(player);
-        } else {
-            expiredPlayers.push(player);
-        }
-    });
-
-    registeredPlayers.sort((a, b) => a.name.localeCompare(b.name));
-    expiredPlayers.sort((a, b) => a.name.localeCompare(b.name));
-
-    let html = `
-        <div class="team-player-list">
-            <h2>Registered Players</h2>
-            ${registeredPlayers.length > 0 ? registeredPlayers.map(p => `
-                <div class="player-item">
-                    <span>${p.name}</span>
-                    <span class="expiry-date">Expires: ${formatDate(p.expiryDate)}</span>
-                </div>`).join('') : '<p>No currently registered players.</p>'}
-        </div>
-        <div class="team-player-list">
-            <h2>Expired Players</h2>
-            ${expiredPlayers.length > 0 ? expiredPlayers.map(p => `
-                <div class="player-item expired">
-                    <span>${p.name}</span>
-                    <span class="expiry-date">Expired: ${p.expiryDate ? formatDate(p.expiryDate) : 'N/A'}</span>
-                </div>`).join('') : '<p>No players with expired registrations.</p>'}
-        </div>
-    `;
-
-    container.innerHTML = html;
-}
 
 function populatePublicInfo(publicData, teamName) {
     const container = document.getElementById('public-info-container');
@@ -247,7 +175,7 @@ function populatePrivateInfo(privateData) {
             </div>
         </div>
         <div class="profile-field">
-            <label>Address</label>
+            <label>Address</label>.
             <p>${formattedAddress}</p>
         </div>
     `;

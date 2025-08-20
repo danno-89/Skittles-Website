@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Management - Skittles Club Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="team-management-page.css">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main>
+            <div class="page-header">
+                <h1>Team Management</h1>
+            </div>
+
+            <div class="tabs-main">
+                <button class="tab-link active" data-tab="players">Players</button>
+                <button class="tab-link" data-tab="fixtures">Fixtures</button>
+                <button class="tab-link" data-tab="results">Results</button>
+                <button class="tab-link" data-tab="statistics">Statistics</button>
+            </div>
+
+            <div id="tab-content-container">
+                <div id="players-content" class="tab-pane active">
+                    <div id="team-management-container">
+                        <p>Loading your team...</p>
+                    </div>
+                </div>
+                <div id="fixtures-content" class="tab-pane">
+                    <p>Team fixtures will be shown here.</p>
+                </div>
+                <div id="results-content" class="tab-pane card">
+                    <p>Team results will be shown here.</p>
+                </div>
+                <div id="statistics-content" class="tab-pane card">
+                    <p>Team statistics will be shown here.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+    <script type="module" src="main.js"></script>
+    <script type="module" src="firebase.config.js"></script>
+    <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="team-management.js"></script>
+</body>
+</html>

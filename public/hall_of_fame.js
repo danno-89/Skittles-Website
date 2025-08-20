@@ -1,14 +1,5 @@
-import { firebaseConfig } from './firebase.config.js';
-
-// --- INITIALIZATION ---
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db } from './firebase.config.js';
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // --- DOM ELEMENTS ---
 const hallOfFameContainer = document.getElementById('hall-of-fame-container');
@@ -32,7 +23,7 @@ const LEAGUE_DIVISION_AWARD_IDS = ['premier-division', 'first-division', 'second
 
 const initializePage = async () => {
     try {
-        const competitionsSnapshot = await db.collection('competitions').get();
+        const competitionsSnapshot = await getDocs(collection(db, 'competitions'));
         if (competitionsSnapshot.empty) {
             hallOfFameContainer.innerHTML = '<p>No competition data found.</p>';
             return;
@@ -107,9 +98,9 @@ const loadWinners = async (competitionId) => {
     }
 
     try {
-        const winnerDoc = await db.collection('winners').doc(competitionId).get();
+        const winnerDoc = await getDoc(doc(db, 'winners', competitionId));
         
-        if (winnerDoc.exists) {
+        if (winnerDoc.exists()) {
             const data = winnerDoc.data();
             if (LEAGUE_DIVISION_AWARD_IDS.includes(competitionId)) {
                 currentWinners = Object.entries(data).map(([season, seasonData]) => ({

@@ -13,7 +13,7 @@
   --charcoal: #212529;
 
   /* Tints & Shades */
-  --light-green: #1e8449;
+  --light-green: #1e8a49;
   --darker-green: #004d00;
   --darker-yellow: #D7B804;
 
@@ -79,6 +79,7 @@ a:hover {
 
 .highlight-green {
     color: var(--darker-green);
+    font-weight: bold;
 }
 
 .highlight-yellow {

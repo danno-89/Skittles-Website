@@ -1,13 +1,5 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db } from './firebase.config.js';
+import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const calendarContainer = document.getElementById('calendar-container');
@@ -33,10 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const matchesSnapshot = await db.collection('match_results')
-                .where('scheduledDate', '>=', startString)
-                .where('scheduledDate', '<=', endString)
-                .get();
+            const q = query(collection(db, 'match_results'), where('scheduledDate', '>=', startString), where('scheduledDate', '<=', endString));
+            const matchesSnapshot = await getDocs(q);
             
             matchesSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -56,10 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const eventsSnapshot = await db.collection('events')
-                .where('date', '>=', new Date(startString))
-                .where('date', '<=', new Date(endString))
-                .get();
+            const q = query(collection(db, 'events'), where('date', '>=', new Date(startString)), where('date', '<=', new Date(endString)));
+            const eventsSnapshot = await getDocs(q);
 
             eventsSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -192,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initializePage = async () => {
         try {
-            const seasonsSnapshot = await db.collection('seasons').orderBy('name', 'desc').get();
+            const q = query(collection(db, 'seasons'), orderBy('name', 'desc'));
+            const seasonsSnapshot = await getDocs(q);
             seasonsSnapshot.forEach(doc => {
                 const season = doc.data();
                 const option = document.createElement('option');

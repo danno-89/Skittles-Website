@@ -1,8 +1,6 @@
-import { firebaseConfig } from './firebase.config.js';
+import { db } from './firebase.config.js';
+import { collection, getDocs, query, orderBy, where, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-// Initialize Firebase using compat libs
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const competitionCache = new Map();
 const teamCache = new Map();
 let allFixtures = [];
@@ -41,7 +39,7 @@ function getWeekStartDate(date) {
 
 async function populateCompetitionCache() {
     try {
-        const snapshot = await db.collection("competitions").get();
+        const snapshot = await getDocs(collection(db, "competitions"));
         snapshot.forEach(doc => {
             competitionCache.set(doc.id, doc.data());
         });
@@ -52,7 +50,7 @@ async function populateCompetitionCache() {
 
 async function populateTeamCache() {
     try {
-        const snapshot = await db.collection("teams").get();
+        const snapshot = await getDocs(collection(db, "teams"));
         snapshot.forEach(doc => {
             teamCache.set(doc.id, doc.data());
         });
@@ -63,7 +61,8 @@ async function populateTeamCache() {
 
 async function fetchAllFixtures() {
     try {
-        const snapshot = await db.collection("match_results").orderBy("scheduledDate", "asc").get();
+        const q = query(collection(db, "match_results"), orderBy("scheduledDate", "asc"));
+        const snapshot = await getDocs(q);
         allFixtures = snapshot.docs.map(doc => {
             const data = doc.data();
             // Convert Firestore Timestamp to JavaScript Date object, or handle string dates
@@ -143,12 +142,8 @@ async function displayMatchResults() {
             const hasResult = match.homeScore != null && match.awayScore != null;
             const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
             const dateObj = match.scheduledDate;
-            const day = dateObj.getUTCDate();
-            const monthIndex = dateObj.getUTCMonth();
-            const year = dateObj.getUTCFullYear().toString().slice(-2);
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const date = `${day} ${months[monthIndex]} ${year}`;
-            const time = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' });
+            const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
+            const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
             const divisionName = competitionCache.get(match.division)?.name || 'N/A';
             const round = match.round || '';
             let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (match.status === 'postponed' ? `<span class="status-postponed">postponed</span>` : '');
@@ -244,7 +239,8 @@ async function populateSeasonFilter() {
     const seasonFilterSelect = document.getElementById('season-filter');
     let currentSeason = null;
     try {
-        const seasonsSnapshot = await db.collection("seasons").where("status", "==", "current").limit(1).get();
+        const q = query(collection(db, "seasons"), where("status", "==", "current"), limit(1));
+        const seasonsSnapshot = await getDocs(q);
         if (!seasonsSnapshot.empty) {
             currentSeason = seasonsSnapshot.docs[0].id;
         }

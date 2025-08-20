@@ -1,13 +1,5 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db } from './firebase.config.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const playersPageContainer = document.getElementById('players-table-container');
 if (playersPageContainer) {
@@ -76,8 +68,8 @@ if (playersPageContainer) {
     const fetchPlayersAndTeams = async () => {
         try {
             const [playersSnapshot, teamsSnapshot] = await Promise.all([
-                db.collection("players_public").get(),
-                db.collection("teams").get()
+                getDocs(collection(db, "players_public")),
+                getDocs(collection(db, "teams"))
             ]);
 
             teamsSnapshot.forEach(doc => {

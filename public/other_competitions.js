@@ -1,13 +1,5 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db } from './firebase.config.js';
+import { collection, getDocs, doc, getDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const competitionTabsContainer = document.getElementById('competition-tabs-container');
 const overviewContent = document.getElementById('overview-content');
@@ -16,7 +8,7 @@ const competitionDatesContainer = document.getElementById('competition-dates-con
 
 const parseDate = (dateInput) => {
     if (!dateInput) return null;
-    if (dateInput.toDate) return dateInput.toDate(); 
+    if (dateInput.toDate) return dateInput.toDate();
     if (dateInput instanceof Date) return dateInput;
     try {
         const d = new Date(dateInput);
@@ -42,7 +34,7 @@ const fetchAndRenderTabs = async () => {
     tabList.appendChild(overviewTab);
 
     try {
-        const competitionsSnapshot = await db.collection("competitions").get();
+        const competitionsSnapshot = await getDocs(collection(db, "competitions"));
         
         competitionsSnapshot.docs.forEach((doc) => {
             const data = doc.data();
@@ -76,7 +68,7 @@ const fetchAndRenderTabs = async () => {
 const fetchCompetitionDates = async () => {
     competitionDatesContainer.innerHTML = '<h2>Competition Dates</h2>';
     try {
-        const seasonQuery = await db.collection("seasons").where("status", "==", "current").limit(1).get();
+        const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
         if (seasonQuery.empty) {
             competitionDatesContainer.innerHTML += '<p>Current season not set.</p>';
             return;
@@ -88,7 +80,7 @@ const fetchCompetitionDates = async () => {
             return;
         }
         competitionDatesContainer.innerHTML += `<h3>${seasonName}</h3>`;
-        const eventsQuery = await db.collection("events").where("season", "==", seasonName).where("registration", "==", true).orderBy("date").get();
+        const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("registration", "==", true), orderBy("date")));
         renderCompetitionEvents(eventsQuery.docs);
     } catch (error) {
         console.error("Error fetching competition dates:", error);
@@ -117,9 +109,9 @@ const renderCompetitionEvents = (eventDocs) => {
 const fetchWinners = async (competitionId, competitionName) => {
     competitionDatesContainer.innerHTML = `<h2>Past Winners</h2>`;
     try {
-        const doc = await db.collection("winners").doc(competitionId).get();
-        if (doc.exists) {
-            const history = doc.data().history || [];
+        const docSnap = await getDoc(doc(db, "winners", competitionId));
+        if (docSnap.exists()) {
+            const history = docSnap.data().history || [];
             renderWinners(history, competitionName);
         } else {
             renderWinners([], competitionName);
@@ -157,18 +149,14 @@ const renderWinners = (history, competitionName) => {
 const fetchCompetitionDetails = async (competitionName) => {
     competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Loading details...</p>`;
     try {
-        const seasonQuery = await db.collection("seasons").where("status", "==", "current").limit(1).get();
+        const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
         if (seasonQuery.empty) {
             competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Could not determine the current season.</p>`;
             return;
         }
         const seasonName = seasonQuery.docs[0].data().name;
 
-        const eventsQuery = await db.collection("events")
-            .where("season", "==", seasonName)
-            .where("name", "==", competitionName)
-            .limit(1)
-            .get();
+        const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("name", "==", competitionName), limit(1)));
 
         if (eventsQuery.empty) {
             competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Details for this competition have not been scheduled for the current season yet.</p>`;

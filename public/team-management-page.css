@@ -1,0 +1,44 @@
+/* Styling for the Team Management Page */
+
+.captain-badge {
+    background-color: var(--club-yellow);
+    color: var(--charcoal);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.player-list {
+    list-style: none;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.player-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--light-grey);
+}
+
+.player-list li:last-child {
+    border-bottom: none;
+}
+
+#players-content,
+#fixtures-content {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+#fixtures-content .card {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+#fixtures-content .card:hover {
+    transform: none;
+}
