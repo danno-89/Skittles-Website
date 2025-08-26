@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if the user's UID exists in the users collection.
+    function isCommitteeMember() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // --- Public Read Rules ---
+    match /competitions/{document} { allow read: if true; }
+    match /league_tables/{document} { allow read: if true; }
+    match /players_public/{document} { allow read: if true; }
+    match /seasons/{document} { allow read: if true; }
+    match /teams/{document} { allow read: if true; }
+    match /winners/{document} { allow read: if true; }
+    match /events/{document} { allow read: if true; }
+    match /committee/{document} { allow read: if true; }
+
+    // --- Users Collection ---
+    // TEMPORARY DIAGNOSTIC RULE: Allow public read access to verify the exists() check.
+    // This will be reverted.
+    match /users/{userId} {
+      allow read: if true; 
+      allow write: if isCommitteeMember();
+    }
+
+    // --- Match Results ---
+    // Reads are public. Writes are now allowed if the user exists in the /users collection.
+    match /match_results/{document} {
+      allow read: if true;
+      allow write: if isCommitteeMember();
+    }
+
+    // --- Private Player Data ---
+    // A user can read and write to their own private data.
+    match /players_private/{privateId} {
+       allow read, write: if request.auth != null;
+    }
+  }
+}

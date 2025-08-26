@@ -42,3 +42,38 @@
 #fixtures-content .card:hover {
     transform: none;
 }
+
+#team-management-container .table-container {
+    margin-bottom: 2rem;
+}
+
+/* Player row highlighting */
+.player-new {
+    background-color: hsla(120, 60%, 90%, 1); /* Light Green */
+}
+.player-expiring-soon {
+    background-color: hsla(55, 100%, 85%, 1); /* Light Yellow */
+}
+.player-no-fixtures-warn {
+    background-color: hsla(39, 100%, 85%, 1); /* Light Orange */
+}
+.player-no-fixtures-danger {
+    background-color: hsla(0, 100%, 90%, 1); /* Light Red */
+}
+
+/* Enforce consistent table layout for player rosters */
+.player-roster-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.player-roster-table th, .player-roster-table td {
+    overflow-wrap: break-word;
+}
+
+.player-roster-table th:nth-child(1) { width: 25%; } /* Player */
+.player-roster-table th:nth-child(2) { width: 15%; } /* Role */
+.player-roster-table th:nth-child(3) { width: 15%; } /* Reg. Date */
+.player-roster-table th:nth-child(4) { width: 15%; } /* Last Game */
+.player-roster-table th:nth-child(5) { width: 15%; } /* Expiry */
+.player-roster-table th:nth-child(6) { width: 15%; } /* Days Left/Status */

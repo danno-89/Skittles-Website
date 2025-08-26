@@ -1,5 +1,4 @@
-import { db } from './firebase.config.js';
-import { collection, getDocs, doc, getDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { db, collection, getDocs, doc, getDoc, query, where, orderBy, limit } from './firebase.config.js';
 
 const competitionTabsContainer = document.getElementById('competition-tabs-container');
 const overviewContent = document.getElementById('overview-content');
@@ -40,7 +39,11 @@ const fetchAndRenderTabs = async () => {
             const data = doc.data();
             const type = data.type || data.Type || null;
             const competitionId = doc.id;
-            const competitionName = data.competitionName || data.name || null;
+            let competitionName = data.competitionName || data.name || null;
+
+            if (competitionName === "Open Pair's") {
+                competitionName = "Open Pairs";
+            }
 
             if (competitionName && typeof type === 'string' && (type.includes('Individual') || type.includes('Pairs'))) {
                 const competitionTab = document.createElement('button');
@@ -134,7 +137,10 @@ const renderWinners = (history, competitionName) => {
         if(entry.season && entry.winner){
             const listItem = document.createElement('li');
             let winnerText;
-            if (typeof entry.winner === 'object' && entry.winner.male && entry.winner.female) {
+            if (typeof entry.winner === 'object' && entry.winner.player1 && entry.winner.player2) {
+                winnerText = `${entry.winner.player1} & ${entry.winner.player2}`;
+            }
+            else if (typeof entry.winner === 'object' && entry.winner.male && entry.winner.female) {
                 winnerText = `${entry.winner.female} & ${entry.winner.male}`;
             } else {
                 winnerText = entry.winner;

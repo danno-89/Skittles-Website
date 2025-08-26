@@ -1,5 +1,4 @@
-import { db } from './firebase.config.js';
-import { collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { db, collection, getDocs, query, where, orderBy } from './firebase.config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const calendarContainer = document.getElementById('calendar-container');

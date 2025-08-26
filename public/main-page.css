@@ -1,56 +1,75 @@
-/* --- Index/Main Page Specific Styles --- */
+/* --- Main Page Specific Styles --- */
+
 .main-grid {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
+    display: flex;
+    flex-wrap: wrap; /* Allows the sidebar to wrap below on smaller screens */
     gap: var(--spacing-lg);
-    align-items: start;
+    align-items: flex-start;
 }
 
-#hero {
+.main-content {
+    flex: 2 1 400px; /* Gives more weight to the main content area */
+}
+
+.sidebar-right {
+    flex: 1 1 300px; /* Allows this column to grow and shrink */
+    display: flex;
+    justify-content: flex-end; /* Aligns the card to the right */
+}
+
+/* Style the content sections as cards */
+.content-section {
     margin-bottom: var(--spacing-lg);
 }
 
-#hero h1 {
-    font-size: 1.5rem;
-}
-
-.action-box {
-    padding: var(--spacing-lg);
+.action-box-card {
     background-color: var(--off-white);
     border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
     box-shadow: var(--shadow-elevation-low);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch; /* This makes the buttons the same width */
+}
+
+.action-box-card h2 {
+    margin-top: 0;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--club-yellow);
+    color: var(--darker-green);
+}
+
+.action-box-card .action-item {
+    margin-bottom: var(--spacing-lg);
+}
+
+.action-box-card .action-item:last-child {
+    margin-bottom: 0;
+}
+
+.action-box-card .action-item p {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-weight: bold;
+    white-space: nowrap; /* Prevents the text from wrapping, forcing the card width */
+}
+
+.action-box-card .btn {
+    width: 100%;
     text-align: center;
+    box-sizing: border-box;
 }
 
-.action-box .btn {
-    /* No longer full width */
-}
-
-.action-box p {
-    margin: 0.5rem 0;
-}
-
-.separator {
-    width: 80%;
-    align-self: center; /* Center the separator line */
-    height: 1px;
-    background-color: var(--light-grey);
-    margin: 1rem 0;
-}
-
-/* Responsive styles for the main page layout */
-@media (max-width: 992px) {
+/* Responsive adjustments for stacking on smaller screens */
+@media (max-width: 900px) {
     .main-grid {
-        grid-template-columns: 1fr;
-    }
-    .main-content {
-        order: 2;
+        flex-direction: column;
     }
     .sidebar-right {
-        order: 1;
-        margin-top: 0;
+        width: 100%;
+        justify-content: flex-start; /* Align left when stacked */
+    }
+    .action-box-card {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .action-box-card .action-item p {
+        white-space: normal; /* Allow text to wrap again on small screens */
     }
 }

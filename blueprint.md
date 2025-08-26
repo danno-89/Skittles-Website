@@ -26,6 +26,13 @@ The Skittles Club Hub is a web application designed to manage and display inform
 *   **Real-time Updates:** The application uses Firebase Firestore to store and sync data in real-time, ensuring that all information is up-to-date.
 *   **Data Validation:** Input validation is implemented to maintain data integrity and prevent errors.
 
+### Player Registration
+
+*   **Registration Form:** A dedicated page for new players to register for the league.
+*   **Data Collection:** The form collects essential player information, including personal details, contact information, and team selection.
+*   **Data Storage:** The registration data is stored in the `players_public` and `players_private` collections in Firestore.
+*   **Registration Expiry:** The player's registration expiry date is automatically set to 365 days from their registration date.
+
 ### Additional Pages
 
 *   **Rules and Regulations:** A dedicated page for the official rules and regulations of the league.
@@ -55,13 +62,11 @@ The Skittles Club Hub is a web application designed to manage and display inform
 
 ## Current Plan
 
-### Fix "undefined's Skittles Hub" Navigation Bar Issue
+### Add Registration Expiry
 
-The current task is to address a bug where the navigation bar displays "undefined's Skittles Hub" after a user signs in. This issue occurs because the user's first name is not always available when the navigation bar is rendered.
+The current task is to add a registration expiry date to new player registrations.
 
 #### Steps
 
-1.  **Identify the Root Cause:** The problem lies in the `public/navigation-auth.js` file, where the user's first name is fetched from Firestore. If the `firstName` field is missing or the data is not yet available, the `publicData.firstName` variable is `undefined`, resulting in the incorrect display.
-2.  **Implement a Fallback:** To fix this, I will add a check to ensure that the `firstName` field exists before using it. If it doesn't, the title will default to "Your Skittles Hub", which is a more appropriate fallback.
-3.  **Test the Solution:** After implementing the fix, I will test the application to ensure that the navigation bar displays correctly for all users, including those with and without a first name in their profile.
-4.  **Update the Blueprint:** I will update this `blueprint.md` file to document the changes made and the solution implemented.
+1.  **Update JavaScript:** Modify `public/player-registration.js` to calculate the expiry date (365 days from registration) and add it to the player's data.
+2.  **Update Blueprint:** Update this `blueprint.md` file to document the new feature.

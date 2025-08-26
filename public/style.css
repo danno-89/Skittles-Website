@@ -54,6 +54,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; 
 }
 
 /* --- Base & Typography --- */
@@ -190,7 +191,7 @@ header h1 {
     color: var(--club-green);
     text-decoration: none;
     transition: color var(--transition-speed), background-color var(--transition-speed);
-    padding: 0.5rem 0.5rem;
+    padding: 0.25rem 0.5rem; /* Reduced padding */
     display: block;
     border-radius: var(--border-radius);
 }
@@ -227,7 +228,21 @@ header h1 {
 }
 
 .nav-group li {
- margin-bottom: 5px;
+ margin-bottom: 2px; /* Reduced margin */
+}
+
+/* Hamburger Menu */
+.menu-icon {
+  display: none;
+  cursor: pointer;
+}
+
+.menu-icon .bar {
+  width: 25px;
+  height: 3px;
+  background-color: var(--club-green);
+  margin: 5px 0;
+  transition: 0.4s;
 }
 
 /* --- Footer --- */
@@ -297,6 +312,15 @@ footer a:hover {
     background-color: var(--light-green);
 }
 
+.btn-secondary {
+    background-color: var(--medium-grey);
+    color: var(--pure-white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--charcoal);
+}
+
 .btn-cta {
     background-color: var(--club-yellow);
     color: var(--charcoal);
@@ -314,6 +338,15 @@ footer a:hover {
 
 .btn-danger:hover {
     background-color: #a71d2a;
+}
+
+.btn-info {
+    background-color: var(--info);
+    color: var(--pure-white);
+}
+
+.btn-info:hover {
+    background-color: #0b5ed7;
 }
 
 .btn-details {
@@ -605,6 +638,29 @@ th, td {
     }
     .tabs-main {
         flex-direction: column;
+    }
+    .menu-icon {
+        display: block;
+    }
+    .main-nav ul {
+        display: none;
+        flex-direction: column;
+    }
+    .main-nav.active ul {
+        display: flex;
+    }
+    header h1 {
+        font-size: 1.5rem;
+    }
+    .logo-container img {
+        height: 50px;
+    }
+    header::before {
+        right: 110px;
+    }
+    header::after {
+        right: 100px;
+        height: 100%;
     }
 }
 

@@ -1,109 +1,77 @@
-/* --- Calendar/Schedule Specific Styles --- */
+/* --- Calendar/Schedule Page Specific Styles --- */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-#month-tabs-container {
-    border-bottom: none;
-}
-
 #calendar-container {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    border-top: 1px solid var(--light-grey);
-    border-left: 1px solid var(--light-grey);
+    /* This will now hold the schedule list, not a grid */
 }
 
-.calendar-header {
-    text-align: center;
-    padding: var(--spacing-sm);
+.schedule-day {
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    background-color: var(--pure-white);
+    overflow: hidden; /* Ensures child elements conform to border radius */
+}
+
+.schedule-date-header {
     background-color: var(--off-white);
+    padding: var(--spacing-md);
+    font-size: 1.2rem;
     font-weight: bold;
     color: var(--darker-green);
     border-bottom: 1px solid var(--light-grey);
-    border-right: 1px solid var(--light-grey);
 }
 
-.calendar-day {
-    min-height: 120px;
-    padding: var(--spacing-sm);
+.schedule-item-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.schedule-item {
+    display: flex;
+    padding: var(--spacing-md);
     border-bottom: 1px solid var(--light-grey);
-    border-right: 1px solid var(--light-grey);
-    display: flex;
-    flex-direction: column;
-    background-color: var(--pure-white);
-    transition: background-color var(--transition-speed);
+    gap: var(--spacing-lg);
+    align-items: center;
 }
 
-.calendar-day.other-month {
-    background-color: var(--off-white);
+.schedule-item:last-child {
+    border-bottom: none;
+}
+
+.schedule-item-time {
+    font-weight: bold;
     color: var(--medium-grey);
+    flex-shrink: 0;
+    width: 80px; /* Aligns the times */
 }
 
-.calendar-day.today {
-    background-color: hsl(54 90% 95%);
-}
-
-.day-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.day-number {
-    font-weight: bold;
-}
-
-.calendar-day.today .day-number {
-    color: var(--club-green);
-}
-
-.events-list {
+.schedule-item-description {
     flex-grow: 1;
-    overflow-y: auto;
-    font-size: 0.85rem;
-    margin-top: var(--spacing-sm);
 }
 
-.event-item {
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    margin-bottom: 0.3rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+/* --- Item Type Styling --- */
 
-.event-general {
-    background-color: hsla(54, 90%, 55%, 0.15);
-    border-left: 3px solid var(--club-yellow);
-}
-
-.fixture-slots {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.3rem;
-    margin-top: var(--spacing-sm);
-}
-
-.fixture-slot {
-    flex-grow: 1;
-    text-align: center;
-    padding: 0.2rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.fixture-occupied {
+.schedule-item.fixture-occupied {
     background-color: var(--club-green);
     color: var(--pure-white);
-    cursor: help;
 }
 
-.fixture-free {
-    background-color: hsla(54, 90%, 55%, 0.5);
-    color: var(--charcoal);
+.schedule-item.fixture-occupied .schedule-item-time {
+    color: var(--pure-white);
+}
+
+.schedule-item.fixture-spare {
+    background-color: #e9f7ec; /* Light green */
+    border-left: 4px solid #28a745;
+}
+
+.schedule-item.event-general {
+    background-color: #fffbeb; /* Light yellow */
+    border-left: 4px solid var(--club-yellow);
 }

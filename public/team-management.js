@@ -1,14 +1,13 @@
-import { db } from './firebase.config.js';
-import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { db, doc, getDoc, collection, query, where, getDocs } from './firebase.config.js';
 
 const playersContainer = document.getElementById('team-management-container');
 const fixturesContainer = document.getElementById('fixtures-content');
 
 document.addEventListener('authReady', ({ detail }) => {
-    const { user, userProfile } = detail;
+    const { user, publicData } = detail; // Correctly destructure publicData
     if (user) {
         setupTabs();
-        initializePageData(userProfile);
+        initializePageData(publicData); // Pass publicData to the function
     } else {
         window.location.href = 'create.html?form=login';
     }
@@ -90,9 +89,9 @@ async function loadTeamFixtures(teamId) {
         homeFixturesSnapshot.forEach(doc => allFixtures.push(doc.data()));
         awayFixturesSnapshot.forEach(doc => allFixtures.push(doc.data()));
 
-        const validFixtures = allFixtures.filter(fixture => fixture.scheduledDate && typeof fixture.scheduledDate.toMillis === 'function');
+        const validFixtures = allFixtures.filter(fixture => fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function');
         
-        validFixtures.sort((a, b) => a.scheduledDate.toMillis() - b.scheduledDate.toMillis());
+        validFixtures.sort((a, b) => a.scheduledDate.toDate() - b.scheduledDate.toDate());
 
         if (validFixtures.length === 0) {
             fixturesContainer.innerHTML = "<p>No fixtures found for the current season.</p>";
@@ -103,7 +102,6 @@ async function loadTeamFixtures(teamId) {
         const fixturesHtml = validFixtures.map(fixture => {
             const dateObj = fixture.scheduledDate.toDate();
             
-            // Format the date and time using the 'Europe/London' timezone
             const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
 
@@ -160,35 +158,155 @@ async function loadTeamFixtures(teamId) {
 
 async function loadTeamPlayers(teamId) {
     if (!playersContainer) return;
+    playersContainer.innerHTML = '<p>Loading roster...</p>';
+
+    const formatDate = (timestamp) => {
+        if (!timestamp || !timestamp.toDate) return 'N/A';
+        return timestamp.toDate().toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
 
     try {
         const playersQuery = query(collection(db, "players_public"), where("teamId", "==", teamId));
         const playersSnapshot = await getDocs(playersQuery);
+        let allPlayers = playersSnapshot.docs.map(doc => doc.data());
 
-        let playersHtml = playersSnapshot.docs
-            .map(doc => {
-                const p = doc.data();
-                return `<li>${p.firstName} ${p.lastName} ${p.role ? `<strong>(${p.role})</strong>` : ''}</li>`;
-            })
-            .join('');
+        const upcomingFixtures = await getUpcomingFixtures(teamId);
+        const now = new Date();
 
-        playersContainer.innerHTML = `
-            <h3>Team Roster</h3>
-            <ul class="player-list">${playersHtml}</ul>
-        `;
+        allPlayers = allPlayers.map(p => {
+            const daysLeft = p.registerExpiry ? Math.ceil((p.registerExpiry.toDate() - now) / (1000 * 60 * 60 * 24)) : null;
+            let highlightClass = '';
+            const hasFixtureBeforeExpiry = p.registerExpiry && upcomingFixtures.some(f => f.scheduledDate.toDate() < p.registerExpiry.toDate());
+
+            if (!p.recentFixture && p.registerDate && p.registerDate.toDate() > new Date(new Date().setDate(now.getDate() - 30))) {
+                highlightClass = 'player-new';
+            } else if (daysLeft !== null && daysLeft <= 30) {
+                highlightClass = 'player-expiring-soon';
+            }
+
+            if (!hasFixtureBeforeExpiry && p.registerExpiry) {
+                 if (daysLeft <= 30) {
+                    highlightClass = 'player-no-fixtures-danger';
+                } else {
+                    highlightClass = 'player-no-fixtures-warn';
+                }
+            }
+
+            return { ...p, daysLeft, highlightClass };
+        });
+
+        const activePlayers = allPlayers.filter(p => !p.registerExpiry || p.registerExpiry.toDate() >= now);
+        const expiredPlayers = allPlayers.filter(p => p.registerExpiry && p.registerExpiry.toDate() < now);
+
+        const roleOrder = { "Captain": 1, "Vice Captain": 2, "Player": 3 };
+        const sortPlayers = (players) => players.sort((a, b) => (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4));
+        
+        sortPlayers(activePlayers);
+        sortPlayers(expiredPlayers);
+
+        const createActiveTable = (players) => {
+            if (players.length === 0) return '<h3>Active Players</h3><p>No active players found.</p>';
+            return `
+                <h3>Active Players</h3>
+                <div class="table-container">
+                    <table class="player-roster-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Role</th>
+                                <th>Reg. Date</th>
+                                <th>Last Game</th>
+                                <th>Expiry</th>
+                                <th>Days Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${players.map(p => `
+                                <tr class="${p.highlightClass}">
+                                    <td>${p.firstName} ${p.lastName}</td>
+                                    <td>${p.role !== 'Player' ? p.role : ''}</td>
+                                    <td>${formatDate(p.registerDate)}</td>
+                                    <td>${formatDate(p.recentFixture)}</td>
+                                    <td>${formatDate(p.registerExpiry)}</td>
+                                    <td>${p.daysLeft !== null ? p.daysLeft : 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        };
+        
+        const createExpiredTable = (players) => {
+            if (players.length === 0) return '';
+            return `
+                <h3>Expired Players</h3>
+                <div class="table-container">
+                    <table class="player-roster-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Role</th>
+                                <th>Reg. Date</th>
+                                <th>Last Game</th>
+                                <th>Expiry</th>
+                                <th>Days Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${players.map(p => `
+                                <tr>
+                                    <td>${p.firstName} ${p.lastName}</td>
+                                    <td>${p.role !== 'Player' ? p.role : ''}</td>
+                                    <td>${formatDate(p.registerDate)}</td>
+                                    <td>${formatDate(p.recentFixture)}</td>
+                                    <td>${formatDate(p.registerExpiry)}</td>
+                                    <td>Expired</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        };
+        
+        let pageHtml = createActiveTable(activePlayers);
+        pageHtml += createExpiredTable(expiredPlayers);
+
+        playersContainer.innerHTML = pageHtml;
+
     } catch (error) {
         console.error("Error loading team players:", error);
-        playersContainer.innerHTML = '<p>An error occurred while loading the player roster.</p>';
+        playersContainer.innerHTML = `<p>An error occurred while loading the player roster.</p>`;
     }
 }
 
-async function initializePageData(userProfile) {
-    if (!userProfile) {
+async function getUpcomingFixtures(teamId) {
+    const fixtures = [];
+    const now = new Date();
+    
+    const homeQuery = query(collection(db, "match_results"), where("homeTeamId", "==", teamId), where("scheduledDate", ">=", now));
+    const awayQuery = query(collection(db, "match_results"), where("awayTeamId", "==", teamId), where("scheduledDate", ">=", now));
+
+    const [homeSnapshot, awaySnapshot] = await Promise.all([getDocs(homeQuery), getDocs(awayQuery)]);
+    
+    homeSnapshot.forEach(doc => fixtures.push(doc.data()));
+    awaySnapshot.forEach(doc => fixtures.push(doc.data()));
+
+    return fixtures;
+}
+
+async function initializePageData(publicData) { // Updated to accept publicData
+    if (!publicData) {
         document.body.innerHTML = '<p>Your player profile could not be found.</p>';
         return;
     }
 
-    const { role, teamId } = userProfile;
+    const { role, teamId } = publicData; // Destructure from publicData
 
     if (role !== 'Captain' && role !== 'Vice Captain') {
         document.body.innerHTML = '<p>You do not have permission to view this page.</p>';
@@ -205,7 +323,6 @@ async function initializePageData(userProfile) {
         document.querySelector('.page-header h1').textContent = teamDocSnap.data().name || "Team Management";
     }
     
-    // Load data for all tabs
     loadTeamPlayers(teamId);
     loadTeamFixtures(teamId);
 }

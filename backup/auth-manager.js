@@ -1,59 +1,85 @@
-import { auth, db } from './firebase.config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { auth, db, onAuthStateChanged, doc, getDoc, collection, query, where, getDocs } from './firebase.config.js';
 
 const SESSION_KEY = 'user_session';
 
 async function fetchUserProfile(uid) {
     try {
+        // Find the private document using the authId
         const privatePlayersRef = collection(db, "players_private");
         const q = query(privatePlayersRef, where("authId", "==", uid));
         const privateQuerySnapshot = await getDocs(q);
 
-        if (!privateQuerySnapshot.empty) {
-            const publicPlayerId = privateQuerySnapshot.docs[0].id;
-            const publicDocRef = doc(db, "players_public", publicPlayerId);
-            const publicDocSnap = await getDoc(publicDocRef);
-
-            if (publicDocSnap.exists()) {
-                const userProfile = publicDocSnap.data();
-                if (userProfile.teamId) {
-                    const teamDocRef = doc(db, "teams", userProfile.teamId);
-                    const teamDocSnap = await getDoc(teamDocRef);
-                    if (teamDocSnap.exists()) {
-                        userProfile.teamName = teamDocSnap.data().name;
-                    }
-                }
-                return { uid, ...userProfile };
-            }
+        if (privateQuerySnapshot.empty) {
+            console.log("No private player document found for this authId.");
+            return null;
         }
+
+        const privateDoc = privateQuerySnapshot.docs[0];
+        const privateData = privateDoc.data();
+        const publicPlayerId = privateDoc.id; // The ID is the same for both docs
+
+        // Fetch the corresponding public document
+        const publicDocRef = doc(db, "players_public", publicPlayerId);
+        const publicDocSnap = await getDoc(publicDocRef);
+
+        if (!publicDocSnap.exists()) {
+            console.log("Found private doc, but no corresponding public player document.");
+            return null;
+        }
+        
+        const publicData = {
+            publicId: publicPlayerId,
+            ...publicDocSnap.data()
+        };
+        
+        // Return both public and private data
+        return { publicData, privateData };
+
     } catch (error) {
         console.error("Error fetching user profile:", error);
+        return null;
     }
-    return null;
 }
 
-function dispatchAuthReady(session) {
-    const event = new CustomEvent('authReady', { detail: session });
+async function updateTeamManagementLink(teamId) {
+    const linkElement = document.getElementById('team-management-nav-link');
+    if (!linkElement) return;
+
+    if (teamId) {
+        const teamDocRef = doc(db, "teams", teamId);
+        const teamDocSnap = await getDoc(teamDocRef);
+        if (teamDocSnap.exists()) {
+            linkElement.textContent = teamDocSnap.data().name;
+        } else {
+            linkElement.textContent = "Team Management";
+        }
+    } else {
+        linkElement.textContent = "Team Management";
+    }
+}
+
+function dispatchAuthReady(user, userProfile) {
+    const event = new CustomEvent('authReady', {
+        detail: { 
+            user, 
+            publicData: userProfile?.publicData,
+            privateData: userProfile?.privateData
+        }
+    });
     document.dispatchEvent(event);
 }
 
 onAuthStateChanged(auth, async (user) => {
+    let userProfile = null;
     if (user) {
-        let session = JSON.parse(sessionStorage.getItem(SESSION_KEY));
-        if (!session || session.uid !== user.uid) {
-            const userProfile = await fetchUserProfile(user.uid);
-            session = { user, userProfile };
-            sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        userProfile = await fetchUserProfile(user.uid);
+        if (userProfile && userProfile.publicData && userProfile.publicData.teamId) {
+            await updateTeamManagementLink(userProfile.publicData.teamId);
+        } else {
+            await updateTeamManagementLink(null);
         }
-        dispatchAuthReady(session);
     } else {
-        sessionStorage.removeItem(SESSION_KEY);
-        dispatchAuthReady({ user: null, userProfile: null });
+        await updateTeamManagementLink(null);
     }
+    dispatchAuthReady(user, userProfile);
 });
-
-// Function to get the current session, to be used by other scripts
-export function getCurrentSession() {
-    return JSON.parse(sessionStorage.getItem(SESSION_KEY));
-}

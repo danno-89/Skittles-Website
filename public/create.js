@@ -1,7 +1,4 @@
-
-import { auth, db } from './firebase.config.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from './firebase.config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const createAccountForm = document.getElementById('createAccountForm');
@@ -54,16 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                // This step only creates the authentication account. No Firestore write.
+                await createUserWithEmailAndPassword(auth, email, password);
                 
-                await setDoc(doc(db, "users", user.uid), {
+                // Redirect to the linking page with all necessary details in the URL.
+                const urlParams = new URLSearchParams({
+                    email: email,
                     firstname: firstname,
-                    lastname: lastname,
-                    email: email
-                });
-        
-                window.location.href = `link.html?email=${encodeURIComponent(email)}`;
+                    lastname: lastname
+                }).toString();
+                
+                window.location.href = `link.html?${urlParams}`;
     
             } catch (error) {
                 console.error('Error creating account:', error);

@@ -1,5 +1,4 @@
-import { db } from './firebase.config.js';
-import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { db, collection, getDocs, doc, getDoc } from './firebase.config.js';
 
 const leagueTableContainer = document.getElementById('league-table-container');
 const seasonFilter = document.getElementById('season-filter');

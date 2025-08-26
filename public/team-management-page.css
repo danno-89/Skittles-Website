@@ -42,3 +42,93 @@
 #fixtures-content .card:hover {
     transform: none;
 }
+
+#team-management-container .table-container {
+    margin-bottom: 2rem;
+    overflow-x: auto; /* This is good */
+}
+
+/* Player row highlighting */
+.player-new {
+    background-color: hsla(120, 60%, 90%, 1); /* Light Green */
+}
+.player-expiring-soon {
+    background-color: hsla(55, 100%, 85%, 1); /* Light Yellow */
+}
+.player-no-fixtures-warn {
+    background-color: hsla(39, 100%, 85%, 1); /* Light Orange */
+}
+.player-no-fixtures-danger {
+    background-color: hsla(0, 100%, 90%, 1); /* Light Red */
+}
+
+/* Enforce consistent table layout for player rosters */
+.player-roster-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.player-roster-table th, .player-roster-table td {
+    padding: 0.4rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--light-grey);
+    font-size: 0.9rem;
+    min-width: 120px; /* Give columns a minimum width */
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.player-roster-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--club-green);
+    font-weight: bold;
+    color: var(--pure-white);
+    z-index: 5;
+}
+
+/* --- Responsive Styles for Team Management Table --- */
+@media (max-width: 768px) {
+    /* The magic is letting the table be a table and just having a scrollable container. */
+    /* All the incorrect display: block rules have been removed. */
+
+    .player-roster-table thead th:first-child,
+    .player-roster-table tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+    }
+
+    .player-roster-table thead th:first-child {
+        background-color: var(--club-green); 
+        z-index: 6; 
+    }
+
+    .player-roster-table tbody td:first-child {
+        background-color: var(--pure-white);
+    }
+
+    .player-roster-table tbody tr:hover td:first-child {
+        background-color: hsl(120 100% 95%);
+    }
+
+    /* Ensure background color is consistent for highlighted rows */
+    .player-roster-table tbody tr.player-new:hover td:first-child,
+    .player-roster-table tbody tr.player-expiring-soon:hover td:first-child,
+    .player-roster-table tbody tr.player-no-fixtures-warn:hover td:first-child,
+    .player-roster-table tbody tr.player-no-fixtures-danger:hover td:first-child {
+        background-color: hsl(120, 100%, 95%);
+    }
+
+    .player-roster-table tr.player-new td:first-child {
+        background-color: hsla(120, 60%, 90%, 1);
+    }
+    .player-roster-table tr.player-expiring-soon td:first-child {
+        background-color: hsla(55, 100%, 85%, 1);
+    }
+    .player-roster-table tr.player-no-fixtures-warn td:first-child {
+        background-color: hsla(39, 100%, 85%, 1);
+    }
+    .player-roster-table tr.player-no-fixtures-danger td:first-child {
+        background-color: hsla(0, 100%, 90%, 1);
+    }
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Player Registration</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="player-registration.css">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main>
+            <div class="page-header">
+                <h1>Player Registration</h1>
+            </div>
+            
+            <div id="registration-container">
+                <p>In order to play for a team in the Sarnia Skittles Club (the "Club") Leagues and Tournaments (the "League"), players must register by completing this form or a paper form which can be found at the Hampshire Lodge Alley (or online via sarniaskittles.leaguerepublic.com).</p>
+                <p>When 1 year has elapsed without any League activity, the registration will be closed. A further form can be submitted / completed to re-register.</p>
+                <p>*Players under 16 may not submit an online form as parent / guardian signature is required. A paper form must be completed in these instances.</p>
+                
+                <form id="registration-form" novalidate>
+                    <div class="form-columns">
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="first-name">First Name *</label>
+                                <input type="text" id="first-name" name="first-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name *</label>
+                                <input type="text" id="last-name" name="last-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dob">Date of birth *</label>
+                                <input type="text" id="dob" name="dob" placeholder="dd/mm/yyyy" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="team">Team *</label>
+                                <select id="team" name="team" required>
+                                    <option value="">Loading teams...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="division">Division</label>
+                                <select id="division" name="division">
+                                    <option value="">Please select</option>
+                                    <option value="Men's">Men's</option>
+                                    <option value="Ladies">Ladies</option>
+                                </select>
+                            </div>
+                             <div class="form-group">
+                                <label for="mobile-number">Mobile Number</label>
+                                <input type="tel" id="mobile-number" name="mobile-number" placeholder="##### ######" maxlength="12">
+                            </div>
+                            <div class="form-group">
+                                <label for="home-work-number">Home / Work Number</label>
+                                <input type="tel" id="home-work-number" name="home-work-number" placeholder="##### ######" maxlength="12">
+                            </div>
+                        </div>
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="address-line-1">Address Line 1 *</label>
+                                <input type="text" id="address-line-1" name="address-line-1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address-line-2">Address Line 2 *</label>
+                                <input type="text" id="address-line-2" name="address-line-2" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address-line-3">Address Line 3</label>
+                                <input type="text" id="address-line-3" name="address-line-3">
+                            </div>
+                           <div class="form-group">
+                                <label for="parish">Parish *</label>
+                                <select id="parish" name="parish" required>
+                                    <option value="">Select a parish</option>
+                                    <option value="Castel">Castel</option>
+                                    <option value="Forest">Forest</option>
+                                    <option value="St Andrew">St Andrew</option>
+                                    <option value="St Martin">St Martin</option>
+                                    <option value="St Peter Port">St Peter Port</option>
+                                    <option value="St Pierre du Bois">St Pierre du Bois</option>
+                                    <option value="St Sampson">St Sampson</option>
+                                    <option value="St Saviour">St Saviour</option>
+                                    <option value="Torteval">Torteval</option>
+                                    <option value="Vale">Vale</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="postcode">Postcode *</label>
+                                <input type="text" id="postcode" name="postcode" placeholder="GY# #XX" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Review Details</button>
+                </form>
+            </div>
+
+            <div id="confirmation-section" class="hidden">
+                <h2>Confirm Your Details</h2>
+                <p>Please review your details below. This information will be saved to the club's database.</p>
+                <div id="confirmation-content"></div>
+                <div class="button-group">
+                    <button id="cancel-submission" class="btn btn-secondary">Edit Details</button>
+                    <button id="register-no-account" type="button" class="btn btn-secondary">Confirm & Register (No Account)</button>
+                    <button id="proceed-to-account" class="btn btn-success">Confirm & Create Account</button>
+                </div>
+            </div>
+
+            <div id="account-creation-section" class="hidden">
+                <h2>Create Your Account</h2>
+                <p>Creating an account allows you to log in and manage your details later.</p>
+                <form id="account-creation-form">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                    </div>
+                    <div id="password-error" class="error-message hidden">Passwords do not match.</div>
+                    <div class="button-group">
+                        <button id="back-to-details" class="btn btn-secondary">Back to Details</button>
+                        <button type="submit" class="btn btn-success">Create Account & Register</button>
+                    </div>
+                </form>
+            </div>
+
+
+            <div id="summary-section" class="hidden">
+                <h2>Registration Successful!</h2>
+                <p>Thank you for registering. Here is a summary of the information you provided:</p>
+                <div id="summary-content"></div>
+                <button id="close-summary" class="btn btn-primary">Close</button>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+    <script type="module" src="main.js"></script>
+    <script type="module" src="firebase.config.js"></script>
+    <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="player-registration.js"></script>
+
+</body>
+</html>

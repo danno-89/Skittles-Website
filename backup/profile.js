@@ -1,248 +1,107 @@
-import { auth, db } from './firebase.config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { auth, db, doc, getDoc, updateDoc, collection, getDocs, onAuthStateChanged } from './firebase.config.js';
 
-// --- HELPER FUNCTIONS ---
-function formatDate(timestamp) {
-    if (!timestamp || typeof timestamp.toDate !== 'function') {
-        return 'N/A';
-    }
-    const dateObj = timestamp.toDate();
-    return dateObj.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
-}
+let user = null;
+let publicData = null;
+let privateData = null;
+let teamsMap = new Map(); // To store teamId -> teamName
 
-function calculateAge(timestamp) {
-    if (!timestamp || typeof timestamp.toDate !== 'function') {
-        return 'N/A';
-    }
-    const birthDate = timestamp.toDate();
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age;
-}
+const profileForm = document.getElementById('profile-form');
+const messageDiv = document.getElementById('message');
 
-// --- TAB HANDLING ---
-function setupTabs() {
-    const tabLinks = document.querySelectorAll('.tabs-main .tab-link');
-    const tabPanes = document.querySelectorAll('#tab-content-container .tab-pane');
-
-    tabLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            const tabId = link.dataset.tab;
-
-            tabLinks.forEach(innerLink => innerLink.classList.remove('active'));
-            link.classList.add('active');
-
-            tabPanes.forEach(pane => {
-                if (pane.id === `${tabId}-content`) {
-                    pane.classList.add('active');
-                } else {
-                    pane.classList.remove('active');
-                }
-            });
+/**
+ * Fetches all teams and stores them in a Map for easy lookup.
+ */
+const populateTeamsMap = async () => {
+    try {
+        const teamsSnapshot = await getDocs(collection(db, "teams"));
+        teamsSnapshot.forEach(doc => {
+            teamsMap.set(doc.id, doc.data().name);
         });
-    });
-}
+    } catch (error) {
+        console.error("Error populating teams map:", error);
+    }
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            try {
-                const privatePlayersRef = collection(db, "players_private");
-                const q = query(privatePlayersRef, where("authId", "==", user.uid));
-                const privateQuerySnapshot = await getDocs(q);
+/**
+ * Formats a Firestore Timestamp into a readable date string.
+ * @param {Timestamp} timestamp The Firestore Timestamp to format.
+ * @returns {string} The formatted date string (e.g., "12 Jan 23") or 'N/A'.
+ */
+const formatDate = (timestamp) => {
+    if (!timestamp || typeof timestamp.toDate !== 'function') return 'N/A';
+    return timestamp.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
-                if (!privateQuerySnapshot.empty) {
-                    const privateDoc = privateQuerySnapshot.docs[0];
-                    const privateData = privateDoc.data();
-                    const publicPlayerId = privateDoc.id;
 
-                    const publicDocRef = doc(db, "players_public", publicPlayerId);
-                    const publicDocSnap = await getDoc(publicDocRef);
+/**
+ * Calculates the number of days until a registration expires.
+ * @param {Timestamp} expiryTimestamp The Firestore Timestamp of the expiry date.
+ * @returns {string} The number of days remaining, or "Expired".
+ */
+const calculateDaysToExpiry = (expiryTimestamp) => {
+    if (!expiryTimestamp || typeof expiryTimestamp.toDate !== 'function') return 'N/A';
+    const expiryDate = expiryTimestamp.toDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-                    if (publicDocSnap.exists()) {
-                        const publicData = publicDocSnap.data();
-                        let teamName = 'N/A';
-                        
-                        if (publicData.teamId) {
-                            const teamDocRef = doc(db, "teams", publicData.teamId);
-                            const teamDocSnap = await getDoc(teamDocRef);
-                            if (teamDocSnap.exists()) {
-                                teamName = teamDocSnap.data().name || 'N/A';
-                            }
-                        }
+    const timeDiff = expiryDate.getTime() - today.getTime();
+    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-                        setupTabs();
-                        populatePublicInfo(publicData, teamName);
-                        populatePrivateInfo(privateData);
-                        populateRegistrationInfo(publicData);
-                        populateConsentSection(privateData);
+    return days < 0 ? 'Expired' : days.toString();
+};
 
-                    } else {
-                        document.getElementById('profile-data').innerHTML = '<p>Could not find player profile.</p>';
-                    }
-                } else {
-                    document.getElementById('profile-data').innerHTML = '<p>No player profile linked to this account.</p>';
-                }
-            } catch (error) {
-                console.error("Error fetching player data:", error);
-                document.getElementById('profile-data').innerHTML = '<p>Error loading profile data.</p>';
-            }
-        } else {
-            window.location.href = 'create.html';
+
+const showMessage = (msg, isError = false) => {
+    messageDiv.textContent = msg;
+    messageDiv.className = isError ? 'message error' : 'message success';
+    messageDiv.style.display = 'block';
+    setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
+};
+
+const populateForm = () => {
+    if (publicData) {
+        document.getElementById('first-name').textContent = publicData.firstName || 'N/A';
+        document.getElementById('last-name').textContent = publicData.lastName || 'N/A';
+        document.getElementById('team-name').textContent = teamsMap.get(publicData.teamId) || 'N/A';
+        document.getElementById('division').textContent = publicData.division || 'N/A';
+        document.getElementById('role').textContent = publicData.role || 'N/A';
+        
+        // Populate Registration Details
+        document.getElementById('registration-date').textContent = formatDate(publicData.registerDate);
+        document.getElementById('recent-fixture').textContent = formatDate(publicData.recentFixture);
+        document.getElementById('register-expiry').textContent = formatDate(publicData.registerExpiry);
+        document.getElementById('days-to-expiry').textContent = calculateDaysToExpiry(publicData.registerExpiry);
+
+    }
+    if (privateData) {
+        document.getElementById('email').textContent = privateData.email || 'N/A';
+        document.getElementById('dob').textContent = privateData.dob ? privateData.dob.toDate().toLocaleDateString('en-GB') : 'N/A';
+        document.getElementById('mobile-no').textContent = privateData.mobileNo || 'N/A';
+        document.getElementById('home-no').textContent = privateData.homeNo || 'N/A';
+        if (privateData.address) {
+            const address = privateData.address;
+            document.getElementById('address-line-1').textContent = address.line1 || '';
+            document.getElementById('address-line-2').textContent = address.line2 || '';
+            document.getElementById('address-line-3').textContent = address.line3 || '';
+            document.getElementById('parish').textContent = address.parish || '';
+            document.getElementById('postcode').textContent = address.postCode || '';
         }
-    });
+    }
+};
+
+document.addEventListener('authReady', async (e) => {
+    user = e.detail.user;
+    publicData = e.detail.publicData;
+    privateData = e.detail.privateData;
+
+    if (!user || !publicData || !privateData) {
+        if (profileForm) profileForm.style.display = 'none';
+        return;
+    }
+    
+    if (profileForm) {
+        profileForm.style.display = 'block';
+        await populateTeamsMap();
+        populateForm();
+    }
 });
-
-function populatePublicInfo(publicData, teamName) {
-    const container = document.getElementById('public-info-container');
-    container.innerHTML = `
-        <h2>Public Information</h2>
-        <div class="profile-field">
-            <label>First Name</label>
-            <p>${publicData?.firstName || 'N/A'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Last Name</label>
-            <p>${publicData?.lastName || 'N/A'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Team Name</label>
-            <p>${teamName || 'N/A'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Nickname</label>
-            <p>${publicData?.nickname || '&nbsp;'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Role</label>
-            <p>${publicData?.role || '&nbsp;'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Committee</label>
-            <p>${publicData?.committee || '&nbsp;'}</p>
-        </div>
-    `;
-}
-
-function populatePrivateInfo(privateData) {
-    const container = document.getElementById('private-info-container');
-    
-    let formattedAddress = '&nbsp;';
-    if (privateData?.address) {
-        const addressFields = ['line1', 'line2', 'line3', 'parish', 'postCode'];
-        const addressParts = [];
-        for (const field of addressFields) {
-            if (privateData.address[field]) {
-                addressParts.push(privateData.address[field]);
-            }
-        }
-        if (addressParts.length > 0) {
-            formattedAddress = addressParts.join('<br>');
-        }
-    }
-    
-    container.innerHTML = `
-        <h2>Personal Information</h2>
-        <div class="profile-field">
-            <label>Email Address</label>
-            <p>${privateData?.email || 'N/A'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Mobile Number</label>
-            <p>${privateData?.mobileNo || '&nbsp;'}</p>
-        </div>
-        <div class="profile-field">
-            <label>Home / Work Number</label>
-            <p>${privateData?.homeNo || '&nbsp;'}</p>
-        </div>
-        <div class="profile-field-horizontal">
-            <div class="profile-field">
-                <label>Date of Birth</label>
-                <p>${formatDate(privateData?.dob) || '&nbsp;'}</p>
-            </div>
-            <div class="profile-field">
-                <label>Age</label>
-                <p>${calculateAge(privateData?.dob) || '&nbsp;'}</p>
-            </div>
-        </div>
-        <div class="profile-field">
-            <label>Address</label>.
-            <p>${formattedAddress}</p>
-        </div>
-    `;
-}
-
-function populateRegistrationInfo(publicData) {
-    const container = document.getElementById('registration-info-container');
-    
-    const registerDate = formatDate(publicData?.registerDate);
-    const recentFixture = formatDate(publicData?.recentFixture);
-    const registerExpiry = formatDate(publicData?.registerExpiry);
-
-    let daysUntilExpiry = 'N/A';
-    if (publicData?.registerExpiry?.toDate) {
-        const expiryDate = publicData.registerExpiry.toDate();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        expiryDate.setHours(0, 0, 0, 0);
-
-        const diffTime = expiryDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-            daysUntilExpiry = '<span class="expired">Expired</span>';
-        } else if (diffDays === 0) {
-            daysUntilExpiry = 'Expires today';
-        } else {
-            daysUntilExpiry = `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
-        }
-    }
-
-    container.innerHTML = `
-        <h2>Registration Details</h2>
-        <div class="profile-field">
-            <label>Registration Date</label>
-            <p>${registerDate}</p>
-        </div>
-        <div class="profile-field">
-            <label>Recent Fixture</label>
-            <p>${recentFixture}</p>
-        </div>
-        <div class="profile-field">
-            <label>Registration Expiry</label>
-            <p>${registerExpiry}</p>
-        </div>
-        <div class="profile-field">
-            <label>Days until Expiry</label>
-            <p>${daysUntilExpiry}</p>
-        </div>
-    `;
-}
-
-function populateConsentSection(privateData) {
-    const container = document.getElementById('consent-section-container');
-    const hasConsented = privateData?.consent === 'Yes';
-
-    container.innerHTML = `
-        <div class="consent-section">
-            <div class="checkbox-group">
-                <input type="checkbox" id="consent-checkbox" ${hasConsented ? 'checked' : ''} disabled>
-                <label for="consent-checkbox">I consent to be notified by the league regarding any events, information, updates or statistics that are circulated from time to time.</label>
-            </div>
-            <p class="explanation">
-                For the Club to be able to register you as a player, we need to collect and store some personal data. 
-                This is a requirement of the local association and for the Club to be able to operate. 
-                Please read our <a href="gdpr.html">GDPR Policy</a> for more details.
-            </p>
-        </div>
-    `;
-}

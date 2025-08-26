@@ -7,18 +7,22 @@
     padding-block-end: 10px;
     border-block-end: 4px solid var(--club-yellow);
     margin-block-end: var(--spacing-md);
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 .page-header h1 {
     border: none;
     padding: 0;
     margin: 0;
+    flex-grow: 1; /* Allow h1 to take available space */
 }
 
 .page-header .filter-group {
+    display: flex; /* Ensure it's a flex container */
     flex-direction: row;
     align-items: center;
     gap: 0.8rem;
+    flex-shrink: 0; /* Prevent the filter from shrinking */
 }
 
 .page-header .filter-group .form-select {
@@ -39,6 +43,7 @@
     border-radius: var(--border-radius);
     display: flex;
     gap: var(--spacing-xl);
+    flex-wrap: wrap; /* Allow wrapping */
 }
 
 .checkbox-group {
@@ -46,6 +51,8 @@
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 0 var(--spacing-sm);
+    flex-grow: 1; /* Allow items to grow */
+    min-width: 250px; /* Prevent excessive squishing */
 }
 
 .checkbox-group input[type="checkbox"] {
@@ -123,7 +130,7 @@ tbody tr:hover {
 }
 
 /* --- Responsive Styles --- */
-@media (max-width: 850px) {
+@media (max-width: 768px) {
     .page-header {
         flex-direction: column;
         align-items: flex-start;
@@ -138,5 +145,35 @@ tbody tr:hover {
 
     .page-header .filter-group .form-select {
         width: 100%;
+    }
+
+    .filter-explanations {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    /* --- Sticky First Column for Mobile --- */
+    thead th:first-child,
+    tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+    }
+
+    thead th:first-child {
+        background-color: var(--club-green); 
+        z-index: 6; 
+    }
+
+    tbody td:first-child {
+        background-color: var(--pure-white);
+    }
+
+    tbody tr:hover td:first-child {
+        background-color: hsl(120 100% 95%);
+    }
+
+    tr.expired-player td:first-child {
+       background-color: inherit;
     }
 }
