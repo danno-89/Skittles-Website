@@ -1,28 +1,42 @@
+/* --- Profile Page Specific Styles --- */
 .profile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: var(--spacing-lg);
+}
+
+.heading-border {
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
 
 .profile-details p {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--light-grey);
-    padding: 0.5rem 0;
-    margin: 0;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.5;
 }
 
-.profile-details p strong {
-    margin-right: 1rem; /* Add some space between label and data */
+.profile-details strong {
+    margin-right: var(--spacing-md);
+    color: var(--dark-grey);
 }
 
 .profile-details span {
     text-align: right;
+    color: var(--medium-grey);
+}
+
+/* --- THIS IS THE FIX --- */
+.address-block {
+    display: flex;
+    justify-content: space-between;
 }
 
 .address-details {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    text-align: right;
 }
+/* --- END FIX --- */

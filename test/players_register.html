@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sarnia Skittles Club - Players Register</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
-    <script src="main.js" defer></script>
+    <link rel="stylesheet" href="players-register-page.css">
 </head>
 <body>
 
@@ -17,19 +17,19 @@
   <main>
     <div class="page-header">
       <h1>Players Register</h1>
-      <div id="filters-container">
-        <label for="team-filter">Filter by Team:</label>
-        <select id="team-filter" class="form-select">
-          <option value="">All Teams</option>
-        </select>
-      </div>
+        <div class="filter-group">
+            <label for="team-filter">Filter by Team:</label>
+            <select id="team-filter" class="form-select">
+                <option value="">All Teams</option>
+            </select>
+        </div>
     </div>
 
     <div class="filter-explanations">
         <div class="checkbox-group">
-            <input type="checkbox" id="exclude-expired-filter">
-            <label for="exclude-expired-filter">Hide expired registrations</label>
-            <p class="explanation">Check this box to hide players whose registrations have lapsed.</p>
+            <input type="checkbox" id="show-expired-filter">
+            <label for="show-expired-filter">Show expired registrations</label>
+            <p class="explanation">Check this box to show players whose registrations have lapsed.</p>
         </div>
         <div class="checkbox-group">
             <input type="checkbox" id="expiring-soon-filter">
@@ -46,8 +46,10 @@
 
 <div w3-include-html="footer.html"></div>
 
-<script src="firebase.config.js" type="module"></script>
-<script src="players_register.js" type="module"></script>
+<script type="module" src="main.js"></script>
+<script type="module" src="firebase.config.js"></script>
+<script type="module" src="auth-manager.js"></script>
+<script type="module" src="players_register.js"></script>
     
 </body>
 </html>

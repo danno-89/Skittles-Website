@@ -64,7 +64,6 @@ async function fetchAllFixtures() {
         const snapshot = await getDocs(q);
         allFixtures = snapshot.docs.map(doc => {
             const data = doc.data();
-            // Convert Firestore Timestamp to JavaScript Date object, or handle string dates
             if (data.scheduledDate && typeof data.scheduledDate.toDate === 'function') {
                 data.scheduledDate = data.scheduledDate.toDate();
             } else if (typeof data.scheduledDate === 'string') {
@@ -87,6 +86,7 @@ async function displayMatchResults() {
     const seasonFilter = document.getElementById('season-filter').value;
     const excludePostponed = document.getElementById('exclude-postponed-filter').checked;
     const onlyPostponed = document.getElementById('only-postponed-filter').checked;
+    const onlySpare = document.getElementById('only-spare-filter').checked;
 
     if (!resultsContainer) return;
     resultsContainer.innerHTML = '<p>Loading fixtures...</p>';
@@ -96,7 +96,14 @@ async function displayMatchResults() {
         const teamMatch = !teamFilter || match.homeTeamId === teamFilter || awayTeamId === teamFilter;
         const competitionMatch = !competitionFilter || match.division === competitionFilter;
         const seasonMatch = !seasonFilter || match.season === seasonFilter;
-        const statusMatch = (!excludePostponed || match.status !== 'postponed') && (!onlyPostponed || match.status === 'postponed');
+        
+        let statusMatch = true;
+        if (onlySpare) {
+            statusMatch = match.status === 'spare';
+        } else {
+            statusMatch = (!excludePostponed || match.status !== 'postponed') && (!onlyPostponed || match.status === 'postponed');
+        }
+
         return teamMatch && competitionMatch && seasonMatch && statusMatch;
     });
 
@@ -135,21 +142,42 @@ async function displayMatchResults() {
 
         let lastRenderedDate = null;
         for (const match of group.matches) {
-            const awayTeamIdentifier = match.awayTeamId || match.awayTeamis;
-            const homeTeamName = formatTeamName(getTeamName(match.homeTeamId));
-            const awayTeamName = formatTeamName(getTeamName(awayTeamIdentifier));
-            const hasResult = match.homeScore != null && match.awayScore != null;
-            const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
             const dateObj = match.scheduledDate;
             const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
-            const divisionName = competitionCache.get(match.division)?.name || 'N/A';
-            const round = match.round || '';
-            let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (match.status === 'postponed' ? `<span class="status-postponed">postponed</span>` : '');
             const dateCell = (date === lastRenderedDate) ? '' : date;
             if (date !== lastRenderedDate) lastRenderedDate = date;
 
-            tableBodyHTML += `<tr class="week-row week-${weekKey}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
+            if (match.status === 'spare') {
+                tableBodyHTML += `<tr class="week-row week-${weekKey} status-spare">
+                                    <td>${dateCell}</td>
+                                    <td>${time}</td>
+                                    <td colspan="6">Spare slot for Postponed Fixtures</td>
+                                  </tr>`;
+            } else {
+                const awayTeamIdentifier = match.awayTeamId || match.awayTeamis;
+                let homeTeamName = formatTeamName(getTeamName(match.homeTeamId));
+                let awayTeamName = formatTeamName(getTeamName(awayTeamIdentifier));
+                const hasResult = match.homeScore != null && match.awayScore != null;
+                const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
+                const divisionName = competitionCache.get(match.division)?.name || 'N/A';
+                const round = match.round || '';
+                
+                const isPostponed = match.status === 'postponed' && !hasResult;
+                const rowClass = isPostponed ? 'status-postponed' : '';
+                
+                if (isPostponed && match.postponedBy) {
+                    if (match.postponedBy === match.homeTeamId) {
+                        homeTeamName = `<span class="postponed-by-team">${homeTeamName}</span>`;
+                    } else if (match.postponedBy === awayTeamIdentifier) {
+                        awayTeamName = `<span class="postponed-by-team">${awayTeamName}</span>`;
+                    }
+                }
+
+                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : '');
+                
+                tableBodyHTML += `<tr class="week-row week-${weekKey} ${rowClass}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
+            }
         }
     }
 
@@ -274,14 +302,29 @@ function setupEventListeners() {
     
     const excludePostponed = document.getElementById('exclude-postponed-filter');
     const onlyPostponed = document.getElementById('only-postponed-filter');
+    const onlySpare = document.getElementById('only-spare-filter');
 
     excludePostponed?.addEventListener('change', () => {
-        if (excludePostponed.checked) onlyPostponed.checked = false;
+        if (excludePostponed.checked) {
+            onlyPostponed.checked = false;
+            onlySpare.checked = false;
+        }
         displayMatchResults();
     });
 
     onlyPostponed?.addEventListener('change', () => {
-        if (onlyPostponed.checked) excludePostponed.checked = false;
+        if (onlyPostponed.checked) {
+            excludePostponed.checked = false;
+            onlySpare.checked = false;
+        }
+        displayMatchResults();
+    });
+
+    onlySpare?.addEventListener('change', () => {
+        if (onlySpare.checked) {
+            excludePostponed.checked = false;
+            onlyPostponed.checked = false;
+        }
         displayMatchResults();
     });
     

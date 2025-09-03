@@ -1,184 +1,195 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db, collection, getDocs, query, where, orderBy } from './firebase.config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const scheduleContainer = document.getElementById('schedule-container');
-    const monthYearDisplay = document.getElementById('current-month-year');
-    const prevMonthBtn = document.getElementById('prev-month');
-    const nextMonthBtn = document.getElementById('next-month');
+    const calendarContainer = document.getElementById('calendar-container');
+    const seasonFilter = document.getElementById('season-filter');
 
-    if (!scheduleContainer || !monthYearDisplay || !prevMonthBtn || !nextMonthBtn) {
-        console.error("Calendar elements not found.");
+    if (!calendarContainer || !seasonFilter) {
+        console.error("Required calendar elements not found.");
         return;
     }
+    
+    const parseFirestoreDate = (field) => {
+        if (!field) return null;
+        if (typeof field.toDate === 'function') return field.toDate();
+        const d = new Date(field);
+        return (d instanceof Date && !isNaN(d.getTime())) ? d : null;
+    };
 
-    let currentDate = new Date();
+    const fetchAllSeasonEvents = async (seasonName, startDate, endDate) => {
+        const allEvents = [];
+        const startUTC = new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000);
+        const endUTC = new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000);
 
-    const fetchFixtures = async (startDate, endDate) => {
+        const processCollection = async (collectionName) => {
+            try {
+                const q = query(collection(db, collectionName), where('season', '==', seasonName));
+                const snapshot = await getDocs(q);
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (Array.isArray(data.date) && data.date.length === 2) {
+                        const eventStartDate = parseFirestoreDate(data.date[0]);
+                        const eventEndDate = parseFirestoreDate(data.date[1]);
+                        if (eventStartDate && eventEndDate) {
+                            allEvents.push({
+                                date: eventStartDate,
+                                endDate: eventEndDate,
+                                isRange: true,
+                                time: 'All Day',
+                                type: 'event-general',
+                                description: data.name
+                            });
+                        }
+                    } else {
+                        const eventDate = parseFirestoreDate(data.date);
+                        if (!eventDate) return;
+                        let eventTime = 'All Day';
+                        if (eventDate.getUTCHours() !== 0 || eventDate.getUTCMinutes() !== 0) {
+                            eventTime = eventDate.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
+                        }
+                        allEvents.push({ date: eventDate, time: eventTime, type: 'event-general', description: data.name });
+                    }
+                });
+            } catch (error) {
+                console.error(`Error fetching ${collectionName}:`, error);
+            }
+        };
+
+        await processCollection('events');
+        await processCollection('competitions');
+        
         try {
-            const snapshot = await db.collection('fixtures')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .orderBy('date')
-                .get();
-            
-            const fixturesByDate = {};
-            snapshot.forEach(doc => {
+            const q = query(
+                collection(db, 'match_results'),
+                where('scheduledDate', '>=', startUTC.toISOString()),
+                where('scheduledDate', '<=', endUTC.toISOString())
+            );
+            const matchesSnapshot = await getDocs(q);
+            matchesSnapshot.forEach(doc => {
                 const data = doc.data();
-                const fixtureDate = data.date.toDate().toISOString().split('T')[0];
-                if (!fixturesByDate[fixtureDate]) {
-                    fixturesByDate[fixtureDate] = [];
+                const eventDate = parseFirestoreDate(data.scheduledDate);
+                if (!eventDate) return;
+                const time = eventDate.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
+                if (data.status === 'scheduled') {
+                    allEvents.push({ date: eventDate, time, type: 'fixture-occupied', description: `${data.homeTeamName || 'TBC'} vs ${data.awayTeamName || 'TBC'}` });
+                } else if (data.status === 'spare') {
+                    allEvents.push({ date: eventDate, time, type: 'fixture-spare', description: 'Spare Slot for Postponed Fixtures' });
                 }
-                fixturesByDate[fixtureDate].push({ ...data, type: 'fixture' });
             });
-            return fixturesByDate;
         } catch (error) {
-            console.error("Error fetching fixtures:", error);
-            return {};
+            console.error("Error fetching match_results:", error);
         }
+        
+        allEvents.sort((a, b) => a.date - b.date);
+        return allEvents;
     };
     
-    const fetchEvents = async (startDate, endDate) => {
-        try {
-            const snapshot = await db.collection('events')
-                .where('date', '>=', startDate)
-                .where('date', '<=', endDate)
-                .orderBy('date')
-                .get();
-            
-            const eventsByDate = {};
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const eventDate = data.date.toDate();
-                const dateStr = eventDate.toISOString().split('T')[0];
-                if (!eventsByDate[dateStr]) {
-                    eventsByDate[dateStr] = [];
-                }
-                eventsByDate[dateStr].push({
-                    type: 'event',
-                    name: data.name,
-                    time: eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-                });
-            });
-            return eventsByDate;
-        } catch (error) {
-            console.error("Error fetching events:", error);
-            return {};
+    const renderSchedule = (events) => {
+        calendarContainer.innerHTML = '';
+        if (events.length === 0) {
+            calendarContainer.innerHTML = '<p>No events found for this season.</p>';
+            return;
         }
-    };
 
-    const renderSchedule = async () => {
-        scheduleContainer.innerHTML = 'Loading...';
-        monthYearDisplay.textContent = currentDate.toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric'
-        });
-
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-
-        const firstDayOfMonth = new Date(year, month, 1);
-        const lastDayOfMonth = new Date(year, month + 1, 0);
-
-        const [fixturesByDate, eventsByDate] = await Promise.all([
-            fetchFixtures(firstDayOfMonth, lastDayOfMonth),
-            fetchEvents(firstDayOfMonth, lastDayOfMonth)
-        ]);
-
-        scheduleContainer.innerHTML = ''; 
-
-        for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
-            const currentDay = new Date(year, month, day);
-            const dateStr = currentDay.toISOString().split('T')[0];
-            const dayOfWeek = currentDay.getDay();
-
-            const dayFixtures = fixturesByDate[dateStr] || [];
-            const dayEvents = eventsByDate[dateStr] || [];
-            const allItems = [...dayFixtures, ...dayEvents];
-
-            // Helper to parse different time formats for sorting
-            const parseTime = (timeStr) => {
-                const lowerTime = timeStr.toLowerCase().replace(/\s/g, '');
-                let [time, modifier] = lowerTime.split(/(am|pm)/);
-                let [hours, minutes] = time.split(':').map(Number);
-                if (modifier === 'pm' && hours < 12) hours += 12;
-                if (modifier === 'am' && hours === 12) hours = 0;
-                return hours * 60 + (minutes || 0);
-            };
+        let i = 0;
+        while (i < events.length) {
+            const currentEvent = events[i];
             
-            allItems.sort((a, b) => parseTime(a.time) - parseTime(b.time));
-
             const dayElement = document.createElement('div');
             dayElement.className = 'schedule-day';
+            const header = document.createElement('div');
+            header.className = 'schedule-date-header';
+            const list = document.createElement('ul');
+            list.className = 'schedule-item-list';
 
-            const dateElement = document.createElement('div');
-            dateElement.className = 'schedule-day-date';
-            dateElement.innerHTML = `${currentDay.toLocaleDateString('en-US', { weekday: 'short' })}<br>${currentDay.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
-            
-            const eventsElement = document.createElement('div');
-            eventsElement.className = 'schedule-day-events';
-            
-            if (allItems.length > 0) {
-                allItems.forEach(item => {
-                    const detailElement = document.createElement('div');
-                    detailElement.className = 'schedule-event';
-                    if (item.type === 'fixture') {
-                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.homeTeam} vs ${item.awayTeam} <em>(${item.division})</em>`;
-                    } else {
-                        detailElement.innerHTML = `<strong>${item.time}:</strong> ${item.name}`;
-                    }
-                    eventsElement.appendChild(detailElement);
-                });
-            } else {
-                eventsElement.textContent = 'No fixtures or events scheduled.';
-            }
-
-            const availabilityElement = document.createElement('div');
-            availabilityElement.className = 'schedule-day-availability';
-
-            const isWeekdayWithSlots = dayOfWeek >= 1 && dayOfWeek <= 4;
-            if (isWeekdayWithSlots) {
-                const allPossibleSlots = ['7:00pm', '8:00pm', '9:00pm'];
-                const usedFixtureTimes = dayFixtures.map(f => f.time);
-                const availableSlots = allPossibleSlots.filter(slot => !usedFixtureTimes.includes(slot));
+            if (currentEvent.isRange) {
+                const startDateStr = currentEvent.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+                const endDateStr = currentEvent.endDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+                header.textContent = `${startDateStr} - ${endDateStr}`;
                 
-                if (availableSlots.length > 0) {
-                    const availabilityCount = document.createElement('a');
-                    availabilityCount.className = 'availability-count';
-                    availabilityCount.textContent = `${availableSlots.length} spare slot${availableSlots.length > 1 ? 's' : ''}: ${availableSlots.join(', ')}`;
-                    availabilityCount.href = `mailto:contact@sarniaskittles.com?subject=Fixture Slot Enquiry for ${dateStr}`;
-                    availabilityElement.appendChild(availabilityCount);
-                } else {
-                    availabilityElement.innerHTML = '<span class="no-availability">Fully booked</span>';
-                }
+                const item = document.createElement('li');
+                item.className = `schedule-item ${currentEvent.type}`;
+                item.innerHTML = `<div class="schedule-item-time">${currentEvent.time}</div><div class="schedule-item-description">${currentEvent.description}</div>`;
+                list.appendChild(item);
+                
+                i++;
             } else {
-                availabilityElement.innerHTML = '<span class="no-availability">No slots available</span>';
+                const dateStr = currentEvent.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                header.textContent = dateStr;
+                
+                const dayEvents = [];
+                let j = i;
+                while (j < events.length && events[j].date.toDateString() === currentEvent.date.toDateString()) {
+                    dayEvents.push(events[j]);
+                    j++;
+                }
+                
+                dayEvents.sort((a, b) => {
+                    if (a.time === 'All Day') return -1;
+                    if (b.time === 'All Day') return 1;
+                    return a.time.localeCompare(b.time);
+                });
+
+                dayEvents.forEach(event => {
+                    const item = document.createElement('li');
+                    item.className = `schedule-item ${event.type}`;
+                    item.innerHTML = `<div class="schedule-item-time">${event.time}</div><div class="schedule-item-description">${event.description}</div>`;
+                    list.appendChild(item);
+                });
+
+                i = j;
             }
             
-            dayElement.appendChild(dateElement);
-            dayElement.appendChild(eventsElement);
-            dayElement.appendChild(availabilityElement);
-            scheduleContainer.appendChild(dayElement);
+            dayElement.appendChild(header);
+            dayElement.appendChild(list);
+            calendarContainer.appendChild(dayElement);
         }
     };
 
-    prevMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderSchedule();
-    });
+    const handleSeasonChange = async () => {
+        calendarContainer.innerHTML = 'Loading...';
+        const selectedOption = seasonFilter.options[seasonFilter.selectedIndex];
+        if (!selectedOption) return;
 
-    nextMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderSchedule();
-    });
+        const seasonName = selectedOption.value;
+        const seasonStartDateStr = selectedOption.dataset.startDate;
+        const seasonEndDateStr = selectedOption.dataset.endDate;
 
-    renderSchedule();
+        if (!seasonStartDateStr || !seasonEndDateStr) {
+            calendarContainer.innerHTML = '<p>This season has no defined start and end date.</p>';
+            return;
+        }
+        
+        const seasonStartDate = new Date(seasonStartDateStr);
+        const seasonEndDate = new Date(seasonEndDateStr);
+
+        const events = await fetchAllSeasonEvents(seasonName, seasonStartDate, seasonEndDate);
+        renderSchedule(events);
+    };
+
+    const initializePage = async () => {
+        try {
+            const q = query(collection(db, 'seasons'), orderBy('name', 'desc'));
+            const seasonsSnapshot = await getDocs(q);
+            seasonsSnapshot.forEach(doc => {
+                const season = doc.data();
+                const option = document.createElement('option');
+                option.value = season.name;
+                option.textContent = season.name;
+                if (season.start && season.end) {
+                    option.dataset.startDate = parseFirestoreDate(season.start)?.toISOString();
+                    option.dataset.endDate = parseFirestoreDate(season.end)?.toISOString();
+                }
+                if (season.status === 'current') option.selected = true;
+                seasonFilter.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error fetching seasons:", error);
+        }
+        seasonFilter.addEventListener('change', handleSeasonChange);
+        handleSeasonChange();
+    };
+
+    initializePage();
 });

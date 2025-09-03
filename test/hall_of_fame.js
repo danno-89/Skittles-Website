@@ -1,14 +1,4 @@
-import { firebaseConfig } from './firebase.config.js';
-
-// --- INITIALIZATION ---
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db, collection, getDocs, doc, getDoc } from './firebase.config.js';
 
 // --- DOM ELEMENTS ---
 const hallOfFameContainer = document.getElementById('hall-of-fame-container');
@@ -32,7 +22,7 @@ const LEAGUE_DIVISION_AWARD_IDS = ['premier-division', 'first-division', 'second
 
 const initializePage = async () => {
     try {
-        const competitionsSnapshot = await db.collection('competitions').get();
+        const competitionsSnapshot = await getDocs(collection(db, 'competitions'));
         if (competitionsSnapshot.empty) {
             hallOfFameContainer.innerHTML = '<p>No competition data found.</p>';
             return;
@@ -107,9 +97,9 @@ const loadWinners = async (competitionId) => {
     }
 
     try {
-        const winnerDoc = await db.collection('winners').doc(competitionId).get();
+        const winnerDoc = await getDoc(doc(db, 'winners', competitionId));
         
-        if (winnerDoc.exists) {
+        if (winnerDoc.exists()) {
             const data = winnerDoc.data();
             if (LEAGUE_DIVISION_AWARD_IDS.includes(competitionId)) {
                 currentWinners = Object.entries(data).map(([season, seasonData]) => ({
@@ -250,9 +240,19 @@ const renderAsList = (winnersArray, competitionName) => {
     const list = document.createElement('ul');
     list.className = 'winners-list';
     winnersArray.forEach(entry => {
-        const winnerText = (typeof entry.winner === 'object' && entry.winner.male && entry.winner.female)
-            ? `${entry.winner.female} & ${entry.winner.male}`
-            : (entry.winner || 'N/A');
+        let winnerText;
+        if (typeof entry.winner === 'object' && entry.winner !== null) {
+            if (entry.winner.male && entry.winner.female) {
+                winnerText = `${entry.winner.female} & ${entry.winner.male}`;
+            } else if (entry.winner.player1 && entry.winner.player2) {
+                winnerText = `${entry.winner.player1} & ${entry.winner.player2}`;
+            } else {
+                winnerText = 'N/A';
+            }
+        } else {
+            winnerText = entry.winner || 'N/A';
+        }
+
         const listItem = document.createElement('li');
         listItem.innerHTML = `<span class="season">${entry.season}</span><span class="winner">${winnerText}</span>`;
         list.appendChild(listItem);
@@ -269,7 +269,7 @@ const renderStatistics = (winCounts, competitionType) => {
     const maxWins = sortedWinners.length > 0 ? sortedWinners[0][1] : 0;
     const mostSuccessful = sortedWinners.filter(w => w[1] === maxWins);
     statsContent.innerHTML = `
-        <div class="stat-item"><strong>Total Winners:</strong><span>${winCounts.size}</span></div>
+        <div class="stat-item"><strong>Total Unique Winners:</strong><span>${winCounts.size}</span></div>
         <div class="stat-item"><strong>Most Wins:</strong><span>${mostSuccessful.map(w => `${w[0]} (${w[1]})`).join(', ')}</span></div>`;
 };
 
@@ -307,12 +307,19 @@ const renderDetailedWinnersList = (winCounts) => {
 
 function getWinCounts(winnersArray) {
     return winnersArray.reduce((acc, entry) => {
-        const processWinner = (name) => acc.set(name, (acc.get(name) || 0) + 1);
+        const processWinner = (name) => {
+            if (name && typeof name === 'string') {
+                acc.set(name, (acc.get(name) || 0) + 1);
+            }
+        };
+
         if (typeof entry.winner === 'string' && entry.winner) {
             processWinner(entry.winner);
-        } else if (typeof entry.winner === 'object' && entry.winner) {
+        } else if (typeof entry.winner === 'object' && entry.winner !== null) {
             if (entry.winner.male) processWinner(entry.winner.male);
             if (entry.winner.female) processWinner(entry.winner.female);
+            if (entry.winner.player1) processWinner(entry.winner.player1);
+            if (entry.winner.player2) processWinner(entry.winner.player2);
         }
         return acc;
     }, new Map());

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sarnia Skittles Club - Committee</title>
     <link rel="stylesheet" href="style.css">
-    <script src="main.js" defer></script>
+    
 </head>
 <body>
 
@@ -15,8 +15,11 @@
     <div w3-include-html="navigation.html"></div>
 
     <main>
-        <section id="committee-members" class="section-center">
-            <h2>Our Committee</h2>
+        <div class="page-header">
+            <h1>Our Committee</h1>
+        </div>
+        
+        <section id="committee-members">
             <div class="committee-grid">
                 <p>Loading committee members...</p>
             </div>
@@ -26,9 +29,9 @@
 
 <div w3-include-html="footer.html"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="firebase.config.js"></script>
-<script src="committee.js"></script>
+<script type="module" src="main.js"></script>
+<script type="module" src="firebase.config.js"></script>
+<script type="module" src="auth-manager.js"></script>
+<script type="module" src="committee.js"></script>
 </body>
 </html>

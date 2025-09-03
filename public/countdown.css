@@ -1,0 +1,30 @@
+#countdown-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+#countdown {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+#countdown div {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    padding: 1rem;
+    min-width: 80px;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+#countdown div span {
+    display: block;
+    font-size: .8rem;
+    font-weight: normal;
+}

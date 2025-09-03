@@ -156,14 +156,27 @@ async function displayMatchResults() {
                                   </tr>`;
             } else {
                 const awayTeamIdentifier = match.awayTeamId || match.awayTeamis;
-                const homeTeamName = formatTeamName(getTeamName(match.homeTeamId));
-                const awayTeamName = formatTeamName(getTeamName(awayTeamIdentifier));
+                let homeTeamName = formatTeamName(getTeamName(match.homeTeamId));
+                let awayTeamName = formatTeamName(getTeamName(awayTeamIdentifier));
                 const hasResult = match.homeScore != null && match.awayScore != null;
                 const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
                 const divisionName = competitionCache.get(match.division)?.name || 'N/A';
                 const round = match.round || '';
-                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (match.status === 'postponed' ? `<span class="status-postponed">postponed</span>` : '');
-                tableBodyHTML += `<tr class="week-row week-${weekKey}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
+                
+                const isPostponed = match.status === 'postponed' && !hasResult;
+                const rowClass = isPostponed ? 'status-postponed' : '';
+                
+                if (isPostponed && match.postponedBy) {
+                    if (match.postponedBy === match.homeTeamId) {
+                        homeTeamName = `<span class="postponed-by-team">${homeTeamName}</span>`;
+                    } else if (match.postponedBy === awayTeamIdentifier) {
+                        awayTeamName = `<span class="postponed-by-team">${awayTeamName}</span>`;
+                    }
+                }
+
+                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : '');
+                
+                tableBodyHTML += `<tr class="week-row week-${weekKey} ${rowClass}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
             }
         }
     }

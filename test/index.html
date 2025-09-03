@@ -1,27 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Sarnia Skittles Club</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="SSC Logo.png" type="image/png">
-  <script src="main.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="main-page.css">
 </head>
 <body>
 
 <div w3-include-html="header.html"></div>
 
 <div class="container">
-  <div w3-include-html="navigation.html"></div>
+    <div w3-include-html="navigation.html"></div>
+    
+    <main>
+        <div class="page-header">
+            <h1>Welcome to the Sarnia Skittles Club</h1>
+        </div>
 
-  <main>
-    <h1>Welcome to our website</h1>
-    <p>Please use the navigation bar to find your way around the site.</p>
-  </main>
+        <p class="page-intro">Your home for skittles in Guernsey, providing league and tournament fixtures for players of all abilities.</p>
+
+        <div class="main-grid">
+            <div class="main-content">
+                <section class="content-section card">
+                    <h2>Latest News</h2>
+                    <p>Please note, there is an issue with the PDF version of the Fixtures Book. This has been removed from the website, until it is corrected. In the meantime, please use the fixtures / results page which is correct.</p>
+                </section>
+            </div>
+
+            <aside class="sidebar-right">
+                <div class="action-box-card">
+                    <h2>Get Started</h2>
+                    <div class="action-item">
+                        <p>Ready to play?</p>
+                        <a href="player-registration.html" class="btn btn-info">Register Here</a>
+                    </div>
+                    <div class="action-item">
+                        <p>Registered but don't have an account?</p>
+                        <a href="create.html" class="btn btn-cta">Create Account</a>
+                    </div>
+                    <div class="action-item">
+                        <p>Already have an account?</p>
+                        <a href="create.html" class="btn btn-primary">Login</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
 </div>
 
 <div w3-include-html="footer.html"></div>
-
+<script type="module" src="firebase.config.js"></script>
+<script type="module" src="auth-manager.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 </html>

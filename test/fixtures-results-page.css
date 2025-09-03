@@ -1,0 +1,176 @@
+/* --- Fixtures/Results Page Specific Styles --- */
+#filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.filter-group-right {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-end;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-xs);
+}
+
+.checkbox-group span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin: 0;
+    width: 1rem;
+    height: 1rem;
+}
+
+#results-container {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.results-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.results-table th, .results-table td {
+    white-space: nowrap;
+    padding: 0.6rem 0.5rem;
+}
+
+.week-header {
+    cursor: pointer;
+    background-color: var(--club-green);
+    color: var(--club-yellow);
+    font-weight: bold;
+}
+
+.week-header.is-cup-week {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+}
+
+.week-header:hover {
+    background-color: var(--darker-green);
+}
+
+.week-header.is-cup-week:hover {
+    background-color: var(--darker-yellow);
+}
+
+.week-header .arrow {
+    display: inline-block;
+    width: 1.5em;
+    transition: transform 0.2s;
+}
+
+.score, .status-cell {
+    text-align: center;
+}
+
+.btn-details {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--club-green);
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--club-green);
+    background-color: var(--pure-white);
+    text-align: center;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.btn-details:hover {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    text-decoration: none;
+}
+
+.status-postponed {
+    background-color: hsla(39, 100%, 90%, 1); /* Light Orange */
+}
+
+.status-postponed span {
+    color: var(--danger);
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+
+.status-spare {
+    background-color: hsla(120, 60%, 90%, 1); /* Light Green */
+    font-style: italic;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #results-container {
+        overflow-x: auto;
+    }
+    
+    .results-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 6;
+        background-color: var(--club-green);
+    }
+    
+    .results-table .week-header td {
+        position: sticky;
+        top: 40px; /* Height of the header row */
+        z-index: 4;
+    }
+
+    .results-table th, .results-table td {
+        min-width: 120px;
+    }
+
+    /* --- Define column widths and sticky positions --- */
+    .results-table th:nth-child(1), .results-table td:nth-child(1) {
+        min-width: 85px;
+        position: sticky;
+        left: 0;
+        z-index: 3;
+    }
+    .results-table th:nth-child(2), .results-table td:nth-child(2) {
+        min-width: 65px;
+        position: sticky;
+        left: 85px; /* Width of the first column */
+        z-index: 3;
+    }
+
+    /* --- Handle backgrounds for sticky elements --- */
+    .results-table tbody td {
+        background-color: var(--pure-white);
+    }
+    
+    .results-table tbody tr:hover td {
+        background-color: hsl(120, 100%, 95%);
+    }
+
+    .results-table .week-header:hover td {
+        background-color: var(--darker-green) !important;
+    }
+    .results-table .week-header.is-cup-week:hover td {
+        background-color: var(--darker-yellow) !important;
+    }
+}

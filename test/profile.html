@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - My Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile-page.css">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main id="profile-form">
+            <div class="page-header">
+                <h1>My Profile</h1>
+                <button id="sign-out-btn" class="btn btn-danger">Sign Out</button>
+            </div>
+
+            <div class="tabs-main">
+                <button class="tab-link active" data-tab="personal-details">Personal Details</button>
+                <button class="tab-link" data-tab="statistics">Statistics</button>
+            </div>
+
+            <div id="tab-content-container">
+                <div id="personal-details-content" class="tab-pane active">
+                    <div class="profile-grid">
+                        
+                        <!-- Public Information Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Public Information</h2>
+                            <div class="profile-details">
+                                <p><strong>First Name:</strong> <span id="first-name"></span></p>
+                                <p><strong>Last Name:</strong> <span id="last-name"></span></p>
+                                <p><strong>Team:</strong> <span id="team-name"></span></p>
+                                <p><strong>Division:</strong> <span id="division"></span></p>
+                                <p><strong>Role:</strong> <span id="role"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Personal Information</h2>
+                            <div class="profile-details">
+                                <p><strong>Email:</strong> <span id="email"></span></p>
+                                <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
+                                <p><strong>Mobile Number:</strong> <span id="mobile-no"></span></p>
+                                <p><strong>Home/Work Number:</strong> <span id="home-no"></span></p>
+                                <div>
+                                    <strong>Address:</strong>
+                                    <div class="address-details">
+                                        <span id="address-line-1"></span>
+                                        <span id="address-line-2"></span>
+                                        <span id="address-line-3"></span>
+                                        <span id="parish"></span>
+                                        <span id="postcode"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registration Details Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Registration Details</h2>
+                             <div class="profile-details">
+                                <p><strong>Registration Date:</strong> <span id="registration-date"></span></p>
+                                <p><strong>Recent Fixture:</strong> <span id="recent-fixture"></span></p>
+                                <p><strong>Registration Expiry:</strong> <span id="register-expiry"></span></p>
+                                <p><strong>Days to Expiry:</strong> <span id="days-to-expiry"></span></p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="statistics-content" class="tab-pane">
+                    <p>Player statistics will be available here in a future update.</p>
+                </div>
+            </div>
+            <div id="message" style="display:none;"></div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+    <script type="module" src="main.js"></script>
+    <script type="module" src="firebase.config.js"></script>
+    <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="profile.js"></script>
+
+</body>
+</html>

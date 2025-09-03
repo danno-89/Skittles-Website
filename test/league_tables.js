@@ -1,13 +1,4 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db, collection, getDocs, doc, getDoc } from './firebase.config.js';
 
 const leagueTableContainer = document.getElementById('league-table-container');
 const seasonFilter = document.getElementById('season-filter');
@@ -19,7 +10,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
 
     const populateSeasons = async () => {
         try {
-            const seasonsSnapshot = await db.collection('league_tables').get();
+            const seasonsSnapshot = await getDocs(collection(db, 'league_tables'));
             if (seasonsSnapshot.empty) {
                 seasonFilter.disabled = true;
                 seasonFilter.innerHTML = '<option>No seasons found</option>';
@@ -180,9 +171,9 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         if (!seasonId) return;
 
         try {
-            const docSnap = await db.collection('league_tables').doc(seasonId).get();
+            const docSnap = await getDoc(doc(db, 'league_tables', seasonId));
             
-            if (docSnap.exists) {
+            if (docSnap.exists()) {
                 const leagueData = docSnap.data();
                 const divisionOrder = ['premier_division', 'first_division', 'second_division', 'ladies_division', 'season'];
                 const sortedDivisionKeys = Object.keys(leagueData).sort((a, b) => {

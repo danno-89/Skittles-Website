@@ -6,6 +6,7 @@
     <title>Sarnia Skittles Club</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="main-page.css">
+    <link rel="stylesheet" href="countdown.css">
 </head>
 <body>
 
@@ -25,7 +26,11 @@
             <div class="main-content">
                 <section class="content-section card">
                     <h2>Latest News</h2>
-                    <p>The new season is about to start! Check out the Fixtures / Results page for the latest schedule and information.</p>
+                    <p>Please note, there is an issue with the PDF version of the Fixtures Book. This has been removed from the website, until it is corrected. In the meantime, please use the fixtures / results page which is correct.</p>
+                </section>
+                <section class="content-section card" id="countdown-card">
+                    <h2>Next Competition Countdown</h2>
+                    <div id="countdown"></div>
                 </section>
             </div>
 
@@ -54,5 +59,6 @@
 <script type="module" src="firebase.config.js"></script>
 <script type="module" src="auth-manager.js"></script>
 <script type="module" src="main.js"></script>
+<script type="module" src="countdown.js"></script>
 </body>
 </html>

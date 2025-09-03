@@ -3,6 +3,13 @@ const admin = require('firebase-admin');
 const db = admin.firestore();
 
 function parseDateToTimestamp(dateString) {
+    // Check if the dateString is already in a format that can be directly used by Date.parse,
+    // which is the case for the expiry date sent from the client.
+    if (Date.parse(dateString)) {
+        return admin.firestore.Timestamp.fromDate(new Date(dateString));
+    }
+
+    // Handle the dd/mm/yyyy format for DOB
     const parts = dateString.split('/');
     if (parts.length === 3) {
         const day = parseInt(parts[0], 10);
@@ -14,6 +21,7 @@ function parseDateToTimestamp(dateString) {
     }
     return null;
 }
+
 
 function capitalizeFirstLetter(string) {
     if (!string) return '';
@@ -51,12 +59,21 @@ async function generateUniquePlayerId(firstName, lastName) {
 
 exports.registerPlayer = functions.https.onCall(async (data, context) => {
     let {
-        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId,
+        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId, registerExpiry,
     } = data;
 
     const dobTimestamp = parseDateToTimestamp(dob);
     if (!dobTimestamp) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid date of birth format. Please use dd/mm/yyyy.');
+    }
+    
+    // Convert the incoming registerExpiry date to a Firestore Timestamp
+    const expiryTimestamp = registerExpiry ? parseDateToTimestamp(registerExpiry) : null;
+    if (!expiryTimestamp) {
+        // Fallback or error if the expiry date is missing
+        console.warn("Registration received without an expiry date. Please ensure the client is sending it.");
+        // Optional: create a default expiry if needed
+        // expiryTimestamp = admin.firestore.Timestamp.fromDate(new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000));
     }
     
     const uniqueId = await generateUniquePlayerId(firstName, lastName);
@@ -77,6 +94,7 @@ exports.registerPlayer = functions.https.onCall(async (data, context) => {
         firstName: capitalizeFirstLetter(firstName), lastName: capitalizeFirstLetter(lastName),
         teamId, division, role: "Player", private_doc_id: uniqueId,
         registerDate: admin.firestore.Timestamp.now(),
+        registerExpiry: expiryTimestamp, // Add the expiry timestamp here
     };
 
     const batch = db.batch();

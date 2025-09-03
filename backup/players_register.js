@@ -7,7 +7,7 @@ if (playersPageContainer) {
     let sortState = { column: 'fullName', direction: 'asc' };
 
     const teamFilter = document.getElementById('team-filter');
-    const excludeExpiredFilter = document.getElementById('exclude-expired-filter');
+    const showExpiredFilter = document.getElementById('show-expired-filter');
     const expiringSoonFilter = document.getElementById('expiring-soon-filter');
 
     const parseDate = (dateInput) => {
@@ -116,7 +116,7 @@ if (playersPageContainer) {
         if (teamFilter.value) {
             filteredPlayers = filteredPlayers.filter(p => p.teamId === teamFilter.value);
         }
-        if (excludeExpiredFilter.checked) {
+        if (!showExpiredFilter.checked) {
             filteredPlayers = filteredPlayers.filter(p => p.expiryStatus !== 'Expired');
         }
         if (expiringSoonFilter.checked) {
@@ -202,7 +202,7 @@ if (playersPageContainer) {
     };
 
     teamFilter.addEventListener('change', renderTable);
-    excludeExpiredFilter.addEventListener('change', renderTable);
+    showExpiredFilter.addEventListener('change', renderTable);
     expiringSoonFilter.addEventListener('change', renderTable);
 
     fetchPlayersAndTeams();

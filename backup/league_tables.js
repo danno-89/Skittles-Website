@@ -4,160 +4,118 @@ const leagueTableContainer = document.getElementById('league-table-container');
 const seasonFilter = document.getElementById('season-filter');
 const divisionTabsContainer = document.getElementById('division-tabs-container');
 
-let currentTables = {};
-
 if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
 
     const populateSeasons = async () => {
         try {
             const seasonsSnapshot = await getDocs(collection(db, 'league_tables'));
-            if (seasonsSnapshot.empty) {
-                seasonFilter.disabled = true;
-                seasonFilter.innerHTML = '<option>No seasons found</option>';
-                return;
-            }
             const seasons = seasonsSnapshot.docs.map(doc => doc.id).sort((a, b) => b.localeCompare(a));
             
+            seasonFilter.innerHTML = '<option value="">Select a Season</option>';
             seasons.forEach(seasonId => {
                 const option = document.createElement('option');
                 option.value = seasonId;
                 option.textContent = seasonId;
                 seasonFilter.appendChild(option);
             });
-            if (seasons.length > 0) {
-                loadLeagueData(seasons[0]);
+
+            const defaultSeason = seasons.includes('2025-26') ? '2025-26' : seasons[0];
+            if (defaultSeason) {
+                seasonFilter.value = defaultSeason;
+                loadLeagueData(defaultSeason);
             }
         } catch (error) {
             console.error("Error loading seasons:", error);
-            leagueTableContainer.innerHTML = "<p>Could not load season list.</p>";
         }
     };
 
-    const renderTable = (divisionData, seasonId) => {
+    const renderTable = (divisionData) => {
         const container = document.createElement('div');
-        if (divisionData && Array.isArray(divisionData.standings)) {
-            const teams = divisionData.standings;
-            
-            // Check if any team in the division has a max_score
-            const hasMaxScore = teams.some(team => team.max_score !== undefined && team.max_score !== null);
-
-            const table = document.createElement('table');
-            table.className = 'league-standings-table';
-            
-            // Dynamically create the header
-            let headerHtml = `
-                <thead>
-                    <tr>
-                        <th>Pos</th>
-                        <th>Team</th>
-                        <th>Pld</th>
-                        <th>W</th>
-                        <th>D</th>
-                        <th>L</th>
-                        <th>Pts</th>
-                        <th>F</th>
-                        <th>A</th>
-                        <th>Win%</th>
-                        <th>Ave</th>
-                        ${hasMaxScore ? '<th>Max</th>' : ''}
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            `;
-            table.innerHTML = headerHtml;
-            const tbody = table.querySelector('tbody');
-            
-            // New comprehensive sorting logic
-            teams.sort((a, b) => {
-                const aPlayed = a.played ?? 0;
-                const bPlayed = b.played ?? 0;
-                const aPoints = a.points ?? 0;
-                const bPoints = b.points ?? 0;
-                const aPinsFor = a.pinsFor ?? 0;
-                const bPinsFor = b.pinsFor ?? 0;
-                const aMaxScore = a.max_score ?? 0;
-                const bMaxScore = b.max_score ?? 0;
-
-                // 1. Points
-                if (aPoints !== bPoints) return bPoints - aPoints;
-                
-                // 2. Average
-                const aAve = aPlayed > 0 ? aPinsFor / aPlayed : 0;
-                const bAve = bPlayed > 0 ? bPinsFor / bPlayed : 0;
-                if (aAve !== bAve) return bAve - aAve;
-
-                // 3. Pins For
-                if (aPinsFor !== bPinsFor) return bPinsFor - aPinsFor;
-                
-                // 4. Max Score
-                if (aMaxScore !== bMaxScore) return bMaxScore - aMaxScore;
-
-                // 5. Team Name (alphabetical)
-                return (a.teamName ?? '').localeCompare(b.teamName ?? '');
-            });
-            
-            teams.forEach((team, index) => {
-                const row = document.createElement('tr');
-                let rowContent;
-                const position = index + 1;
-                
-                const played = team.played ?? 0;
-                const won = team.won ?? 0;
-                const pinsFor = team.pinsFor ?? 0;
-                const pinsAgainst = team.pinsAgainst ?? 0;
-
-                const winPercentage = played > 0 ? ((won / played) * 100).toFixed(1) + '%' : '0.0%';
-                const avgScore = played > 0 ? (pinsFor / played).toFixed(1) : '0.0';
-
-                let maxScoreCell = '';
-                if (hasMaxScore) {
-                    maxScoreCell = `<td>${team.max_score ?? '-'}</td>`;
-                }
-
-                if (seasonId === '2025-26') {
-                    rowContent = `
-                        <td>${position}</td>
-                        <td>${team.teamName}</td>
-                        <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                        <td>-</td><td>-</td><td>-</td><td>-</td>
-                        ${hasMaxScore ? '<td>-</td>' : ''}
-                    `;
-                } else {
-                     rowContent = `
-                        <td>${position}</td>
-                        <td>${team.teamName ?? 'N/A'}</td>
-                        <td>${played}</td>
-                        <td>${won}</td>
-                        <td>${team.drawn ?? 0}</td>
-                        <td>${team.lost ?? 0}</td>
-                        <td>${team.points ?? 0}</td>
-                        <td>${pinsFor.toLocaleString()}</td>
-                        <td>${pinsAgainst.toLocaleString()}</td>
-                        <td>${winPercentage}</td>
-                        <td>${avgScore}</td>
-                        ${maxScoreCell}
-                    `;
-                }
-
-                row.innerHTML = rowContent;
-                tbody.appendChild(row);
-            });
-            container.appendChild(table);
+        if (!divisionData || !Array.isArray(divisionData.standings)) {
+            return container; 
         }
+        
+        // --- THIS IS THE DEFINITIVE FIX ---
+        // 1. Clean the data: Ensure every team has all necessary properties, defaulting to 0.
+        const teams = divisionData.standings.map(team => ({
+            teamId: team.teamId,
+            teamName: team.teamName ?? 'N/A',
+            played: team.played ?? 0,
+            won: team.won ?? 0,
+            drawn: team.drawn ?? 0,
+            lost: team.lost ?? 0,
+            points: team.points ?? 0,
+            pinsFor: team.pinsFor ?? 0,
+            pinsAgainst: team.pinsAgainst ?? 0,
+            max_score: team.max_score ?? 0,
+        }));
+
+        const hasMaxScore = teams.some(team => team.max_score > 0);
+
+        const table = document.createElement('table');
+        table.className = 'league-standings-table';
+        
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Pos</th><th>Team</th><th>Pld</th><th>W</th><th>D</th><th>L</th>
+                    <th>Pts</th><th>F</th><th>A</th><th>Win%</th><th>Ave</th>
+                    ${hasMaxScore ? '<th>Max</th>' : ''}
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        // 2. Sort the clean data using the explicit logic.
+        teams.sort((a, b) => {
+            const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
+            const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
+
+            const pointsDiff = b.points - a.points;
+            if (pointsDiff !== 0) return pointsDiff;
+
+            const aveDiff = bAve - aAve;
+            if (aveDiff !== 0) return aveDiff;
+
+            const pinsForDiff = b.pinsFor - a.pinsFor;
+            if (pinsForDiff !== 0) return pinsForDiff;
+
+            const maxDiff = b.max_score - a.max_score;
+            if (maxDiff !== 0) return maxDiff;
+
+            return a.teamName.localeCompare(b.teamName);
+        });
+        
+        teams.forEach((team, index) => {
+            const row = document.createElement('tr');
+            const winPercentage = team.played > 0 ? `${((team.won / team.played) * 100).toFixed(1)}%` : '0.0%';
+            const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '0.0';
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${team.teamName}</td>
+                <td>${team.played === 0 ? '-' : team.played}</td>
+                <td>${team.won === 0 ? '-' : team.won}</td>
+                <td>${team.drawn === 0 ? '-' : team.drawn}</td>
+                <td>${team.lost === 0 ? '-' : team.lost}</td>
+                <td>${team.points === 0 ? '-' : team.points}</td>
+                <td>${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
+                <td>${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
+                <td>${winPercentage === '0.0%' ? '-' : winPercentage}</td>
+                <td>${avgScore === '0.0' ? '-' : avgScore}</td>
+                ${hasMaxScore ? `<td>${team.max_score === 0 ? '-' : team.max_score}</td>` : ''}
+            `;
+            tbody.appendChild(row);
+        });
+        container.appendChild(table);
         return container;
     };
 
     const switchTab = (divisionKey) => {
-        // Deactivate all tabs
-        divisionTabsContainer.querySelectorAll('.tab-link').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        // Hide all tables
-        leagueTableContainer.querySelectorAll('.division-table').forEach(table => {
-            table.style.display = 'none';
-        });
+        divisionTabsContainer.querySelectorAll('.tab-link').forEach(tab => tab.classList.remove('active'));
+        leagueTableContainer.querySelectorAll('.division-table').forEach(table => table.style.display = 'none');
 
-        // Activate the selected tab and show the corresponding table
         const activeTab = divisionTabsContainer.querySelector(`[data-division="${divisionKey}"]`);
         const activeTable = leagueTableContainer.querySelector(`[data-division-content="${divisionKey}"]`);
         
@@ -166,34 +124,39 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
     }
 
     const loadLeagueData = async (seasonId) => {
-        leagueTableContainer.innerHTML = '';
+        leagueTableContainer.innerHTML = '<p>Loading table...</p>';
         divisionTabsContainer.innerHTML = '';
-        if (!seasonId) return;
+        if (!seasonId) {
+            leagueTableContainer.innerHTML = '';
+            return;
+        }
 
         try {
             const docSnap = await getDoc(doc(db, 'league_tables', seasonId));
             
             if (docSnap.exists()) {
                 const leagueData = docSnap.data();
-                const divisionOrder = ['premier_division', 'first_division', 'second_division', 'ladies_division', 'season'];
+                const divisionOrder = ['premier_division', 'first_division', 'second_division', 'ladies_division'];
                 const sortedDivisionKeys = Object.keys(leagueData).sort((a, b) => {
                     const indexA = divisionOrder.indexOf(a);
                     const indexB = divisionOrder.indexOf(b);
+                    if(a === 'season') return 1;
+                    if(b === 'season') return -1;
                     if (indexA !== -1 && indexB !== -1) return indexA - indexB;
                     if (indexA !== -1) return -1;
                     if (indexB !== -1) return 1;
                     return a.localeCompare(b);
                 });
+                
+                leagueTableContainer.innerHTML = ''; 
 
                 sortedDivisionKeys.forEach((divisionKey, index) => {
-                    if (Object.prototype.hasOwnProperty.call(leagueData, divisionKey) && divisionKey !== 'season') {
-                        // Create and render the table
-                        const tableContainer = renderTable(leagueData[divisionKey], seasonId);
+                    if (divisionKey !== 'season') {
+                        const tableContainer = renderTable(leagueData[divisionKey]);
                         tableContainer.className = 'division-table';
                         tableContainer.dataset.divisionContent = divisionKey;
                         leagueTableContainer.appendChild(tableContainer);
                         
-                        // Create the tab
                         const tab = document.createElement('button');
                         tab.className = 'tab-link';
                         tab.dataset.division = divisionKey;
@@ -201,7 +164,6 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                         tab.onclick = () => switchTab(divisionKey);
                         divisionTabsContainer.appendChild(tab);
 
-                        // Activate the first tab by default
                         if (index === 0) {
                             tab.classList.add('active');
                             tableContainer.style.display = 'block';

@@ -1,13 +1,4 @@
-import { firebaseConfig } from './firebase.config.js';
-
-try {
-  firebase.initializeApp(firebaseConfig);
-} catch (error) {
-  if (!error.message.includes("already exists")) {
-    console.error("Error initializing Firebase:", error);
-  }
-}
-const db = firebase.firestore();
+import { db, collection, getDocs } from './firebase.config.js';
 
 const playersPageContainer = document.getElementById('players-table-container');
 if (playersPageContainer) {
@@ -16,44 +7,68 @@ if (playersPageContainer) {
     let sortState = { column: 'fullName', direction: 'asc' };
 
     const teamFilter = document.getElementById('team-filter');
-    const excludeExpiredFilter = document.getElementById('exclude-expired-filter');
+    const showExpiredFilter = document.getElementById('show-expired-filter');
     const expiringSoonFilter = document.getElementById('expiring-soon-filter');
 
-    const formatDate = (dateInput) => {
-        if (!dateInput) return 'N/A';
-
-        let date;
-        // Check if the input is a Firestore timestamp object
+    const parseDate = (dateInput) => {
+        if (!dateInput) return null;
+    
+        // Firestore timestamp
         if (dateInput.seconds) {
-            date = new Date(dateInput.seconds * 1000);
+            return new Date(dateInput.seconds * 1000);
         }
-        // Check if the input is a string or number that can be parsed
-        else if (typeof dateInput === 'string' || typeof dateInput === 'number') {
-            date = new Date(dateInput);
+    
+        // dd/mm/yyyy string
+        if (typeof dateInput === 'string') {
+            const parts = dateInput.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                const year = parseInt(parts[2], 10);
+                if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                     const fullYear = year < 100 ? 2000 + year : year;
+                     return new Date(fullYear, month, day);
+                }
+            }
         }
-        // If it's already a Date object, use it directly
-        else if (dateInput instanceof Date) {
-            date = dateInput;
+        
+        // Fallback for other string formats (e.g., ISO) or numbers
+        const d = new Date(dateInput);
+        if (d instanceof Date && !isNaN(d.getTime())) {
+            return d;
         }
-        // If the format is not recognized, return 'Invalid Date'
-        else {
-            return 'Invalid Date';
-        }
+    
+        return null; // Return null if parsing fails
+    };
 
-        if (isNaN(date.getTime())) return 'Invalid Date';
+    const formatDate = (dateInput) => {
+        const date = parseDate(dateInput);
+        if (!date) return 'N/A';
 
-        return date.toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: '2-digit'
-        }).replace(/ /g, ' ');
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' }).replace(/ /g, ' ');
+    };
+
+    const calculateExpiry = (expiryDateStr) => {
+        if (!expiryDateStr) return { daysUntilExpiry: Infinity, expiryStatus: 'N/A' };
+        
+        const expiryDate = parseDate(expiryDateStr);
+        if (!expiryDate) return { daysUntilExpiry: Infinity, expiryStatus: 'Invalid Date' };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const timeDiff = expiryDate.getTime() - today.getTime();
+        const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const status = days < 0 ? 'Expired' : 'Active';
+        
+        return { daysUntilExpiry: days, expiryStatus: status };
     };
 
     const fetchPlayersAndTeams = async () => {
         try {
             const [playersSnapshot, teamsSnapshot] = await Promise.all([
-                db.collection("players_public").get(),
-                db.collection("teams").get()
+                getDocs(collection(db, "players_public")),
+                getDocs(collection(db, "teams"))
             ]);
 
             teamsSnapshot.forEach(doc => {
@@ -95,29 +110,13 @@ if (playersPageContainer) {
         });
     };
 
-    const calculateExpiry = (expiryDateStr) => {
-        if (!expiryDateStr) return { daysUntilExpiry: Infinity, expiryStatus: 'N/A' };
-        
-        const expiryDate = new Date(expiryDateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        if (isNaN(expiryDate.getTime())) return { daysUntilExpiry: Infinity, expiryStatus: 'Invalid Date' };
-
-        const timeDiff = expiryDate.getTime() - today.getTime();
-        const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        const status = days < 0 ? 'Expired' : 'Active';
-        
-        return { daysUntilExpiry: days, expiryStatus: status };
-    };
-
     const renderTable = () => {
         let filteredPlayers = [...allPlayers];
 
         if (teamFilter.value) {
             filteredPlayers = filteredPlayers.filter(p => p.teamId === teamFilter.value);
         }
-        if (excludeExpiredFilter.checked) {
+        if (!showExpiredFilter.checked) {
             filteredPlayers = filteredPlayers.filter(p => p.expiryStatus !== 'Expired');
         }
         if (expiringSoonFilter.checked) {
@@ -203,7 +202,7 @@ if (playersPageContainer) {
     };
 
     teamFilter.addEventListener('change', renderTable);
-    excludeExpiredFilter.addEventListener('change', renderTable);
+    showExpiredFilter.addEventListener('change', renderTable);
     expiringSoonFilter.addEventListener('change', renderTable);
 
     fetchPlayersAndTeams();

@@ -112,6 +112,7 @@
     padding: 0.6rem;
     border-bottom: 1px solid var(--light-grey);
     font-size: 1rem;
+    text-align: center; /* --- THIS IS THE FIX --- */
 }
 
 .statistics-table th {
@@ -139,7 +140,6 @@
 }
 
 .statistics-table td.stat-value {
-    text-align: center;
     position: relative;
     font-weight: normal;
 }

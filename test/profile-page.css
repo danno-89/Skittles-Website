@@ -1,0 +1,28 @@
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-details p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--light-grey);
+    padding: 0.5rem 0;
+    margin: 0;
+}
+
+.profile-details p strong {
+    margin-right: 1rem; /* Add some space between label and data */
+}
+
+.profile-details span {
+    text-align: right;
+}
+
+.address-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}

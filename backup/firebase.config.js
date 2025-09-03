@@ -20,7 +20,9 @@ import {
     updateDoc,
     setDoc,
     deleteDoc,
-    onSnapshot
+    onSnapshot,
+    Timestamp,
+    documentId
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { 
     getFunctions, 
@@ -71,6 +73,8 @@ export {
     setDoc,
     deleteDoc,
     onSnapshot,
+    Timestamp,
+    documentId,
     // Functions
     httpsCallable
 };

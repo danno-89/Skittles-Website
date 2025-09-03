@@ -1,0 +1,129 @@
+/* --- Player Statistics Page Specific Styles --- */
+
+.stats-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+}
+
+.stats-key {
+    flex: 0 1 280px; /* Don't grow, allow shrink, set a max-width like basis */
+}
+
+.key-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.key-table th,
+.key-table td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid var(--light-grey);
+}
+
+.key-table th {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    text-align: center;
+}
+
+/* Specific styling for key rows */
+.key-table td {
+    background-color: var(--pure-white); /* Default background */
+}
+
+.key-table tr.division-leader td {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    font-weight: bold;
+}
+
+.key-table tr.ineligible-player td {
+    background-color: #fce8e6;
+    color: var(--danger-red);
+    font-style: italic;
+}
+
+.key-example {
+    font-weight: bold;
+    margin-right: var(--spacing-sm);
+}
+
+.filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.filter-dropdowns {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+
+.stats-table-container {
+    overflow-x: auto;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.stats-table th {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+}
+
+.stats-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.stats-table .player-col,
+.stats-table .team-col,
+.stats-table .opponent-col {
+    text-align: left;
+}
+
+.main-stat {
+    background-color: var(--club-green);
+    color: var(--club-yellow);
+    font-weight: bold;
+}
+
+
+/* --- THIS IS THE FIX --- */
+.ineligible-player {
+    color: var(--danger-red);
+    background-color: #f9f9f9;
+    font-style: italic;
+}
+
+tr.division-leader td {
+    background-color: var(--club-yellow) !important;
+    color: var(--club-green);
+    font-weight: bold;
+}
+
+.team-games-played {
+    font-size: 0.9rem;
+    color: var(--medium-grey);
+}
+
+
+.divisions-header {
+    text-align: center;
+}
+/* --- END FIX --- */
