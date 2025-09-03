@@ -87,6 +87,12 @@ async function displayStatistics() {
                 gap: 5px;
                 white-space: nowrap; /* Prevent text from wrapping */
             }
+            
+            @media (max-width: 768px) {
+                .counters-container {
+                    display: none;
+                }
+            }
         `;
         document.head.appendChild(style);
     }
@@ -98,9 +104,7 @@ document.addEventListener('htmlIncludesLoaded', () => {
     displayStatistics();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    includeHTML();
-});
+document.addEventListener('DOMContentLoaded', includeHTML);
 
 
 // Use the promise from auth-manager to update the UI

@@ -14,7 +14,8 @@
 .sidebar-right {
     flex: 1 1 300px; /* Allows this column to grow and shrink */
     display: flex;
-    justify-content: flex-end; /* Aligns the card to the right */
+    flex-direction: column;
+    gap: var(--spacing-lg);
 }
 
 /* Style the content sections as cards */

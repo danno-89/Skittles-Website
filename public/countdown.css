@@ -1,30 +1,52 @@
 #countdown-card {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: .25rem;
-    padding: 1.5rem;
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-elevation-low);
+    box-sizing: border-box;
+    width: 100%; /* Ensure it takes the width of the sidebar column */
+}
+
+#countdown-card h2 {
+    margin-top: 0;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--club-yellow);
+    color: var(--darker-green);
+    font-size: 1.25rem;
     text-align: center;
+}
+
+#countdown-card h3 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    color: var(--text-color);
 }
 
 #countdown {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.5rem; /* Reduced gap */
     margin-top: 1rem;
 }
 
 #countdown div {
     background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: .25rem;
-    padding: 1rem;
-    min-width: 80px;
-    font-size: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius-sm);
+    padding: 0.5rem; /* Reduced padding */
+    flex: 1;
+    min-width: 0; /* Remove min-width to allow shrinking */
+    text-align: center;
+    font-size: 1.5rem; /* Reduced font size */
     font-weight: bold;
+    color: var(--dark-green);
 }
 
 #countdown div span {
     display: block;
-    font-size: .8rem;
+    font-size: .7rem; /* Reduced font size */
     font-weight: normal;
+    color: var(--text-color-light);
 }
