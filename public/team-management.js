@@ -1,17 +1,26 @@
-import { db, doc, getDoc, collection, query, where, getDocs } from './firebase.config.js';
+import { auth, db, doc, getDoc, collection, query, where, getDocs, onAuthStateChanged } from './firebase.config.js';
+import { getPublicData } from './auth-manager.js';
 
 const playersContainer = document.getElementById('team-management-container');
 const fixturesContainer = document.getElementById('fixtures-content');
+const resultsContainer = document.getElementById('results-content');
 
-document.addEventListener('authReady', ({ detail }) => {
-    const { user, publicData } = detail; // Correctly destructure publicData
+// --- NEW AUTHENTICATION HANDLING ---
+onAuthStateChanged(auth, async (user) => {
     if (user) {
-        setupTabs();
-        initializePageData(publicData); // Pass publicData to the function
+        const publicData = await getPublicData(user.uid);
+        if (publicData) {
+            setupTabs();
+            initializePageData(publicData);
+        } else {
+            document.body.innerHTML = '<p>Your player profile could not be found.</p>';
+        }
     } else {
+        // If no user is logged in, redirect to the login page
         window.location.href = 'create.html?form=login';
     }
 });
+
 
 // --- TAB HANDLING ---
 function setupTabs() {
@@ -57,6 +66,16 @@ function getTeamName(teamsMap, teamIdentifier) {
 
 // --- DATA LOADING ---
 
+const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return 'N/A';
+    const date = timestamp.toDate();
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    return `${day} ${month} ${year}`;
+};
+
 async function loadTeamFixtures(teamId) {
     if (!fixturesContainer) return;
 
@@ -86,23 +105,25 @@ async function loadTeamFixtures(teamId) {
         ]);
 
         let allFixtures = [];
-        homeFixturesSnapshot.forEach(doc => allFixtures.push(doc.data()));
-        awayFixturesSnapshot.forEach(doc => allFixtures.push(doc.data()));
+        homeFixturesSnapshot.forEach(doc => allFixtures.push({ id: doc.id, ...doc.data() }));
+        awayFixturesSnapshot.forEach(doc => allFixtures.push({ id: doc.id, ...doc.data() }));
 
-        const validFixtures = allFixtures.filter(fixture => fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function');
+        const upcomingFixtures = allFixtures.filter(fixture => {
+            return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && (!fixture.homeScore || !fixture.awayScore);
+        });
         
-        validFixtures.sort((a, b) => a.scheduledDate.toDate() - b.scheduledDate.toDate());
+        upcomingFixtures.sort((a, b) => a.scheduledDate.toDate() - b.scheduledDate.toDate());
 
-        if (validFixtures.length === 0) {
+        if (upcomingFixtures.length === 0) {
             fixturesContainer.innerHTML = "<p>No fixtures found for the current season.</p>";
             return;
         }
 
         let lastRenderedDate = null;
-        const fixturesHtml = validFixtures.map(fixture => {
+        const fixturesHtml = upcomingFixtures.map(fixture => {
             const dateObj = fixture.scheduledDate.toDate();
             
-            const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
+            const date = formatDate(fixture.scheduledDate);
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
 
             const homeTeamName = formatTeamName(getTeamName(teamsMap, fixture.homeTeamId));
@@ -156,18 +177,124 @@ async function loadTeamFixtures(teamId) {
     }
 }
 
+async function loadTeamResults(teamId) {
+    if (!resultsContainer) return;
+
+    try {
+        const seasonsQuery = query(collection(db, "seasons"), where("status", "==", "current"));
+        const seasonsSnapshot = await getDocs(seasonsQuery);
+        if (seasonsSnapshot.empty) {
+            resultsContainer.innerHTML = "<p>Could not determine the current season.</p>";
+            return;
+        }
+        const currentSeasonName = seasonsSnapshot.docs[0].data().name || seasonsSnapshot.docs[0].id;
+
+        const teamsSnapshot = await getDocs(collection(db, "teams"));
+        const teamsMap = new Map();
+        teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
+
+        const competitionsSnapshot = await getDocs(collection(db, "competitions"));
+        const competitionsMap = new Map();
+        competitionsSnapshot.forEach(doc => competitionsMap.set(doc.id, doc.data().name));
+
+        const homeFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("homeTeamId", "==", teamId));
+        const awayFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("awayTeamId", "==", teamId));
+        
+        const [homeFixturesSnapshot, awayFixturesSnapshot] = await Promise.all([
+            getDocs(homeFixturesQuery),
+            getDocs(awayFixturesQuery)
+        ]);
+
+        let allFixtures = [];
+        homeFixturesSnapshot.forEach(doc => allFixtures.push({ id: doc.id, ...doc.data() }));
+        awayFixturesSnapshot.forEach(doc => allFixtures.push({ id: doc.id, ...doc.data() }));
+
+        const playedFixtures = allFixtures.filter(fixture => {
+            return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && fixture.homeScore && fixture.awayScore;
+        });
+        
+        playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.scheduledDate.toDate());
+
+        if (playedFixtures.length === 0) {
+            resultsContainer.innerHTML = "<p>No results found for the current season.</p>";
+            return;
+        }
+
+        let lastRenderedDate = null;
+        const resultsHtml = playedFixtures.map(fixture => {
+            const date = formatDate(fixture.scheduledDate);
+
+            const homeTeamName = formatTeamName(getTeamName(teamsMap, fixture.homeTeamId));
+            const awayTeamIdentifier = fixture.awayTeamId || fixture.awayTeamis;
+            const awayTeamName = formatTeamName(getTeamName(teamsMap, awayTeamIdentifier));
+            const competitionName = competitionsMap.get(fixture.division) || fixture.division;
+            const round = fixture.round || '';
+            
+            const dateCell = (date === lastRenderedDate) ? '' : date;
+            if (date !== lastRenderedDate) {
+                lastRenderedDate = date;
+            }
+
+            let resultIndicator = '<span class="result-indicator draw"></span>';
+            if (fixture.homeTeamId === teamId) {
+                if (fixture.homeScore > fixture.awayScore) {
+                    resultIndicator = '<span class="result-indicator win"></span>';
+                } else if (fixture.homeScore < fixture.awayScore) {
+                    resultIndicator = '<span class="result-indicator loss"></span>';
+                }
+            } else {
+                if (fixture.awayScore > fixture.homeScore) {
+                    resultIndicator = '<span class="result-indicator win"></span>';
+                } else if (fixture.awayScore < fixture.homeScore) {
+                    resultIndicator = '<span class="result-indicator loss"></span>';
+                }
+            }
+
+            return `
+                <tr>
+                    <td>${resultIndicator}</td>
+                    <td>${dateCell}</td>
+                    <td class="team-name ${fixture.homeTeamId === teamId ? 'highlight-green' : ''}">${homeTeamName}</td>
+                    <td class="score-cell">${fixture.homeScore} - ${fixture.awayScore}</td>
+                    <td class="team-name ${fixture.awayTeamId === teamId ? 'highlight-green' : ''}">${awayTeamName}</td>
+                    <td>${competitionName}</td>
+                    <td>${round}</td>
+                    <td><a href="match_details.html?matchId=${fixture.id}&from=team-management" class="btn-details">View Details</a></td>
+                </tr>
+            `;
+        }).join('');
+
+        resultsContainer.innerHTML = `
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Home</th>
+                            <th>Score</th>
+                            <th>Away</th>
+                            <th>Competition</th>
+                            <th>Round</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${resultsHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Error loading team results:", error);
+        resultsContainer.innerHTML = "<p>An error occurred while loading team results.</p>";
+    }
+}
+
 async function loadTeamPlayers(teamId) {
     if (!playersContainer) return;
     playersContainer.innerHTML = '<p>Loading roster...</p>';
-
-    const formatDate = (timestamp) => {
-        if (!timestamp || !timestamp.toDate) return 'N/A';
-        return timestamp.toDate().toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    };
 
     try {
         const playersQuery = query(collection(db, "players_public"), where("teamId", "==", teamId));
@@ -325,4 +452,5 @@ async function initializePageData(publicData) { // Updated to accept publicData
     
     loadTeamPlayers(teamId);
     loadTeamFixtures(teamId);
+    loadTeamResults(teamId);
 }

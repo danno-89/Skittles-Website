@@ -59,7 +59,7 @@ async function generateUniquePlayerId(firstName, lastName) {
 
 exports.registerPlayer = functions.https.onCall(async (data, context) => {
     let {
-        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId, registerExpiry,
+        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId,
     } = data;
 
     const dobTimestamp = parseDateToTimestamp(dob);
@@ -67,14 +67,10 @@ exports.registerPlayer = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid date of birth format. Please use dd/mm/yyyy.');
     }
     
-    // Convert the incoming registerExpiry date to a Firestore Timestamp
-    const expiryTimestamp = registerExpiry ? parseDateToTimestamp(registerExpiry) : null;
-    if (!expiryTimestamp) {
-        // Fallback or error if the expiry date is missing
-        console.warn("Registration received without an expiry date. Please ensure the client is sending it.");
-        // Optional: create a default expiry if needed
-        // expiryTimestamp = admin.firestore.Timestamp.fromDate(new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000));
-    }
+    const registrationDate = new Date();
+    const expiryDate = new Date(registrationDate);
+    expiryDate.setDate(expiryDate.getDate() + 365);
+    const expiryTimestamp = admin.firestore.Timestamp.fromDate(expiryDate);
     
     const uniqueId = await generateUniquePlayerId(firstName, lastName);
     
@@ -93,8 +89,8 @@ exports.registerPlayer = functions.https.onCall(async (data, context) => {
     const publicPlayerData = {
         firstName: capitalizeFirstLetter(firstName), lastName: capitalizeFirstLetter(lastName),
         teamId, division, role: "Player", private_doc_id: uniqueId,
-        registerDate: admin.firestore.Timestamp.now(),
-        registerExpiry: expiryTimestamp, // Add the expiry timestamp here
+        registerDate: admin.firestore.Timestamp.fromDate(registrationDate),
+        registerExpiry: expiryTimestamp,
     };
 
     const batch = db.batch();

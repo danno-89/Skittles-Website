@@ -2,6 +2,7 @@
 
 .league-standings-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .league-standings-table {
@@ -12,20 +13,63 @@
 
 .league-standings-table th,
 .league-standings-table td {
-    padding: 8px;
+    padding: 8px 12px; /* Increased padding for better readability */
     text-align: center;
+    white-space: nowrap; /* Prevent headers and cells from wrapping */
 }
 
 .league-standings-table th {
     background-color: var(--club-green);
     color: var(--pure-white);
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .league-standings-table tbody tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
+/* --- Sticky Column for Team Name --- */
 .team-name {
     text-align: left;
     font-weight: bold;
+    position: sticky;
+    left: 0;
+    background-color: var(--pure-white); /* Match the row background */
+    z-index: 1;
+}
+
+/* Ensure the sticky header has a higher z-index */
+.league-standings-table th.team-name {
+    z-index: 3;
+}
+
+/* Alternate row color for sticky column */
+.league-standings-table tbody tr:nth-child(even) .team-name {
+    background-color: #f2f2f2;
+}
+
+/* Add a subtle shadow to indicate scrollable content */
+.team-name::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10px;
+    bottom: 0;
+    width: 10px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 768px) {
+    .league-standings-table th,
+    .league-standings-table td {
+        padding: 6px 8px; /* Reduce padding on smaller screens */
+        font-size: 0.85rem; /* Slightly smaller font for mobile */
+    }
+
+    .division-filter-container {
+        justify-content: center; /* Center the division filter on mobile */
+    }
 }

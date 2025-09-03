@@ -68,7 +68,21 @@
                     </div>
                 </div>
                 <div id="amend-player-content" class="tab-pane">
-                    <p>This section will contain tools for amending player details.</p>
+                    <h2>Amend Player Details</h2>
+                    <div class="form-section-row">
+                        <div class="form-section">
+                            <label for="amend-team-select">Select Team:</label>
+                            <select id="amend-team-select" class="form-select"></select>
+                        </div>
+                        <div class="form-section">
+                            <label for="amend-player-select">Select Player:</label>
+                            <select id="amend-player-select" class="form-select" disabled></select>
+                        </div>
+                    </div>
+                    <button id="get-player-data-btn" class="btn btn-primary" disabled>Get Data</button>
+                    <div id="player-data-display" class="data-display-section"></div>
+                    <div id="amend-player-status" class="status-message"></div>
+                    <button id="submit-player-changes-btn" class="btn btn-success" style="display: none;">Submit Changes</button>
                 </div>
                 <div id="postpone-fixture-content" class="tab-pane">
                     <h2>Postpone a Fixture</h2>

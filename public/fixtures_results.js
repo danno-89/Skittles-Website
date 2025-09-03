@@ -174,7 +174,7 @@ async function displayMatchResults() {
                     }
                 }
 
-                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : '');
+                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : '');
                 
                 tableBodyHTML += `<tr class="week-row week-${weekKey} ${rowClass}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
             }

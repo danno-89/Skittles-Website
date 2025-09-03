@@ -4,6 +4,31 @@ import { authReady } from './auth-manager.js';
 // --- Globals for Admin Page Data ---
 const teamsMap = new Map();
 let allFixtures = [];
+let allPlayersData = new Map(); // Store all players data for amend tab
+
+// --- User-Friendly Descriptions for Player Data Fields ---
+const fieldDescriptions = {
+    // Public Fields
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "teamId": "Team ID",
+    "registrationDate": "Registration Date",
+    "recentFixture": "Most Recent Fixture",
+    "registerExpiry": "Registration Expiry",
+    "captain": "Is Captain",
+    "viceCaptain": "Is Vice Captain",
+    "committee": "Is Committee Member",
+    "paid": "Has Paid",
+    "gdpr": "GDPR Consented",
+    
+    // Private Fields
+    "authId": "Authentication ID",
+    "email": "Email Address",
+    "dob": "Date of Birth",
+    "postcode": "Postcode",
+    "address": "Address",
+    "telephone": "Telephone"
+};
 
 // --- Authorization and Initialization ---
 
@@ -21,9 +46,11 @@ authReady.then(({ user, publicData }) => {
 async function initializeAdminPage() {
     await fetchTeams();
     await fetchScheduledFixtures();
+    await fetchAllPlayersData(); // Fetch all players data for the amend player tab
     initializeTabs();
     initializeResultsInput();
     initializePostponeFixture();
+    initializeAmendPlayerTab(); // Initialize the amend player tab
 }
 
 // --- Data Fetching ---
@@ -47,6 +74,23 @@ async function fetchScheduledFixtures() {
     }
 }
 
+async function fetchAllPlayersData() {
+    try {
+        const publicPlayersSnapshot = await getDocs(collection(db, "players_public"));
+        publicPlayersSnapshot.forEach(doc => allPlayersData.set(doc.id, { id: doc.id, public: doc.data() }));
+
+        const privatePlayersSnapshot = await getDocs(collection(db, "players_private"));
+        privatePlayersSnapshot.forEach(doc => {
+            if (allPlayersData.has(doc.id)) {
+                allPlayersData.get(doc.id).private = doc.data();
+            } else {
+                allPlayersData.set(doc.id, { id: doc.id, private: doc.data() });
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching all players data:", error);
+    }
+}
 
 // --- Tab Management ---
 
@@ -247,6 +291,32 @@ function initializeResultsInput() {
             const fixture = allFixtures.find(f => f.id === fixtureId);
             if (fixture) {
                 await updateLeagueTable(fixture, resultsData);
+
+                const playersInMatch = new Set();
+                homeScores.forEach(score => {
+                    if (score.playerId !== "sixthPlayer") {
+                        playersInMatch.add(score.playerId);
+                    }
+                });
+                awayScores.forEach(score => {
+                    if (score.playerId !== "sixthPlayer") {
+                        playersInMatch.add(score.playerId);
+                    }
+                });
+
+                const matchDate = fixture.scheduledDate.toDate();
+                const recentFixtureTimestamp = Timestamp.fromDate(matchDate);
+
+                const expiryDate = new Date(matchDate);
+                expiryDate.setDate(matchDate.getDate() + 365);
+                const registerExpiryTimestamp = Timestamp.fromDate(expiryDate);
+
+                for (const playerId of playersInMatch) {
+                    await updateDoc(doc(db, "players_public", playerId), {
+                        recentFixture: recentFixtureTimestamp,
+                        registerExpiry: registerExpiryTimestamp
+                    });
+                }
             }
 
             alert('Results submitted and league table updated successfully!');
@@ -266,6 +336,185 @@ function initializeResultsInput() {
         await fetchPlayers();
         populateDateSelect();
     })();
+}
+
+// --- Amend Player Tab ---
+
+function initializeAmendPlayerTab() {
+    const amendTeamSelect = document.getElementById('amend-team-select');
+    const amendPlayerSelect = document.getElementById('amend-player-select');
+    const getPlayerDataBtn = document.getElementById('get-player-data-btn');
+    const playerDataDisplay = document.getElementById('player-data-display');
+    const submitPlayerChangesBtn = document.getElementById('submit-player-changes-btn');
+    const amendPlayerStatus = document.getElementById('amend-player-status');
+
+    if (!amendTeamSelect || !amendPlayerSelect || !getPlayerDataBtn || !playerDataDisplay) return;
+
+    amendTeamSelect.innerHTML = '<option value="">Select a Team</option>';
+    const teamsWithPlayers = new Set();
+    Array.from(allPlayersData.values()).forEach(player => {
+        if (player.public?.teamId) {
+            teamsWithPlayers.add(player.public.teamId);
+        }
+    });
+
+    Array.from(teamsMap.entries()).sort((a, b) => a[1].localeCompare(b[1])).forEach(([teamId, teamName]) => {
+        if (teamsWithPlayers.has(teamId)) {
+            const option = document.createElement('option');
+            option.value = teamId;
+            option.textContent = teamName;
+            amendTeamSelect.appendChild(option);
+        }
+    });
+
+    amendTeamSelect.addEventListener('change', () => {
+        const selectedTeamId = amendTeamSelect.value;
+        amendPlayerSelect.innerHTML = '<option value="">Select a Player</option>';
+        amendPlayerSelect.disabled = true;
+        getPlayerDataBtn.disabled = true;
+        playerDataDisplay.innerHTML = '';
+        submitPlayerChangesBtn.style.display = 'none';
+
+        if (selectedTeamId) {
+            const playersInTeam = Array.from(allPlayersData.values()).filter(player => player.public?.teamId === selectedTeamId);
+            playersInTeam.sort((a, b) => {
+                const nameA = `${a.public.firstName} ${a.public.lastName}`.toUpperCase();
+                const nameB = `${b.public.firstName} ${b.public.lastName}`.toUpperCase();
+                return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+            });
+            playersInTeam.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = `${player.public.firstName} ${player.public.lastName}`;
+                amendPlayerSelect.appendChild(option);
+            });
+            amendPlayerSelect.disabled = false;
+        }
+    });
+
+    amendPlayerSelect.addEventListener('change', () => {
+        getPlayerDataBtn.disabled = !amendPlayerSelect.value;
+        playerDataDisplay.innerHTML = '';
+        submitPlayerChangesBtn.style.display = 'none';
+    });
+
+    getPlayerDataBtn.addEventListener('click', () => {
+        const selectedPlayerId = amendPlayerSelect.value;
+        if (selectedPlayerId) {
+            displayPlayerData(selectedPlayerId, playerDataDisplay);
+            submitPlayerChangesBtn.style.display = 'block';
+        }
+    });
+
+    submitPlayerChangesBtn.addEventListener('click', async () => {
+        const selectedPlayerId = amendPlayerSelect.value;
+        if (!selectedPlayerId) return;
+
+        const publicUpdate = {};
+        const privateUpdate = {};
+        
+        document.querySelectorAll('#player-data-display .edit-input').forEach(input => {
+            const { field, collection, type } = input.dataset;
+            let newValue = input.value;
+
+            if (newValue.trim() !== '') {
+                if (type === 'number') newValue = Number(newValue);
+                if (type === 'boolean') newValue = (newValue.toLowerCase() === 'true');
+                if (type === 'timestamp') newValue = Timestamp.fromDate(new Date(newValue));
+
+                if (collection === 'public') publicUpdate[field] = newValue;
+                else if (collection === 'private') privateUpdate[field] = newValue;
+            }
+        });
+
+        amendPlayerStatus.textContent = '';
+        amendPlayerStatus.className = 'status-message';
+        
+        try {
+            if (Object.keys(publicUpdate).length > 0) {
+                await updateDoc(doc(db, "players_public", selectedPlayerId), publicUpdate);
+            }
+            if (Object.keys(privateUpdate).length > 0) {
+                await updateDoc(doc(db, "players_private", selectedPlayerId), privateUpdate);
+            }
+            
+            amendPlayerStatus.textContent = 'Player data updated successfully!';
+            amendPlayerStatus.classList.add('status-success');
+            
+            await fetchAllPlayersData();
+            displayPlayerData(selectedPlayerId, playerDataDisplay);
+
+        } catch (error) {
+            console.error("Error updating player data:", error);
+            amendPlayerStatus.textContent = 'Error updating data. Please try again.';
+            amendPlayerStatus.classList.add('status-error');
+        }
+    });
+}
+
+function displayPlayerData(playerId, displayElement) {
+    const player = allPlayersData.get(playerId);
+    if (player) {
+        let html = '<h3>Player Details</h3><table class="data-edit-table">';
+        html += '<thead><tr><th>Field</th><th>Description</th><th>Current Value</th><th>New Value</th></tr></thead><tbody>';
+
+        html += '<tr><td colspan="4" class="table-section-header">Public Data</td></tr>';
+        for (const key in player.public) {
+            html += generateTableRow(key, player.public[key], 'public');
+        }
+
+        if (player.private) {
+            html += '<tr><td colspan="4" class="table-section-header">Private Data</td></tr>';
+            for (const key in player.private) {
+                html += generateTableRow(key, player.private[key], 'private');
+            }
+        }
+        
+        html += '</tbody></table>';
+        displayElement.innerHTML = html;
+    } else {
+        displayElement.innerHTML = '<p>Player data not found.</p>';
+    }
+}
+
+function generateTableRow(key, value, collection) {
+    const description = fieldDescriptions[key] || key;
+    const displayValue = formatDisplayValue(value);
+    
+    let inputType = 'text';
+    if (typeof value === 'number') {
+        inputType = 'number';
+    } else if (value instanceof Timestamp) {
+        inputType = 'datetime-local';
+    }
+    
+    const dataType = (value instanceof Timestamp) ? 'timestamp' : (typeof value);
+    
+    return `<tr>
+        <td>${key}</td>
+        <td>${description}</td>
+        <td>${displayValue}</td>
+        <td><input type="${inputType}" class="edit-input form-select" data-field="${key}" data-collection="${collection}" data-type="${dataType}"></td>
+    </tr>`;
+}
+
+function formatDateForDisplay(date) {
+    if (!(date instanceof Date)) return '';
+    const options = {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+    };
+    return date.toLocaleString('en-GB', options).replace(',', '');
+}
+
+function formatDisplayValue(value) {
+    if (value instanceof Timestamp) {
+        return formatDateForDisplay(value.toDate());
+    } else if (typeof value === 'object' && value !== null) {
+        return JSON.stringify(value, null, 2);
+    } else {
+        return value;
+    }
 }
 
 // --- Update League Table with Max Score logic ---
@@ -321,12 +570,9 @@ async function updateLeagueTable(fixture, resultsData) {
         teamStats.pinsFor = (teamStats.pinsFor ?? 0) + pinsFor;
         teamStats.pinsAgainst = (teamStats.pinsAgainst ?? 0) + pinsAgainst;
 
-        // --- THIS IS THE FIX ---
-        // Add or update the max_score field
         if (!teamStats.max_score || pinsFor > teamStats.max_score) {
             teamStats.max_score = pinsFor;
         }
-        // --------------------
 
         standings[teamIndex] = teamStats;
     };
@@ -343,6 +589,32 @@ async function updateLeagueTable(fixture, resultsData) {
 function renderScorecard(teamId, container, allPlayers) {
     if(!container) return;
     const teamPlayers = Array.from(allPlayers.values()).filter(p => p.teamId === teamId);
+
+    const updateSelectOptions = (selectElement, selectedPlayers) => {
+        const currentSelectedValue = selectElement.value;
+        selectElement.innerHTML = '';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select player';
+        selectElement.appendChild(defaultOption);
+
+        const sixthPlayerOption = document.createElement('option');
+        sixthPlayerOption.value = 'sixthPlayer';
+        sixthPlayerOption.textContent = '6th Player';
+        selectElement.appendChild(sixthPlayerOption);
+
+        teamPlayers.forEach(p => {
+            if (!selectedPlayers.includes(p.id) || p.id === currentSelectedValue) {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.firstName} ${p.lastName}`;
+                selectElement.appendChild(option);
+            }
+        });
+        selectElement.value = currentSelectedValue;
+    };
+
     container.innerHTML = `
         <thead>
             <tr>
@@ -357,7 +629,7 @@ function renderScorecard(teamId, container, allPlayers) {
                     <td class="player-name-col">
                         <select class="player-select">
                             <option value="">Select player</option>
-                            ${teamPlayers.map(p => `<option value="${p.id}">${p.firstName} ${p.lastName}</option>`).join('')}
+                            <option value="sixthPlayer">6th Player</option>
                         </select>
                     </td>
                     ${Array(5).fill().map(() => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27"></td>`).join('')}
@@ -366,8 +638,29 @@ function renderScorecard(teamId, container, allPlayers) {
             `).join('')}
         </tbody>`;
 
+    const playerSelects = container.querySelectorAll('.player-select');
+
+    const updateAllPlayerSelects = () => {
+        const currentlySelectedPlayerIds = Array.from(playerSelects)
+            .map(select => select.value)
+            .filter(value => value && value !== 'sixthPlayer');
+
+        playerSelects.forEach(selectElement => {
+            updateSelectOptions(selectElement, currentlySelectedPlayerIds);
+        });
+    };
+
+    playerSelects.forEach(selectElement => {
+        selectElement.addEventListener('change', () => {
+            updateTeamTotal(container, container.id.includes('home') ? document.getElementById('home-team-total-display') : document.getElementById('away-team-total-display'));
+            updateAllPlayerSelects();
+        });
+    });
+
+    updateAllPlayerSelects();
+
     container.addEventListener('input', (e) => {
-        if (e.target.classList.contains('hand-score') || e.target.classList.contains('player-select')) {
+        if (e.target.classList.contains('hand-score')) {
             const row = e.target.closest('tr');
             if(row) {
                 const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);

@@ -2,6 +2,7 @@ import { db, doc, getDoc, collection, query, where, getDocs, documentId } from '
 
 // --- Helper Functions ---
 const getMatchId = () => new URLSearchParams(window.location.search).get('matchId');
+const getFromPage = () => new URLSearchParams(window.location.search).get('from');
 
 const fetchTeamName = async (teamId) => {
     if (!teamId) return 'Team N/A';
@@ -196,6 +197,23 @@ const setupTabNavigation = () => {
     });
 };
 
+const setupBackButton = () => {
+    const backButton = document.getElementById('back-btn');
+    if (!backButton) return;
+
+    const from = getFromPage();
+
+    if (from === 'team-management') {
+        backButton.textContent = '← Back to Team';
+        backButton.href = 'team-management.html';
+    } else {
+        // Default to fixtures
+        backButton.textContent = '← Back to Fixtures';
+        backButton.href = 'fixtures_results.html';
+    }
+};
+
+
 // --- Main Display Function ---
 async function displayMatchDetails() {
     const matchId = getMatchId();
@@ -269,4 +287,7 @@ async function displayMatchDetails() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', displayMatchDetails);
+document.addEventListener('htmlIncludesLoaded', () => {
+    displayMatchDetails();
+    setupBackButton();
+});

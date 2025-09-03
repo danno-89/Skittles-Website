@@ -1,9 +1,15 @@
-import { auth, db, onAuthStateChanged, doc, getDoc, collection, query, where, getDocs } from './firebase.config.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, collection, query, where, getDocs } from './firebase.config.js';
 
 let resolveAuthReady;
 export const authReady = new Promise(resolve => {
     resolveAuthReady = resolve;
 });
+
+// --- NEW EXPORTED FUNCTION ---
+export async function getPublicData(uid) {
+    const profile = await fetchUserProfile(uid);
+    return profile ? profile.publicData : null;
+}
 
 async function fetchUserProfile(uid) {
     try {
@@ -49,6 +55,18 @@ document.addEventListener('htmlIncludesLoaded', () => {
         let userProfile = null;
         if (user) {
             userProfile = await fetchUserProfile(user.uid);
+
+            // If the user is a committee member, ensure their status is reflected
+            // in the 'users' collection for security rule validation.
+            if (userProfile?.publicData?.committee) {
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    await setDoc(userDocRef, { committee: true }, { merge: true });
+                } catch (error) {
+                    console.error("Error synchronizing committee status to 'users' collection:", error);
+                }
+            }
+
             await updateTeamManagementLink(userProfile?.publicData?.teamId);
         } else {
             await updateTeamManagementLink(null);

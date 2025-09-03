@@ -136,15 +136,30 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             
             if (docSnap.exists()) {
                 const leagueData = docSnap.data();
-                const divisionOrder = ['premier_division', 'first_division', 'second_division', 'ladies_division'];
+                
+                const getDivisionRank = (key) => {
+                    const lowerKey = key.toLowerCase();
+                    if (lowerKey.includes('premier')) return 0;
+                    if (lowerKey.includes('first') || lowerKey.includes('1')) return 1;
+                    if (lowerKey.includes('second') || lowerKey.includes('2')) return 2;
+                    if (lowerKey.includes('third') || lowerKey.includes('3')) return 3;
+                    if (lowerKey.includes('fourth') || lowerKey.includes('4')) return 4;
+                    if (lowerKey.includes('fifth') || lowerKey.includes('5')) return 5;
+                    if (lowerKey.includes('ladies')) return 99;
+                    return 100;
+                };
+
                 const sortedDivisionKeys = Object.keys(leagueData).sort((a, b) => {
-                    const indexA = divisionOrder.indexOf(a);
-                    const indexB = divisionOrder.indexOf(b);
-                    if(a === 'season') return 1;
-                    if(b === 'season') return -1;
-                    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                    if (indexA !== -1) return -1;
-                    if (indexB !== -1) return 1;
+                    if (a === 'season') return 1;
+                    if (b === 'season') return -1;
+                    
+                    const rankA = getDivisionRank(a);
+                    const rankB = getDivisionRank(b);
+
+                    if (rankA !== rankB) {
+                        return rankA - rankB;
+                    }
+                    
                     return a.localeCompare(b);
                 });
                 

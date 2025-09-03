@@ -5,20 +5,36 @@ service cloud.firestore {
     
     // --- Publicly Readable Data ---
     match /{collection}/{docId=**} {
-      allow read: if collection in ['competitions', 'teams', 'seasons', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions'];
+      allow read: if collection in ['competitions', 'teams', 'seasons', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners'];
     }
 
-    // --- User-Specific Private Data ---
+    // --- User-Specific Documents ---
+    // Allow users to create and update their own document in the 'users' collection.
+    // This is necessary for synchronizing committee status from auth-manager.js.
+    match /users/{userId} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // --- User-Specific Private Data & Committee Access ---
     match /players_private/{privateId} {
+      // Allow a user to read/list their own private data
       allow list: if request.auth != null && request.query.where.authId == request.auth.uid;
       allow read, write: if request.auth != null && resource.data.authId == request.auth.uid;
+
+      // Allow committee members to read and write all private player data
+      allow read, write: if request.auth != null && isCommitteeMember(request.auth.uid);
+    }
+    
+    // --- Committee write access for public player data ---
+    match /players_public/{publicId} {
+        allow write: if request.auth != null && isCommitteeMember(request.auth.uid);
     }
 
-    // --- Admin/Committee Access (DEFINITIVE FIX) ---
-    // This function now correctly checks for the user's document in the 'users' collection,
-    // which is the reliable source of truth for committee status.
+    // --- Admin/Committee Access Function ---
     function isCommitteeMember(userId) {
-      return exists(/databases/$(database)/documents/users/$(userId));
+      // Safely check for a committee member status in the 'users' collection.
+      return exists(/databases/$(database)/documents/users/$(userId))
+             && get(/databases/$(database)/documents/users/$(userId)).data.committee == true;
     }
 
     // Allow committee members to update match results AND league tables.

@@ -53,16 +53,16 @@ async function displayStatistics() {
         countersContainer.className = 'counters-container';
         countersContainer.innerHTML = `
             <div class="counter">
-                <span class="label">Pins:</span>
-                <span class="value">${stats.pins}</span>
-            </div>
-            <div class="counter">
                 <span class="label">Matches played:</span>
                 <span class="value">${stats.completedMatches} of ${stats.totalMatches}</span>
             </div>
             <div class="counter">
                 <span class="label">Postponements:</span>
                 <span class="value">${stats.postponements}</span>
+            </div>
+            <div class="counter">
+                <span class="label">Pins:</span>
+                <span class="value">${stats.pins}</span>
             </div>
         `;
         header.appendChild(countersContainer);
@@ -87,6 +87,12 @@ async function displayStatistics() {
                 gap: 5px;
                 white-space: nowrap; /* Prevent text from wrapping */
             }
+            
+            @media (max-width: 768px) {
+                .counters-container {
+                    display: none;
+                }
+            }
         `;
         document.head.appendChild(style);
     }
@@ -99,6 +105,7 @@ document.addEventListener('htmlIncludesLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', includeHTML);
+
 
 // Use the promise from auth-manager to update the UI
 authReady.then(({ user, publicData }) => {
