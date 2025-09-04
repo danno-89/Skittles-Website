@@ -86,7 +86,7 @@ function calculateAverages(matches, players, teams, competitions, leagueTables) 
 
         [...(match.homeScores || []), ...(match.awayScores || [])].forEach(playerScore => {
             const { playerId, score } = playerScore;
-            if (!playerId) return;
+            if (!playerId || playerId === 'sixthPlayer') return;
             const stats = playerStats.get(playerId) || { totalPins: 0, gamesPlayed: 0 };
             stats.totalPins += score;
             stats.gamesPlayed += 1;
@@ -172,7 +172,7 @@ function calculateSpares(matches) {
     matches.forEach(match => {
         if (match.status !== 'completed') return;
         [...(match.homeScores || []), ...(match.awayScores || [])].forEach(playerScore => {
-            if (!playerScore.playerId || !playerScore.hands) return;
+            if (!playerScore.playerId || !playerScore.hands || playerScore.playerId === 'sixthPlayer') return;
             const playerSpares = playerScore.hands.filter(hand => hand >= 10);
             if (playerSpares.length > 0) {
                 const stats = spareStats.get(playerScore.playerId) || { count: 0, totalPins: 0 };
@@ -193,6 +193,7 @@ function calculateHighScores(matches, teams) {
             if (!scores) return;
             scores.forEach(playerScore => {
                 const { playerId, score } = playerScore;
+                if (!playerId || playerId === 'sixthPlayer') return;
                 const opponentName = teams.get(opponentId)?.name || 'Unknown';
                 const matchDate = match.scheduledDate.toDate();
 

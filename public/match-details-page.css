@@ -95,6 +95,19 @@
     color: var(--club-green);
 }
 
+.highlight-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    font-weight: bold;
+    color: var(--darker-green);
+    box-shadow: 0 0 4px 1px var(--club-yellow);
+}
+
+
 /* --- Statistics Table --- */
 .statistics-container {
     background-color: var(--off-white);
@@ -155,6 +168,17 @@
     color: gold;
     vertical-align: middle;
     margin-left: 5px;
+}
+
+/* --- Graph Styles --- */
+.graph-controls {
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-container {
+    position: relative;
+    height: 500px;
+    width: 100%;
 }
 
 /* --- Responsive Styles --- */

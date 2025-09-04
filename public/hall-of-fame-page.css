@@ -11,10 +11,9 @@
 }
 
 #hall-of-fame-container {
-    background-color: var(--off-white);
+    background-color: var(--pure-white);
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
-    box-shadow: var(--shadow-elevation-low);
 }
 
 .sidebar {
@@ -139,36 +138,31 @@
 }
 
 /* --- Division Winner Table Styles --- */
-.division-winner-table {
-    margin-top: var(--spacing-md);
+.winners-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.division-winner-table th {
-    text-align: center;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.division-winner-table td {
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-.division-winner-table tbody tr td:first-child {
-    font-weight: bold;
-    color: var(--darker-green);
+.winners-table th {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    padding: var(--spacing-md);
     text-align: left;
 }
 
-/* --- Division Standings Table Styles --- */
-.division-standings-table th, .division-standings-table td {
-    text-align: center;
+.winners-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--light-grey);
 }
 
-.division-standings-table tbody tr td:first-child {
+.winners-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.winners-table .club-leader {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
     font-weight: bold;
-    color: var(--darker-green);
-    text-align: left;
 }
 
 /* --- Responsive adjustment for hall of fame --- */
