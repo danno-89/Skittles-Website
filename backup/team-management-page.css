@@ -132,3 +132,25 @@
         background-color: hsla(0, 100%, 90%, 1);
     }
 }
+
+/* --- Result Indicator Styles --- */
+.result-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    vertical-align: middle;
+}
+
+.result-indicator.win {
+    background: radial-gradient(circle at 50% 0%, hsl(120, 80%, 80%), hsl(120, 60%, 40%) 80%);
+}
+
+.result-indicator.loss {
+    background: radial-gradient(circle at 50% 0%, hsl(0, 80%, 80%), hsl(0, 70%, 50%) 80%);
+}
+
+.result-indicator.draw {
+    background: radial-gradient(circle at 50% 0%, hsl(55, 100%, 80%), hsl(55, 90%, 60%) 80%);
+}

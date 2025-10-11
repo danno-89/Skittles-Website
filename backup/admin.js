@@ -1,83 +1,159 @@
-import { db, collection, doc, getDocs, updateDoc, query, where, orderBy, getDoc, auth, Timestamp } from './firebase.config.js';
+
+/**
+ * Admin Page Management Script
+ * 
+ * This script handles all functionality on the admin page, including:
+ * - Authorisation checks to ensure only committee members can access it.
+ * - Tabbed navigation for different admin functions.
+ * - Data fetching for teams, fixtures, and players.
+ * - UI initialisation for all admin tabs (Results Input, Edit Fixture, etc.).
+ * 
+ * The entire script is wrapped in a DOMContentLoaded listener to ensure
+ * the HTML is fully loaded before any code attempts to interact with the DOM.
+ */
+
+import { db, collection, doc, getDocs, updateDoc, query, where, orderBy, getDoc, Timestamp } from './firebase.config.js';
 import { authReady } from './auth-manager.js';
+import { initAdminEditFixture } from './admin-edit-fixture.js';
+import { initRescheduleFixture } from './admin-reschedule.js';
+import { initNewsManagement } from './news-management.js';
 
 // --- Globals for Admin Page Data ---
 const teamsMap = new Map();
 let allFixtures = [];
+let allPlayersData = new Map();
 
-// --- Authorization and Initialization ---
-
-authReady.then(({ user, publicData }) => {
-    if (user && publicData?.committee) {
-        initializeAdminPage();
-    } else {
-        const tabContentContainer = document.getElementById('tab-content-container');
-        if (tabContentContainer) {
-            tabContentContainer.innerHTML = '<p>You do not have the necessary permissions to view this page.</p>';
+// --- Main Initialisation on DOM Ready ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait for Firebase Auth to be ready
+    authReady.then(({ user, publicData }) => {
+        const adminContent = document.getElementById('tab-content-container');
+        if (!adminContent) {
+            console.error("Admin page content container not found.");
+            return;
         }
-    }
+
+        // Check if user is a committee member
+        if (user && publicData?.committee) {
+            initializeAdminPage();
+        } else {
+            // If not authorised, display a message and do nothing else
+            adminContent.innerHTML = '<p>You do not have the necessary permissions to view this page.</p>';
+        }
+    });
 });
 
+/**
+ * Kicks off the setup for the entire admin page after authorisation is confirmed.
+ * Fetches all necessary data and then initialises each UI component.
+ */
 async function initializeAdminPage() {
-    await fetchTeams();
-    await fetchScheduledFixtures();
-    initializeTabs();
-    initializeResultsInput();
-    initializePostponeFixture();
+    try {
+        // Fetch core data first
+        await fetchTeams();
+        await fetchScheduledFixtures();
+        await fetchAllPlayersData();
+
+        // Then, initialise all the interactive tabs and forms
+        initializeTabs();
+        initializeResultsInput();
+        initializePostponeFixture();
+        initializeAmendPlayerTab();
+        
+        // Initialise modules for specific tabs
+        initAdminEditFixture();
+        initRescheduleFixture(teamsMap);
+        initNewsManagement();
+
+    } catch (error) {
+        console.error("An error occurred during admin page initialisation:", error);
+        const adminContent = document.getElementById('tab-content-container');
+        if (adminContent) {
+            adminContent.innerHTML = '<p>A critical error occurred while loading the admin page. Please try again later.</p>';
+        }
+    }
 }
 
-// --- Data Fetching ---
+
+// --- Data Fetching Functions ---
 
 async function fetchTeams() {
-    try {
-        const teamsSnapshot = await getDocs(collection(db, "teams"));
-        teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
-    } catch (error) {
-        console.error("Error fetching teams:", error);
-    }
+    const teamsSnapshot = await getDocs(collection(db, "teams"));
+    teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
 }
 
 async function fetchScheduledFixtures() {
-    try {
-        const fixturesQuery = query(collection(db, "match_results"), where("status", "==", "scheduled"), orderBy("scheduledDate"));
-        const fixturesSnapshot = await getDocs(fixturesQuery);
-        allFixtures = fixturesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Error fetching scheduled fixtures:", error);
-    }
+    const fixturesQuery = query(collection(db, "match_results"), where("status", "in", ["scheduled", "rescheduled"]), orderBy("scheduledDate"));
+    const fixturesSnapshot = await getDocs(fixturesQuery);
+    allFixtures = fixturesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+async function fetchAllPlayersData() {
+    const publicPlayersSnapshot = await getDocs(collection(db, "players_public"));
+    publicPlayersSnapshot.forEach(doc => allPlayersData.set(doc.id, { id: doc.id, public: doc.data() }));
+
+    const privatePlayersSnapshot = await getDocs(collection(db, "players_private"));
+    privatePlayersSnapshot.forEach(doc => {
+        if (allPlayersData.has(doc.id)) {
+            allPlayersData.get(doc.id).private = doc.data();
+        } else {
+            allPlayersData.set(doc.id, { id: doc.id, private: doc.data() });
+        }
+    });
 }
 
 
 // --- Tab Management ---
 
+/**
+ * Sets up the tabbed navigation.
+ */
 function initializeTabs() {
-    const tabs = document.querySelectorAll('.tab-link');
-    const tabPanes = document.querySelectorAll('.tab-pane');
+    const tabsContainer = document.getElementById('admin-tabs-container');
+    const tabContentContainer = document.getElementById('tab-content-container');
+    const tabsToggleBtn = document.getElementById('tabs-toggle-btn');
 
+    if (!tabsContainer || !tabContentContainer || !tabsToggleBtn) {
+        console.error("Tab containers or toggle button not found. Tab functionality will be disabled.");
+        return;
+    }
+
+    const tabs = tabsContainer.querySelectorAll('.tab-link');
+    const tabPanes = tabContentContainer.querySelectorAll('.tab-pane');
+    
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             tabPanes.forEach(pane => {
-                if (pane) {
-                    pane.id === `${tabName}-content` ? pane.classList.add('active') : pane.classList.remove('active');
-                }
+                pane.classList.toggle('active', pane.id === `${tabName}-content`);
             });
+            if (window.innerWidth <= 768) {
+                tabsContainer.classList.remove('visible');
+            }
         });
     });
+
+    tabsToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        tabsContainer.classList.toggle('visible');
+    });
 }
+
 
 // --- Postpone Fixture Tab ---
 
 function initializePostponeFixture() {
     const form = document.getElementById('postpone-fixture-form');
-    if (!form) return; 
+    if (!form) return;
 
     const fixtureSelect = document.getElementById('fixture-to-postpone-select');
     const teamSelect = document.getElementById('postponing-team-select');
     const dateInput = document.getElementById('postponement-date-input');
     const statusDiv = document.getElementById('postpone-fixture-status');
+
+    if (!fixtureSelect || !teamSelect || !dateInput || !statusDiv) return;
 
     fixtureSelect.addEventListener('change', () => {
         teamSelect.innerHTML = '<option value="">Which team postponed?</option>';
@@ -142,23 +218,28 @@ function populateFixturePostponeSelect() {
     });
 }
 
+
 // --- Results Input Tab ---
 
 function initializeResultsInput() {
     const dateSelect = document.getElementById('date-select');
-    if(!dateSelect) return;
-
     const matchSelect = document.getElementById('match-select');
     const resultsFormContainer = document.getElementById('results-form-container');
+    const submitBtn = document.getElementById('submit-results-btn');
+
+    if (!dateSelect || !matchSelect || !resultsFormContainer || !submitBtn) {
+        console.error("One or more elements for results input are missing.");
+        return;
+    }
+
     let allPlayers = new Map();
 
     const fetchPlayers = async () => {
-        try {
-            const playersSnapshot = await getDocs(collection(db, "players_public"));
-            playersSnapshot.forEach(doc => allPlayers.set(doc.id, { id: doc.id, ...doc.data() }));
-        } catch(error) {
-            console.error("Error fetching players:", error);
-        }
+        const playersSnapshot = await getDocs(collection(db, "players_public"));
+        playersSnapshot.forEach(doc => {
+            const data = doc.data();
+            allPlayers.set(doc.id, { id: doc.id, name: `${data.firstName} ${data.lastName}`, teamId: data.teamId });
+        });
     };
 
     const populateDateSelect = () => {
@@ -175,9 +256,9 @@ function initializeResultsInput() {
 
     dateSelect.addEventListener('change', () => {
         matchSelect.innerHTML = '<option value="">Select a match</option>';
-        matchSelect.disabled = true;
         resultsFormContainer.style.display = 'none';
         const matchesOnDate = allFixtures.filter(f => f.scheduledDate.toDate().toISOString().split('T')[0] === dateSelect.value);
+        
         matchesOnDate.forEach(fixture => {
             const homeTeamName = teamsMap.get(fixture.homeTeamId);
             const awayTeamName = teamsMap.get(fixture.awayTeamId);
@@ -187,7 +268,7 @@ function initializeResultsInput() {
             option.textContent = `${homeTeamName} vs ${awayTeamName} (${time})`;
             matchSelect.appendChild(option);
         });
-        matchSelect.disabled = false;
+        matchSelect.disabled = !matchesOnDate.length;
     });
 
     matchSelect.addEventListener('change', () => {
@@ -196,26 +277,24 @@ function initializeResultsInput() {
         if (fixture) {
             document.getElementById('home-team-name-header').textContent = teamsMap.get(fixture.homeTeamId);
             document.getElementById('away-team-name-header').textContent = teamsMap.get(fixture.awayTeamId);
-            
             document.getElementById('home-bowled-first').value = fixture.homeTeamId;
             document.getElementById('away-bowled-first').value = fixture.awayTeamId;
             
-            const homeScorecard = document.getElementById('home-team-scorecard');
-            const awayScorecard = document.getElementById('away-team-scorecard');
-            renderScorecard(fixture.homeTeamId, homeScorecard, allPlayers);
-            renderScorecard(fixture.awayTeamId, awayScorecard, allPlayers);
+            renderScorecard(fixture.homeTeamId, document.getElementById('home-team-scorecard'), allPlayers);
+            renderScorecard(fixture.awayTeamId, document.getElementById('away-team-scorecard'), allPlayers);
             resultsFormContainer.style.display = 'block';
         }
     });
 
-    document.getElementById('submit-results-btn').addEventListener('click', async () => {
+    submitBtn.addEventListener('click', async () => {
         const fixtureId = matchSelect.value;
         const getScores = (containerId) => {
-            return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => ({
-                playerId: row.querySelector('.player-select').value,
-                hands: Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0),
-                score: parseInt(row.querySelector('.total-score-col').textContent)
-            })).filter(s => s.playerId && s.hands.length === 5);
+            return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => {
+                const playerId = row.querySelector('.player-select').value;
+                const hands = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
+                const score = hands.reduce((a, b) => a + b, 0);
+                return { playerId, hands, score };
+            }).filter(s => s.playerId && s.hands.length === 5);
         };
 
         const homeScores = getScores('home-team-scorecard');
@@ -246,15 +325,28 @@ function initializeResultsInput() {
 
             const fixture = allFixtures.find(f => f.id === fixtureId);
             if (fixture) {
-                await updateLeagueTable(fixture, resultsData);
+                // Future implementation: await updateLeagueTable(fixture, resultsData);
+
+                const playersInMatch = new Set([...homeScores.map(s => s.playerId), ...awayScores.map(s => s.playerId)]);
+                playersInMatch.delete("sixthPlayer"); 
+
+                const matchDate = fixture.scheduledDate.toDate();
+                const recentFixtureTimestamp = Timestamp.fromDate(matchDate);
+                const expiryDate = new Date(matchDate);
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+                const registerExpiryTimestamp = Timestamp.fromDate(expiryDate);
+
+                for (const playerId of playersInMatch) {
+                    await updateDoc(doc(db, "players_public", playerId), {
+                        recentFixture: recentFixtureTimestamp,
+                        registerExpiry: registerExpiryTimestamp
+                    });
+                }
             }
 
-            alert('Results submitted and league table updated successfully!');
+            alert('Results submitted successfully!');
             await fetchScheduledFixtures(); 
             populateDateSelect(); 
-            populateFixturePostponeSelect(); 
-            matchSelect.innerHTML = '<option value="">Select a match</option>';
-            matchSelect.disabled = true;
             resultsFormContainer.style.display = 'none';
         } catch (error) {
             console.error("Error submitting results:", error);
@@ -268,81 +360,25 @@ function initializeResultsInput() {
     })();
 }
 
-// --- Update League Table with Max Score logic ---
-async function updateLeagueTable(fixture, resultsData) {
-    const { homeTeamId, awayTeamId, division, season } = fixture;
-    const { homeScore, awayScore } = resultsData;
-
-    let homeOutcome, awayOutcome;
-    if (homeScore > awayScore) {
-        homeOutcome = { result: 'won', points: 2 };
-        awayOutcome = { result: 'lost', points: 0 };
-    } else if (awayScore > homeScore) {
-        homeOutcome = { result: 'lost', points: 0 };
-        awayOutcome = { result: 'won', points: 2 };
-    } else {
-        homeOutcome = { result: 'drawn', points: 1 };
-        awayOutcome = { result: 'drawn', points: 1 };
-    }
-
-    const leagueTableRef = doc(db, 'league_tables', season);
-    const leagueTableSnap = await getDoc(leagueTableRef);
-
-    if (!leagueTableSnap.exists()) {
-        console.error(`League table for season ${season} not found.`);
-        return;
-    }
-
-    const leagueTableData = leagueTableSnap.data();
-    
-    if (!leagueTableData[division]) {
-        leagueTableData[division] = {
-            leagueName: division.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            standings: []
-        };
-    }
-    const standings = leagueTableData[division].standings || [];
-
-    const updateStatsForTeam = (teamId, outcome, pinsFor, pinsAgainst) => {
-        let teamIndex = standings.findIndex(t => t.teamId === teamId);
-        
-        if (teamIndex === -1) {
-            standings.push({ teamId, teamName: teamsMap.get(teamId) });
-            teamIndex = standings.length - 1;
-        }
-        
-        const teamStats = standings[teamIndex];
-
-        teamStats.played = (teamStats.played ?? 0) + 1;
-        teamStats.won = (teamStats.won ?? 0) + (outcome.result === 'won' ? 1 : 0);
-        teamStats.lost = (teamStats.lost ?? 0) + (outcome.result === 'lost' ? 1 : 0);
-        teamStats.drawn = (teamStats.drawn ?? 0) + (outcome.result === 'drawn' ? 1 : 0);
-        teamStats.points = (teamStats.points ?? 0) + outcome.points;
-        teamStats.pinsFor = (teamStats.pinsFor ?? 0) + pinsFor;
-        teamStats.pinsAgainst = (teamStats.pinsAgainst ?? 0) + pinsAgainst;
-
-        // --- THIS IS THE FIX ---
-        // Add or update the max_score field
-        if (!teamStats.max_score || pinsFor > teamStats.max_score) {
-            teamStats.max_score = pinsFor;
-        }
-        // --------------------
-
-        standings[teamIndex] = teamStats;
-    };
-
-    updateStatsForTeam(homeTeamId, homeOutcome, homeScore, awayScore);
-    updateStatsForTeam(awayTeamId, awayOutcome, awayScore, homeScore);
-
-    const updatePayload = {
-        [`${division}.standings`]: standings
-    };
-    await updateDoc(leagueTableRef, updatePayload);
-}
-
 function renderScorecard(teamId, container, allPlayers) {
-    if(!container) return;
     const teamPlayers = Array.from(allPlayers.values()).filter(p => p.teamId === teamId);
+
+    const updateSelectOptions = (selectElement) => {
+        const selectedPlayers = Array.from(container.querySelectorAll('.player-select')).map(s => s.value);
+        const currentValue = selectElement.value;
+
+        selectElement.innerHTML = '<option value="">Select player</option><option value="sixthPlayer">6th Player</option>';
+        teamPlayers.forEach(p => {
+            if (!selectedPlayers.includes(p.id) || p.id === currentValue) {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = p.name;
+                selectElement.appendChild(option);
+            }
+        });
+        selectElement.value = currentValue;
+    };
+
     container.innerHTML = `
         <thead>
             <tr>
@@ -354,35 +390,43 @@ function renderScorecard(teamId, container, allPlayers) {
         <tbody>
             ${Array(6).fill().map(() => `
                 <tr>
-                    <td class="player-name-col">
-                        <select class="player-select">
-                            <option value="">Select player</option>
-                            ${teamPlayers.map(p => `<option value="${p.id}">${p.firstName} ${p.lastName}</option>`).join('')}
-                        </select>
-                    </td>
+                    <td class="player-name-col"><select class="player-select"></select></td>
                     ${Array(5).fill().map(() => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27"></td>`).join('')}
                     <td class="total-score-col">0</td>
                 </tr>
             `).join('')}
         </tbody>`;
+    
+    const playerSelects = container.querySelectorAll('.player-select');
+    playerSelects.forEach(updateSelectOptions);
+
+    container.addEventListener('change', (e) => {
+        if (e.target.classList.contains('player-select')) {
+            playerSelects.forEach(sel => {
+                if (sel !== e.target) updateSelectOptions(sel);
+            });
+        }
+    });
 
     container.addEventListener('input', (e) => {
-        if (e.target.classList.contains('hand-score') || e.target.classList.contains('player-select')) {
+        if (e.target.classList.contains('hand-score')) {
             const row = e.target.closest('tr');
-            if(row) {
-                const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
-                row.querySelector('.total-score-col').textContent = handScores.reduce((a, b) => a + b, 0);
-                const totalDisplay = container.id.includes('home') ? document.getElementById('home-team-total-display') : document.getElementById('away-team-total-display');
-                if(totalDisplay) {
-                    updateTeamTotal(container, totalDisplay);
-                }
-            }
+            const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
+            row.querySelector('.total-score-col').textContent = handScores.reduce((a, b) => a + b, 0);
+            updateTeamTotal(container);
         }
     });
 }
 
-function updateTeamTotal(table, totalDisplay) {
-    if(!table || !totalDisplay) return;
-    const playerTotals = Array.from(table.querySelectorAll('tbody .total-score-col')).map(td => parseInt(td.textContent) || 0);
-    totalDisplay.textContent = playerTotals.reduce((a, b) => a + b, 0);
+function updateTeamTotal(container) {
+    const playerTotals = Array.from(container.querySelectorAll('tbody .total-score-col')).map(td => parseInt(td.textContent) || 0);
+    const teamTotal = playerTotals.reduce((a, b) => a + b, 0);
+    const totalDisplay = container.id.includes('home') ? document.getElementById('home-team-total-display') : document.getElementById('away-team-total-display');
+    totalDisplay.textContent = teamTotal;
+}
+
+// --- Amend Player Tab ---
+
+function initializeAmendPlayerTab() {
+    // Placeholder for amend player tab logic
 }

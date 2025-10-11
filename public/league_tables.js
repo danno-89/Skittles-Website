@@ -165,10 +165,18 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                 
                 leagueTableContainer.innerHTML = ''; 
 
-                sortedDivisionKeys.forEach((divisionKey, index) => {
+                let firstTab = true;
+                sortedDivisionKeys.forEach((divisionKey) => {
                     if (divisionKey !== 'season') {
+                        const divisionData = leagueData[divisionKey];
+                        const leagueName = divisionData.leagueName || divisionKey;
+
+                        if (leagueName.toLowerCase().includes('knockout')) {
+                            return; 
+                        }
+
                         const tableContainer = renderTable(leagueData[divisionKey]);
-                        tableContainer.className = 'division-table';
+                        tableContainer.classList.add('division-table', 'league-standings-container');
                         tableContainer.dataset.divisionContent = divisionKey;
                         leagueTableContainer.appendChild(tableContainer);
                         
@@ -179,9 +187,10 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                         tab.onclick = () => switchTab(divisionKey);
                         divisionTabsContainer.appendChild(tab);
 
-                        if (index === 0) {
+                        if (firstTab) {
                             tab.classList.add('active');
                             tableContainer.style.display = 'block';
+                            firstTab = false;
                         } else {
                             tableContainer.style.display = 'none';
                         }

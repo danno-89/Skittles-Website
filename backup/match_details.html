@@ -6,6 +6,7 @@
     <title>Sarnia Skittles Club - Match Details</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="match-details-page.css">
+    <link rel="icon" type="image/png" href="SSC%20Logo.png">
 </head>
 <body>
 
@@ -17,7 +18,7 @@
     <main>
         <div class="page-header">
             <h1>Match Details</h1>
-            <a href="fixtures_results.html" class="btn btn-primary">← Back to Fixtures</a>
+            <a href="fixtures_results.html" id="back-btn" class="btn btn-primary">← Back to Fixtures</a>
         </div>
         <div id="match-details-container">
             <!-- Match header card will be loaded here -->
@@ -27,7 +28,15 @@
             <div class="tabs main-tabs">
                 <button class="tab-link active" data-tab="scoreboard">Scoreboard</button>
                 <button class="tab-link" data-tab="statistics">Statistics</button>
+                <button class="tab-link" data-tab="graph">Graph</button>
                 <button class="tab-link" data-tab="previous-results">Previous Results</button>
+                <div class="graph-controls">
+                    <select id="graph-view-select" class="form-select">
+                        <option value="simultaneous">Simultaneous</option>
+                        <option value="progression">Game Progression</option>
+                        <option value="battle">Battle</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -40,6 +49,11 @@
             <div id="statistics-content" class="tab-pane">
                 <p>Statistics for this match will be available soon.</p>
             </div>
+            <div id="graph-content" class="tab-pane">
+                <div class="chart-container">
+                    <canvas id="score-progression-chart"></canvas>
+                </div>
+            </div>
             <div id="previous-results-content" class="tab-pane">
                 <p>A list of previous results between these two teams will be shown here.</p>
             </div>
@@ -49,6 +63,7 @@
 
 <div w3-include-html="footer.html"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="main.js"></script>
     <script type="module" src="firebase.config.js"></script>
     <script type="module" src="match_details.js"></script>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard Game Setup - Scoreboard</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="scoreboard.css">
+    <link rel="stylesheet" href="standard-setup.css">
+</head>
+<body class="scoreboard-page">
+
+    <div class="setup-wrapper">
+        <div class="setup-main-content">
+            <div class="header-container">
+                <button id="back-button" class="back-btn header-btn">&#8249; Back</button>
+                <div class="title-container">
+                    <h1 class="main-title">Standard Game Setup</h1>
+                    <h2 id="step-title" class="step-title">Step 1: Team Names</h2>
+                </div>
+                <button id="action-button" class="submit-btn header-btn">Next</button>
+            </div>
+            
+            <!-- Step 1: Team Names -->
+            <div id="step1" class="setup-step active">
+                <div class="team-name-container">
+                    <div class="input-group">
+                        <input type="text" id="home-team-name" placeholder="Home Team Name">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="away-team-name" placeholder="Away Team Name">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Player Configuration -->
+            <div id="step2" class="setup-step" style="display:none;">
+                <div id="player-config-container" class="setup-container">
+                    <!-- Player configuration will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Step 3: Player Names -->
+            <div id="step3" class="setup-step" style="display:none;">
+                <div id="player-name-container" class="player-name-grid">
+                    <div id="home-player-names"></div>
+                    <div id="away-player-names"></div>
+                </div>
+            </div>
+
+            <!-- Step 4: Who Bowls First? -->
+            <div id="step4" class="setup-step" style="display:none;">
+                <div id="bowling-first-container" class="bowling-prompt-container">
+                     <!-- Bowling first selection will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="standard-setup.js"></script>
+</body>
+</html>

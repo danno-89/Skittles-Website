@@ -6,6 +6,9 @@
     <title>Admin - Skittles Club Hub</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="admin-page.css">
+    <link rel="stylesheet" href="news-management.css">
+    <link rel="icon" type="image/png" href="SSC%20Logo.png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
 
@@ -17,12 +20,22 @@
         <main>
             <div class="page-header">
                 <h1>Admin</h1>
+                <div class="mobile-header-icons">
+                    <button id="tabs-toggle-btn" class="icon-btn">
+                        <span class="material-symbols-outlined">menu_open</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="tabs-main">
-                <button class="tab-link active" data-tab="results-input">Results Input</button>
-                <button class="tab-link" data-tab="amend-player">Amend Player</button>
-                <button class="tab-link" data-tab="postpone-fixture">Postpone Fixture</button>
+            <div id="admin-tabs-container">
+                <div class="tabs-main">
+                    <button class="tab-link active" data-tab="results-input">Results Input</button>
+                    <button class="tab-link" data-tab="edit-fixture">Edit Fixture</button>
+                    <button class="tab-link" data-tab="amend-player">Amend Player</button>
+                    <button class="tab-link" data-tab="postpone-fixture">Postpone Fixture</button>
+                    <button class="tab-link" data-tab="reschedule-fixture">Reschedule Fixture</button>
+                    <button class="tab-link" data-tab="news-management">News</button>
+                </div>
             </div>
 
             <div id="tab-content-container">
@@ -67,6 +80,47 @@
                         <button id="submit-results-btn" class="btn btn-primary">Submit Results</button>
                     </div>
                 </div>
+                <div id="edit-fixture-content" class="tab-pane">
+                    <div class="form-section-row">
+                        <div class="form-section">
+                            <label for="edit-date-select">Select Date:</label>
+                            <select id="edit-date-select" class="form-select"></select>
+                        </div>
+                        <div class="form-section">
+                            <label for="edit-match-select">Select Match:</label>
+                            <select id="edit-match-select" class="form-select" disabled></select>
+                        </div>
+                    </div>
+
+                    <div id="edit-results-form-container" style="display: none;">
+                        <div class="scores-grid">
+                            <div id="edit-home-team-card" class="scorecard-container">
+                                <div class="scorecard-header">
+                                    <h3 id="edit-home-team-name-header"></h3>
+                                    <div class="bowled-first-section">
+                                        <input type="radio" id="edit-home-bowled-first" name="edit-bowled-first" value="">
+                                        <label for="edit-home-bowled-first">Bowled First</label>
+                                    </div>
+                                    <div id="edit-home-team-total-display" class="team-total-display">0</div>
+                                </div>
+                                <table id="edit-home-team-scorecard" class="scorecard"></table>
+                            </div>
+                            <div id="edit-away-team-card" class="scorecard-container">
+                                <div class="scorecard-header">
+                                    <h3 id="edit-away-team-name-header"></h3>
+                                    <div class="bowled-first-section">
+                                        <input type="radio" id="edit-away-bowled-first" name="edit-bowled-first" value="">
+                                        <label for="edit-away-bowled-first">Bowled First</label>
+                                    </div>
+                                    <div id="edit-away-team-total-display" class="team-total-display">0</div>
+                                </div>
+                                <table id="edit-away-team-scorecard" class="scorecard"></table>
+                            </div>
+                        </div>
+
+                        <button id="submit-edited-results-btn" class="btn btn-primary">Submit Changes</button>
+                    </div>
+                </div>
                 <div id="amend-player-content" class="tab-pane">
                     <h2>Amend Player Details</h2>
                     <div class="form-section-row">
@@ -103,6 +157,30 @@
                     </form>
                     <div id="postpone-fixture-status"></div>
                 </div>
+                <div id="reschedule-fixture-content" class="tab-pane">
+                    <h2>Reschedule a Postponed Fixture</h2>
+                    <div class="form-section">
+                        <p>Use this tool to move a postponed fixture into an available spare slot.</p>
+
+                        <div class="form-group">
+                            <label for="postponed-fixture-select"><strong>1. Select the Postponed Fixture to Move</strong></label>
+                            <select id="postponed-fixture-select" class="form-select">
+                                <option value="">Loading postponed fixtures...</option>
+                            </select>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="spare-fixture-select"><strong>2. Select the Available Spare Slot</strong></label>
+                            <select id="spare-fixture-select" class="form-select">
+                                <option value="">Loading spare slots...</option>
+                            </select>
+                        </div>
+            
+                        <button id="reschedule-submit-btn" class="btn btn-primary" disabled>Reschedule Fixture</button>
+                        <div id="reschedule-feedback" class="feedback-message" style="display: none;"></div>
+                    </div>
+                </div>
+                <div id="news-management-content" class="tab-pane" w3-include-html="news-management.html"></div>
             </div>
         </main>
     </div>
@@ -113,6 +191,9 @@
     <script type="module" src="firebase.config.js"></script>
     <script type="module" src="auth-manager.js"></script>
     <script type="module" src="admin.js"></script>
+    <script type="module" src="admin-edit-fixture.js"></script>
+    <script type="module" src="admin-reschedule.js"></script>
+    <script type="module" src="news-management.js"></script>
 
 </body>
 </html>

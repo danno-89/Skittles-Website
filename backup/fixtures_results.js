@@ -124,34 +124,63 @@ async function displayMatchResults() {
         return groups;
     }, {});
 
-    let tableBodyHTML = '';
+    let html = '';
     const sortedWeekKeys = Object.keys(groupedFixtures).sort();
 
     for (const weekKey of sortedWeekKeys) {
         const group = groupedFixtures[weekKey];
         group.matches.sort((a, b) => a.scheduledDate - b.scheduledDate);
 
+        const weekStartDate = group.startDate;
+        const weekSaturday = new Date(weekStartDate);
+        weekSaturday.setDate(weekSaturday.getDate() + 5);
+        weekSaturday.setHours(23, 59, 59, 999);
+        const isPastWeek = new Date() > weekSaturday;
+        const isOpen = isPastWeek ? '' : 'open';
+
         const weekStartDateFormatted = group.startDate.toLocaleDateString('en-GB', {
             day: 'numeric', month: 'short', year: 'numeric'
         });
         
-        const containsRound = group.matches.some(match => match.round);
-        const headerClass = containsRound ? 'week-header is-cup-week' : 'week-header';
+        const cupFixturesCount = group.matches.filter(match => match.round).length;
+        const isCupWeek = cupFixturesCount > group.matches.length / 2;
+        const summaryClass = isCupWeek ? 'week-header is-cup-week' : 'week-header';
 
-        tableBodyHTML += `<tr class="${headerClass}" data-week-key="${weekKey}"><td colspan="8"><span class="arrow">▼</span> Week Commencing: ${weekStartDateFormatted}</td></tr>`;
+        html += `<details class="week-details" ${isOpen}>`;
+        html += `<summary class="${summaryClass}">Week Commencing: ${weekStartDateFormatted}</summary>`;
+        
+        let weekTableHTML = `<div class="table-container"><table class="results-table">
+            <thead class="sticky-header">
+                <tr>
+                    <th class="date-col">Date</th>
+                    <th class="time-col">Time</th>
+                    <th class="home-team-col">Home Team</th>
+                    <th class="away-team-col">Away Team</th>
+                    <th class="centered-header">Score</th>
+                    <th class="centered-header">Status</th>
+                    <th>Competition</th>
+                    <th>Round</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
         let lastRenderedDate = null;
         for (const match of group.matches) {
             const dateObj = match.scheduledDate;
+        
+            if (match.status === 'spare' && dateObj < new Date()) {
+                continue;
+            }
+        
             const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
             const dateCell = (date === lastRenderedDate) ? '' : date;
             if (date !== lastRenderedDate) lastRenderedDate = date;
 
             if (match.status === 'spare') {
-                tableBodyHTML += `<tr class="week-row week-${weekKey} status-spare">
-                                    <td>${dateCell}</td>
-                                    <td>${time}</td>
+                weekTableHTML += `<tr class="status-spare">
+                                    <td class="date-col">${dateCell}</td>
+                                    <td class="time-col">${time}</td>
                                     <td colspan="6">Spare slot for Postponed Fixtures</td>
                                   </tr>`;
             } else {
@@ -164,7 +193,13 @@ async function displayMatchResults() {
                 const round = match.round || '';
                 
                 const isPostponed = match.status === 'postponed' && !hasResult;
-                const rowClass = isPostponed ? 'status-postponed' : '';
+                const isRescheduled = match.status === 'rescheduled';
+                let rowClass = '';
+                if (isPostponed) {
+                    rowClass = 'status-postponed';
+                } else if (isRescheduled) {
+                    rowClass = 'status-rescheduled';
+                }
                 
                 if (isPostponed && match.postponedBy) {
                     if (match.postponedBy === match.homeTeamId) {
@@ -174,14 +209,26 @@ async function displayMatchResults() {
                     }
                 }
 
-                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : '');
+                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : (isRescheduled ? `<span>Rescheduled</span>` : ''));
                 
-                tableBodyHTML += `<tr class="week-row week-${weekKey} ${rowClass}"><td>${dateCell}</td><td>${time}</td><td>${homeTeamName}</td><td>${awayTeamName}</td><td class="score">${score}</td><td class="status-cell">${statusCell}</td><td>${divisionName}</td><td>${round}</td></tr>`;
+                weekTableHTML += `<tr class="${rowClass}">
+                                    <td class="date-col">${dateCell}</td>
+                                    <td class="time-col">${time}</td>
+                                    <td class="home-team-col">${homeTeamName}</td>
+                                    <td class="away-team-col">${awayTeamName}</td>
+                                    <td class="score">${score}</td>
+                                    <td class="status-cell">${statusCell}</td>
+                                    <td>${divisionName}</td>
+                                    <td>${round}</td>
+                                </tr>`;
             }
         }
+        weekTableHTML += `</tbody></table></div>`;
+        html += weekTableHTML;
+        html += `</details>`;
     }
 
-    resultsContainer.innerHTML = `<table class="results-table"><thead class="sticky-header"><tr><th>Date</th><th>Time</th><th>Home Team</th><th>Away Team</th><th class="centered-header">Score</th><th class="centered-header">Status</th><th>Competition</th><th>Round</th></tr></thead><tbody>${tableBodyHTML}</tbody></table>`;
+    resultsContainer.innerHTML = html;
 }
 
 // --- Filter Logic ---
@@ -328,28 +375,13 @@ function setupEventListeners() {
         displayMatchResults();
     });
     
-    document.getElementById('results-container').addEventListener('click', function(event) {
-        const headerRow = event.target.closest('.week-header, .is-cup-week');
-        if (headerRow) {
-            const weekKey = headerRow.dataset.weekKey;
-            const rows = document.querySelectorAll(`.week-row.week-${weekKey}`);
-            const arrow = headerRow.querySelector('.arrow');
-            let isVisible = false;
-            rows.forEach(row => {
-                const currentDisplay = window.getComputedStyle(row).display;
-                if (currentDisplay !== 'none') isVisible = true;
-                row.style.display = currentDisplay === 'none' ? '' : 'none';
-            });
-            if (arrow) arrow.textContent = isVisible ? '►' : '▼';
-        }
-    });
-
     const toggleBtn = document.getElementById('toggle-all-btn');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = toggleBtn.textContent === 'Expand All';
-            document.querySelectorAll('.week-row').forEach(row => row.style.display = isCollapsed ? '' : 'none');
-            document.querySelectorAll('.arrow').forEach(arrow => arrow.textContent = isCollapsed ? '▼' : '►');
+            document.querySelectorAll('.week-details').forEach(details => {
+                details.open = isCollapsed;
+            });
             toggleBtn.textContent = isCollapsed ? 'Collapse All' : 'Expand All';
         });
     }

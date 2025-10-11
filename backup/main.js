@@ -1,5 +1,5 @@
 // main.js
-import { auth } from './firebase.config.js';
+import { auth, db, collection, getDocs, query, orderBy, limit } from './firebase.config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { authReady } from './auth-manager.js';
 import { getStatistics } from './statistics.js';
@@ -98,10 +98,41 @@ async function displayStatistics() {
     }
 }
 
+async function loadNews() {
+    const newsContainer = document.getElementById('news-container');
+    if (!newsContainer) return;
+
+    const q = query(collection(db, "news"), orderBy("timestamp", "desc"), limit(5));
+    const newsSnapshot = await getDocs(q);
+
+    if (newsSnapshot.empty) {
+        newsContainer.innerHTML = '<p>No news to display.</p>';
+        return;
+    }
+
+    let newsHTML = '';
+    newsSnapshot.forEach(doc => {
+        const newsItem = doc.data();
+        newsHTML += `
+            <div class="news-item-home">
+                <h4>${newsItem.title}</h4>
+                <p>${newsItem.content}</p>
+            </div>
+        `;
+    });
+    newsContainer.innerHTML = newsHTML;
+}
+
+
 document.addEventListener('htmlIncludesLoaded', () => {
     setupSignOutListeners();
     setupMenuToggle();
-    displayStatistics();
+    if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+        loadNews();
+    }
+    if (!window.location.pathname.includes('/scoreboard/')) {
+        displayStatistics();
+    }
 });
 
 document.addEventListener('DOMContentLoaded', includeHTML);

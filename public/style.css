@@ -104,7 +104,7 @@ main {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    min-width: 0; /* Prevents flex item from overflowing its container */
 }
 
 .flex-grow {
@@ -112,6 +112,11 @@ main {
 }
 
 /* --- Header --- */
+/* This is the new rule that will hide the header on specific pages */
+body.no-header > header {
+    display: none !important;
+}
+
 header {
     background-color: var(--pure-white);
     display: flex;
@@ -176,6 +181,7 @@ header h1 {
 
 /* --- Main Navigation --- */
 .main-nav {
+    flex-shrink: 0;
     width: 250px;
     background-color: var(--off-white);
     padding: 10px;
@@ -416,7 +422,7 @@ footer a:hover {
     border-radius: var(--border-radius);
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 16px 12px;
@@ -496,7 +502,16 @@ footer a:hover {
     background-color: var(--off-white);
     border-radius: var(--border-radius);
     margin-bottom: var(--spacing-lg);
-    align-items: flex-end;
+    align-items: flex-.page-header {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    justify-content: space-between;
+    align-items: center;
+    padding-block-end: 10px;
+    border-block-end: 4px solid var(--club-yellow);
+    margin-block-end: var(--spacing-md);
+    gap: var(--spacing-md); /* Add gap for wrapped items */
+}
 }
 
 .filter-card-explanation {
@@ -618,11 +633,6 @@ th, td {
 
 /* --- Responsive Styles --- */
 @media (max-width: 992px) {
-    .sidebar {
-    }
-}
-
-@media (max-width: 768px) {
     .container {
         flex-direction: column;
     }
@@ -662,6 +672,10 @@ th, td {
         right: 100px;
         height: 100%;
     }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 /* --- General Content Container --- */
@@ -670,4 +684,302 @@ th, td {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Scoreboard & UI Page Specific Styles --- */
+.scoreboard-body {
+    background-color: var(--off-white);
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+}
+
+.scoreboard-body .main-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.scoreboard-body .main-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.scoreboard-body .main-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--club-green);
+}
+
+.scoreboard-body .content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.scoreboard-body .panel {
+    background: var(--pure-white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+}
+
+.scoreboard-body .panel h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--light-grey);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--club-green);
+}
+
+.scoreboard-body .fixtures-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.scoreboard-body .fixture-btn, .scoreboard-body .other-fixtures-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--off-white);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    text-align: left;
+    color: var(--charcoal);
+    transition: background-color 0.2s, border-color 0.2s;
+    width: 100%;
+}
+
+.scoreboard-body .fixture-btn:hover, .scoreboard-body .other-fixtures-btn:hover {
+    background-color: hsl(54 90% 95%);
+    border-color: var(--club-yellow);
+}
+
+.scoreboard-body .fixture-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.scoreboard-body .fixture-teams {
+    font-weight: 600;
+    color: var(--darker-green);
+}
+
+.scoreboard-body .fixture-date {
+    font-size: 0.9rem;
+    color: var(--medium-grey);
+    margin-top: 0.25rem;
+}
+
+.scoreboard-body .arrow {
+    font-size: 1.5rem;
+    color: var(--club-green);
+}
+
+.scoreboard-body .other-fixtures-btn {
+    background-color: transparent;
+    border: 1px dashed var(--light-grey);
+    color: var(--medium-grey);
+}
+
+.scoreboard-body .no-fixtures {
+    color: var(--medium-grey);
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.scoreboard-body .match-types-panel {
+    padding: 0; /* No extra padding needed */
+}
+
+.scoreboard-body .match-type-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.scoreboard-body .match-type-btn {
+    padding: 1.5rem;
+    background: var(--pure-white);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    text-align: left;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: var(--shadow-elevation-low);
+}
+
+.scoreboard-body .match-type-btn:hover {
+    transform: translateY(-5px);
+    border-color: var(--club-green);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+.scoreboard-body .match-type-title {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--club-green);
+}
+
+.scoreboard-body .match-type-desc {
+    font-size: 0.9rem;
+    color: var(--medium-grey);
+}
+
+/* Scoreboard Specific Styles */
+.scoreboard-body .container, .scoreboard-body .scoreboard-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+    background: var(--pure-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+    text-align: center;
+}
+
+.scoreboard-body .scoreboard {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 4rem;
+    font-weight: bold;
+    margin: 2rem 0;
+    background: var(--off-white);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 2px solid var(--club-yellow);
+}
+
+.scoreboard-body .team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.scoreboard-body .team .name {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--medium-grey);
+}
+
+.scoreboard-body .team .score {
+    line-height: 1;
+    color: var(--darker-green);
+}
+
+.scoreboard-body .separator {
+    font-size: 3rem;
+    color: var(--light-grey);
+}
+
+.scoreboard-body .match-info {
+    margin-top: 1.5rem;
+    color: var(--medium-grey);
+}
+
+.scoreboard-body #create-match-container, .scoreboard-body #match-controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.scoreboard-body input[type="text"] {
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    background: var(--pure-white);
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.scoreboard-body input[type="text"]:focus {
+    border-color: var(--club-green);
+}
+
+.scoreboard-body button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.scoreboard-body .team-controls {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background: var(--off-white);
+    border-radius: var(--border-radius);
+}
+
+.scoreboard-body .team-controls h3 {
+    margin-bottom: 1rem;
+    color: var(--darker-green);
+}
+
+.scoreboard-body .score-btn {
+    margin: 0 0.5rem;
+    min-width: 60px;
+    background-color: var(--club-green);
+    color: var(--pure-white);
+}
+
+.scoreboard-body .score-btn:hover {
+    background-color: var(--light-green);
+}
+
+
+.scoreboard-body #reset-scores-btn {
+    background-color: var(--club-yellow);
+    color: var(--charcoal);
+}
+
+.scoreboard-body #reset-scores-btn:hover {
+    background-color: var(--darker-yellow);
+}
+
+.scoreboard-body #end-match-btn {
+    margin-top: 1rem;
+    background-color: var(--danger);
+    color: var(--pure-white);
+}
+
+.scoreboard-body #end-match-btn:hover {
+    background-color: #a71d2a;
+}
+
+.message-container.error {
+    color: var(--danger);
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .scoreboard-body .content-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .scoreboard-body {
+        padding: 1rem;
+    }
+    .scoreboard-body .match-type-buttons {
+        grid-template-columns: 1fr;
+    }
 }

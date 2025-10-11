@@ -6,6 +6,7 @@
     <title>Sarnia Skittles Club - Match Details</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="match-details-page.css">
+    <link rel="icon" type="image/png" href="SSC%20Logo.png">
 </head>
 <body>
 
@@ -29,6 +30,13 @@
                 <button class="tab-link" data-tab="statistics">Statistics</button>
                 <button class="tab-link" data-tab="graph">Graph</button>
                 <button class="tab-link" data-tab="previous-results">Previous Results</button>
+                <div class="graph-controls">
+                    <select id="graph-view-select" class="form-select">
+                        <option value="simultaneous">Simultaneous</option>
+                        <option value="progression">Game Progression</option>
+                        <option value="battle">Battle</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -42,14 +50,6 @@
                 <p>Statistics for this match will be available soon.</p>
             </div>
             <div id="graph-content" class="tab-pane">
-                <div class="graph-controls">
-                    <label for="graph-view-select">Select View:</label>
-                    <select id="graph-view-select" class="form-select">
-                        <option value="simultaneous">Simultaneous</option>
-                        <option value="progression">Game Progression</option>
-                        <option value="battle">Battle</option>
-                    </select>
-                </div>
                 <div class="chart-container">
                     <canvas id="score-progression-chart"></canvas>
                 </div>

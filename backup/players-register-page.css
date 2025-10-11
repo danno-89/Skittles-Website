@@ -84,7 +84,8 @@
 
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* Changed to allow cell border-radius */
+    border-spacing: 0;      /* Remove space between cells */
 }
 
 th, td {
@@ -120,6 +121,30 @@ tbody tr:hover {
     background-color: hsl(120 100% 95%);
 }
 
+/* --- Zebra Striping for alternating row colors --- */
+/* This gives the table alternating light and dark rows for readability. */
+tbody tr:nth-child(even) {
+    background-color: var(--off-white, #f9f9f9); /* Uses a variable with a fallback color */
+}
+
+/* --- Rounded Corners for the Table --- */
+/* These rules target the four outer corners of the table to apply a radius. */
+thead th:first-child {
+    border-top-left-radius: 8px;
+}
+
+thead th:last-child {
+    border-top-right-radius: 8px;
+}
+
+tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
 .expired-player {
     color: var(--danger);
     font-style: italic;
@@ -150,30 +175,5 @@ tbody tr:hover {
     .filter-explanations {
         flex-direction: column;
         gap: var(--spacing-md);
-    }
-
-    /* --- Sticky First Column for Mobile --- */
-    thead th:first-child,
-    tbody td:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 2;
-    }
-
-    thead th:first-child {
-        background-color: var(--club-green); 
-        z-index: 6; 
-    }
-
-    tbody td:first-child {
-        background-color: var(--pure-white);
-    }
-
-    tbody tr:hover td:first-child {
-        background-color: hsl(120 100% 95%);
-    }
-
-    tr.expired-player td:first-child {
-       background-color: inherit;
     }
 }

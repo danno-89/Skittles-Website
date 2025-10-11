@@ -134,9 +134,6 @@ function handleFormSubmit() {
         }
 
         const formData = new FormData(form);
-        const registerDate = new Date();
-        const expiryDate = new Date();
-        expiryDate.setDate(registerDate.getDate() + 365);
 
         registrationData = {
             firstName: formData.get('first-name'),
@@ -153,9 +150,7 @@ function handleFormSubmit() {
                 line3: formData.get('address-line-3'),
                 parish: formData.get('parish'),
                 postCode: formData.get('postcode'),
-            },
-            registerDate: registerDate,
-            registerExpiry: expiryDate
+            }
         };
         displayConfirmation(registrationData);
     });

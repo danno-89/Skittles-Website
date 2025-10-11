@@ -138,26 +138,94 @@
 }
 
 /* --- Division Winner Table Styles --- */
+.winners-table-container {
+    overflow: hidden;
+    border: 1px solid var(--club-green);
+    border-radius: var(--border-radius);
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    margin-block-start: var(--spacing-lg); /* Restores space below the tabs */
+}
+
 .winners-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.winners-table th {
-    background-color: var(--club-green);
-    color: var(--pure-white);
-    padding: var(--spacing-md);
+.winners-table th,
+.winners-table td {
+    padding: var(--spacing-xs);; /* Increased padding for better readability */
+    text-align: center;
+    white-space: nowrap; /* Prevent headers and cells from wrapping */
+}
+
+.winners-table th:not(:first-child),
+.winners-table td:not(:first-child) {
     text-align: left;
 }
 
-.winners-table td {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--light-grey);
+.winners-table th {
+    padding: var(--spacing-sm);
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
-.winners-table tbody tr:last-child td {
-    border-bottom: none;
+/* --- Top Corner Rounding --- */
+.winners-table th:first-child {
+    border-top-left-radius: var(--border-radius);
 }
+
+.winners-table th:last-child {
+    border-top-right-radius: var(--border-radius);
+}
+
+/* --- Bottom Corner Rounding --- */
+.winners-table tr:last-child td:first-child {
+    border-bottom-left-radius: calc(var(--border-radius) - 1px);
+}
+
+.winners-table tr:last-child td:last-child {
+    border-bottom-right-radius: calc(var(--border-radius) - 1px);
+}
+
+
+.winners-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* --- Sticky Column for Team Name --- */
+.team-name {
+    text-align: left;
+    font-weight: bold;
+    position: sticky;
+    left: 0;
+    background-color: var(--pure-white); /* Match the row background */
+    z-index: 1;
+}
+
+/* Ensure the sticky header has a higher z-index */
+.winners-table th.team-name {
+    z-index: 3;
+}
+
+/* Alternate row color for sticky column */
+.winners-table tbody tr:nth-child(even) .team-name {
+    background-color: #f2f2f2;
+}
+
+/* Add a subtle shadow to indicate scrollable content */
+.team-name::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10px;
+    bottom: 0;
+    width: 10px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+}
+
 
 .winners-table .club-leader {
     background-color: var(--club-yellow);
@@ -174,5 +242,18 @@
         position: static;
         top: auto;
         margin-top: var(--spacing-xl);
+    }
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 768px) {
+    .winners-table th,
+    .winners-table td {
+        padding: 6px 8px; /* Reduce padding on smaller screens */
+        font-size: 0.85rem; /* Slightly smaller font for mobile */
+    }
+
+    .division-filter-container {
+        justify-content: center; /* Center the division filter on mobile */
     }
 }

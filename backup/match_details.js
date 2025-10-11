@@ -1,7 +1,14 @@
 import { db, doc, getDoc, collection, query, where, getDocs, documentId } from './firebase.config.js';
 
+// --- GLOBAL STATE ---
+let scoreChart = null;
+let currentMatchData = null;
+let homeTeamName = '';
+let awayTeamName = '';
+
 // --- Helper Functions ---
 const getMatchId = () => new URLSearchParams(window.location.search).get('matchId');
+const getFromPage = () => new URLSearchParams(window.location.search).get('from');
 
 const fetchTeamName = async (teamId) => {
     if (!teamId) return 'Team N/A';
@@ -27,7 +34,7 @@ const fetchCompetitionName = async (competitionId) => {
 
 const fetchPlayerNamesInBatch = async (playerIds) => {
     const namesMap = new Map();
-    const uniqueIds = [...new Set(playerIds.filter(id => id))];
+    const uniqueIds = [...new Set(playerIds.filter(id => id && id !== 'sixthPlayer'))];
     if (uniqueIds.length === 0) return namesMap;
 
     const chunks = [];
@@ -71,7 +78,7 @@ const calculateTeamStatistics = (scores, namesMap) => {
         if (playerTotal > bestPlayerScore) {
             bestPlayerScore = playerTotal;
             stats.bestPlayer = {
-                name: namesMap.get(player.playerId) || 'Unknown Player',
+                name: player.playerId === 'sixthPlayer' ? '6th Player' : (namesMap.get(player.playerId) || 'Unknown Player'),
                 score: playerTotal,
             };
         }
@@ -95,7 +102,7 @@ const calculateTeamStatistics = (scores, namesMap) => {
 };
 
 // --- Rendering Functions ---
-const renderPlayerScores = (scores, teamType, namesMap) => {
+const renderPlayerScores = (scores, teamName, namesMap) => {
     if (!Array.isArray(scores) || scores.length === 0 || !scores[0].hands) {
         return `<div class="player-scores-table-container"><p>Score data is not available.</p></div>`;
     }
@@ -103,12 +110,11 @@ const renderPlayerScores = (scores, teamType, namesMap) => {
     const scoreHeaders = scores[0].hands.map((_, index) => `<th>${index + 1}</th>`).join('');
     
     const playerRows = scores.map(player => {
-        const playerName = namesMap.get(player.playerId) || 'Unknown Player';
-        const scoreCells = player.hands.map(score => `<td>${score}</td>`).join('');
+        const playerName = player.playerId === 'sixthPlayer' ? '6th Player' : (namesMap.get(player.playerId) || 'Unknown Player');
+        const scoreCells = player.hands.map(score => `<td><span class="${score >= 10 ? 'highlight-score' : ''}">${score}</span></td>`).join('');
         return `<tr><td>${playerName}</td>${scoreCells}<td class="total-score">${player.score}</td></tr>`;
     }).join('');
 
-    // --- NEW: Calculate Hand Totals ---
     const numHands = scores[0].hands.length;
     const handTotals = Array(numHands).fill(0);
     let grandTotal = 0;
@@ -119,11 +125,10 @@ const renderPlayerScores = (scores, teamType, namesMap) => {
         grandTotal += player.score;
     });
     const handTotalCells = handTotals.map(total => `<td>${total}</td>`).join('');
-    // --- END: Calculate Hand Totals ---
 
-    // --- UPDATED: Return table with footer and without H3 ---
     return `
         <div class="player-scores-table-container">
+            <h3>${teamName} Scores</h3>
             <table class="player-scores-table">
                 <thead>
                     <tr>
@@ -151,7 +156,7 @@ const renderStatistics = (homeStats, awayStats, homeTeamName, awayTeamName) => {
     if (!homeStats || !awayStats) {
         return '<p>Statistics cannot be generated as score data is incomplete.</p>';
     }
-    const crownIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="winner-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>`;
+    const crownIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="currentColor" class="winner-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>`;
     const metrics = [
         { label: 'Team Score', home: homeStats.teamScore, away: awayStats.teamScore },
         { label: 'Pins from Spares', home: homeStats.pinsFromSpares, away: awayStats.pinsFromSpares },
@@ -183,17 +188,179 @@ const renderStatistics = (homeStats, awayStats, homeTeamName, awayTeamName) => {
             </tr></thead><tbody>${rows}</tbody></table></div>`;
 };
 
+const renderScoreProgressionChart = (view) => {
+    const ctx = document.getElementById('score-progression-chart').getContext('2d');
+    if (!ctx) return;
+
+    if (scoreChart) {
+        scoreChart.destroy();
+    }
+
+    const { homeScores, awayScores, bowledFirst } = currentMatchData;
+    let homeCumulative = 0;
+    let awayCumulative = 0;
+    const homeData = [0];
+    const awayData = [0];
+    const battleData = [0];
+    let labels = ['Start'];
+
+    if (view === 'simultaneous' || view === 'battle') {
+        for (let handIndex = 0; handIndex < 5; handIndex++) {
+            for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
+                homeCumulative += homeScores[playerIndex]?.hands[handIndex] || 0;
+                awayCumulative += awayScores[playerIndex]?.hands[handIndex] || 0;
+                homeData.push(homeCumulative);
+                awayData.push(awayCumulative);
+                battleData.push(homeCumulative - awayCumulative);
+                labels.push('');
+            }
+        }
+    } else { // 'progression' view
+        const firstTeamScores = bowledFirst === 'home' ? homeScores : awayScores;
+        const secondTeamScores = bowledFirst === 'home' ? awayScores : homeScores;
+        
+        const processHand = (teamScores, handIndex, isFirstTeam) => {
+            for (let i = 0; i < 6; i++) {
+                const score = teamScores[i]?.hands[handIndex] || 0;
+                if (isFirstTeam) {
+                    if (bowledFirst === 'home') homeCumulative += score;
+                    else awayCumulative += score;
+                } else {
+                    if (bowledFirst === 'home') awayCumulative += score;
+                    else homeCumulative += score;
+                }
+                homeData.push(homeCumulative);
+                awayData.push(awayCumulative);
+                labels.push('');
+            }
+        };
+        
+        processHand(firstTeamScores, 0, true);
+        processHand(secondTeamScores, 0, false);
+        processHand(secondTeamScores, 1, false);
+        processHand(firstTeamScores, 1, true);
+        processHand(firstTeamScores, 2, true);
+        processHand(secondTeamScores, 2, false);
+        processHand(secondTeamScores, 3, false);
+        processHand(firstTeamScores, 3, true);
+        processHand(firstTeamScores, 4, true);
+        processHand(secondTeamScores, 4, false);
+    }
+    
+    const datasets = view === 'battle' ? [
+        {
+            label: 'Lead',
+            data: battleData,
+            segment: {
+                borderColor: ctx => ctx.p1.raw >= 0 ? '#006400' : '#FFC107',
+                backgroundColor: ctx => ctx.p1.raw >= 0 ? 'rgba(0, 100, 0, 0.1)' : 'rgba(255, 193, 7, 0.1)',
+            },
+            fill: 'origin',
+        }
+    ] : [
+        {
+            label: homeTeamName,
+            data: homeData,
+            borderColor: '#006400',
+            backgroundColor: 'rgba(0, 100, 0, 0.1)',
+            fill: true,
+        },
+        {
+            label: awayTeamName,
+            data: awayData,
+            borderColor: '#FFC107',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+            fill: true,
+        }
+    ];
+
+    scoreChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        generateLabels: function(chart) {
+                            if (view === 'battle') {
+                                return [
+                                    {
+                                        text: `${homeTeamName} Lead`,
+                                        fillStyle: 'rgba(0, 100, 0, 0.1)',
+                                        strokeStyle: '#006400',
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: 0
+                                    },
+                                    {
+                                        text: `${awayTeamName} Lead`,
+                                        fillStyle: 'rgba(255, 193, 7, 0.1)',
+                                        strokeStyle: '#FFC107',
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: 1
+                                    }
+                                ];
+                            }
+                            return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Player Turn' },
+                    grid: {
+                        color: (context) => {
+                            if (context.index > 0 && context.index % 6 === 0) {
+                                return 'rgba(0, 0, 0, 0.5)';
+                            }
+                            return 'rgba(0, 0, 0, 0.1)';
+                        }
+                    },
+                    ticks: { display: false }
+                },
+                y: {
+                    title: { display: true, text: view === 'battle' ? 'Point Difference' : 'Cumulative Score' },
+                    beginAtZero: view !== 'battle'
+                }
+            }
+        }
+    });
+};
+
 const setupTabNavigation = () => {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
+    const graphControls = document.querySelector('.graph-controls');
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const targetTab = tab.dataset.tab;
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             tabPanes.forEach(pane => pane.id === `${targetTab}-content` ? pane.classList.add('active') : pane.classList.remove('active'));
+
+            if (targetTab === 'graph') {
+                graphControls.style.display = 'block';
+            } else {
+                graphControls.style.display = 'none';
+            }
         });
     });
+};
+
+const setupBackButton = () => {
+    const backButton = document.getElementById('back-btn');
+    if (!backButton) return;
+    const from = getFromPage();
+    backButton.href = from === 'team-management' ? 'team-management.html' : 'fixtures_results.html';
+    backButton.textContent = from === 'team-management' ? '← Back to Team' : '← Back to Fixtures';
 };
 
 // --- Main Display Function ---
@@ -202,11 +369,9 @@ async function displayMatchDetails() {
     const matchDetailsContainer = document.getElementById('match-details-container');
     const scoreboardContent = document.getElementById('scoreboard-content');
     const statisticsContent = document.getElementById('statistics-content'); 
+    const graphViewSelect = document.getElementById('graph-view-select');
 
-    if (!matchId || !matchDetailsContainer || !scoreboardContent || !statisticsContent) {
-        console.error("Required HTML elements for match details are missing.");
-        return;
-    }
+    if (!matchId || !matchDetailsContainer || !scoreboardContent || !statisticsContent) return;
 
     scoreboardContent.innerHTML = '<p>Loading scoreboard...</p>';
     statisticsContent.innerHTML = '<p>Loading statistics...</p>'; 
@@ -218,14 +383,15 @@ async function displayMatchDetails() {
             return;
         }
 
-        const matchData = matchDocSnap.data();
-        const [homeTeamName, awayTeamName, competitionName] = await Promise.all([
-            fetchTeamName(matchData.homeTeamId),
-            fetchTeamName(matchData.awayTeamId),
-            fetchCompetitionName(matchData.division)
+        currentMatchData = matchDocSnap.data();
+        
+        [homeTeamName, awayTeamName] = await Promise.all([
+            fetchTeamName(currentMatchData.homeTeamId),
+            fetchTeamName(currentMatchData.awayTeamId)
         ]);
+        const competitionName = await fetchCompetitionName(currentMatchData.division);
 
-        const dateObj = matchData.scheduledDate.toDate();
+        const dateObj = currentMatchData.scheduledDate.toDate();
         const formattedDate = dateObj.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const formattedTime = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true });
 
@@ -233,7 +399,7 @@ async function displayMatchDetails() {
             <div class="match-header-card">
                 <div class="result-display">
                     <span class="team-name home-team">${homeTeamName}</span>
-                    <span class="score">${matchData.homeScore} - ${matchData.awayScore}</span>
+                    <span class="score">${currentMatchData.homeScore} - ${currentMatchData.awayScore}</span>
                     <span class="team-name away-team">${awayTeamName}</span>
                 </div>
                 <div class="match-meta-container">
@@ -242,19 +408,24 @@ async function displayMatchDetails() {
                 </div>
             </div>`;
         
-        if (matchData.homeScores && matchData.awayScores) {
-            const allPlayerIds = [...matchData.homeScores, ...matchData.awayScores].map(p => p.playerId);
+        if (currentMatchData.homeScores && currentMatchData.awayScores) {
+            const allPlayerIds = [...currentMatchData.homeScores, ...currentMatchData.awayScores].map(p => p.playerId);
             const playerNamesMap = await fetchPlayerNamesInBatch(allPlayerIds);
             
             scoreboardContent.innerHTML = `
                 <div class="player-scores-grid">
-                    ${renderPlayerScores(matchData.homeScores, 'home', playerNamesMap)}
-                    ${renderPlayerScores(matchData.awayScores, 'away', playerNamesMap)}
+                    ${renderPlayerScores(currentMatchData.homeScores, homeTeamName, playerNamesMap)}
+                    ${renderPlayerScores(currentMatchData.awayScores, awayTeamName, playerNamesMap)}
                 </div>`;
             
-            const homeStats = calculateTeamStatistics(matchData.homeScores, playerNamesMap);
-            const awayStats = calculateTeamStatistics(matchData.awayScores, playerNamesMap);
+            const homeStats = calculateTeamStatistics(currentMatchData.homeScores, playerNamesMap);
+            const awayStats = calculateTeamStatistics(currentMatchData.awayScores, playerNamesMap);
             statisticsContent.innerHTML = renderStatistics(homeStats, awayStats, homeTeamName, awayTeamName);
+            renderScoreProgressionChart(graphViewSelect.value);
+
+            graphViewSelect.addEventListener('change', (e) => {
+                renderScoreProgressionChart(e.target.value);
+            });
 
         } else {
              scoreboardContent.innerHTML = '<p>Scoreboard data is not available for this match.</p>';
@@ -269,4 +440,7 @@ async function displayMatchDetails() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', displayMatchDetails);
+document.addEventListener('htmlIncludesLoaded', () => {
+    displayMatchDetails();
+    setupBackButton();
+});

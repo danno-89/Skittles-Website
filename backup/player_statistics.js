@@ -17,6 +17,23 @@ const formatDate = (date) => {
     return `${day} ${month} ${year}`;
 };
 
+const getWeekDateRange = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); 
+    const diffToSunday = dayOfWeek; 
+    
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - diffToSunday);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    return { start: weekStart, end: weekEnd };
+};
+
+
 // --- Data Fetching ---
 async function fetchAllData() {
     if (allPlayersData && allTeamsData && allCompetitionsData) return { players: allPlayersData, teams: allTeamsData, competitions: allCompetitionsData };
@@ -74,6 +91,7 @@ async function fetchCurrentSeasonData() {
 function calculateAverages(matches, players, teams, competitions, leagueTables) {
     const playerStats = new Map();
     const teamGamesPlayed = new Map();
+    const { start: weekStart, end: weekEnd } = getWeekDateRange();
 
     const completedLeagueMatches = matches.filter(match =>
         match.status === 'completed' &&
@@ -83,13 +101,28 @@ function calculateAverages(matches, players, teams, competitions, leagueTables) 
     completedLeagueMatches.forEach(match => {
         teamGamesPlayed.set(match.homeTeamId, (teamGamesPlayed.get(match.homeTeamId) || 0) + 1);
         teamGamesPlayed.set(match.awayTeamId, (teamGamesPlayed.get(match.awayTeamId) || 0) + 1);
+        const matchDate = match.scheduledDate.toDate();
+        const isThisWeek = matchDate >= weekStart && matchDate <= weekEnd;
 
         [...(match.homeScores || []), ...(match.awayScores || [])].forEach(playerScore => {
             const { playerId, score } = playerScore;
-            if (!playerId) return;
-            const stats = playerStats.get(playerId) || { totalPins: 0, gamesPlayed: 0 };
+            if (!playerId || playerId === 'sixthPlayer') return;
+
+            const stats = playerStats.get(playerId) || {
+                totalPins: 0,
+                gamesPlayed: 0,
+                pinsThisWeek: [],
+                gamesThisWeek: 0
+            };
+
             stats.totalPins += score;
             stats.gamesPlayed += 1;
+
+            if (isThisWeek) {
+                stats.pinsThisWeek.push(score);
+                stats.gamesThisWeek += 1;
+            }
+
             playerStats.set(playerId, stats);
         });
     });
@@ -99,7 +132,14 @@ function calculateAverages(matches, players, teams, competitions, leagueTables) 
         const team = player ? teams.get(player.teamId) : null;
         const competition = team ? competitions.get(team.division) : null;
         const totalTeamGames = team ? teamGamesPlayed.get(player.teamId) || 0 : 0;
-        const rawAverage = stats.gamesPlayed > 0 ? (stats.totalPins / stats.gamesPlayed) : 0;
+        
+        const totalPinsThisWeek = stats.pinsThisWeek.reduce((a, b) => a + b, 0);
+        const pinsBeforeThisWeek = stats.totalPins - totalPinsThisWeek;
+        const gamesBeforeThisWeek = stats.gamesPlayed - stats.gamesThisWeek;
+
+        const averageBeforeThisWeek = gamesBeforeThisWeek > 0 ? (pinsBeforeThisWeek / gamesBeforeThisWeek) : 0;
+        const currentAverage = stats.gamesPlayed > 0 ? (stats.totalPins / stats.gamesPlayed) : 0;
+        const averageMovement = (stats.gamesThisWeek > 0 && averageBeforeThisWeek > 0) ? (currentAverage - averageBeforeThisWeek) : 0;
 
         return {
             name: player ? `${player.firstName} ${player.lastName}` : 'Unknown',
@@ -108,12 +148,15 @@ function calculateAverages(matches, players, teams, competitions, leagueTables) 
             league: competition ? competition.shortName : 'N/A',
             gamesPlayed: stats.gamesPlayed,
             totalPins: stats.totalPins,
-            average: rawAverage.toFixed(2),
-            rawAverage: rawAverage,
+            pinsThisWeek: stats.pinsThisWeek,
+            average: currentAverage.toFixed(2),
+            rawAverage: currentAverage,
+            averageMovement: averageMovement,
             eligible: stats.gamesPlayed >= (totalTeamGames / 2),
             totalTeamGames: totalTeamGames
         };
     }).sort((a, b) => b.rawAverage - a.rawAverage);
+
 
     // --- Add Overall Rank ---
     let rankCounter = 0;
@@ -172,7 +215,7 @@ function calculateSpares(matches) {
     matches.forEach(match => {
         if (match.status !== 'completed') return;
         [...(match.homeScores || []), ...(match.awayScores || [])].forEach(playerScore => {
-            if (!playerScore.playerId || !playerScore.hands) return;
+            if (!playerScore.playerId || !playerScore.hands || playerScore.playerId === 'sixthPlayer') return;
             const playerSpares = playerScore.hands.filter(hand => hand >= 10);
             if (playerSpares.length > 0) {
                 const stats = spareStats.get(playerScore.playerId) || { count: 0, totalPins: 0 };
@@ -193,6 +236,7 @@ function calculateHighScores(matches, teams) {
             if (!scores) return;
             scores.forEach(playerScore => {
                 const { playerId, score } = playerScore;
+                if (!playerId || playerId === 'sixthPlayer') return;
                 const opponentName = teams.get(opponentId)?.name || 'Unknown';
                 const matchDate = match.scheduledDate.toDate();
 
@@ -210,6 +254,8 @@ function calculateHighScores(matches, teams) {
 // --- Rendering Functions ---
 async function displayAverages() {
     const container = document.getElementById('averages-content');
+    const headerContainer = document.getElementById('stats-header-container');
+    headerContainer.innerHTML = ''; 
 
     let tableContainer = container.querySelector('.stats-table-container');
     if (!tableContainer) {
@@ -219,16 +265,7 @@ async function displayAverages() {
     }
 
     tableContainer.innerHTML = '<p>Calculating averages...</p>';
-
-    // --- Create or clear the header and filters container ---
-    let headerContainer = container.querySelector('.stats-header');
-    if (!headerContainer) {
-        headerContainer = document.createElement('div');
-        headerContainer.className = 'stats-header';
-        container.insertBefore(headerContainer, tableContainer);
-    }
-    headerContainer.innerHTML = '';
-
+    
     const [{ players, teams, competitions }, { matches, leagueTables }] = await Promise.all([fetchAllData(), fetchCurrentSeasonData()]);
 
     if (matches.length === 0) {
@@ -238,35 +275,11 @@ async function displayAverages() {
 
     const allPlayerAverages = calculateAverages(matches, players, teams, competitions, leagueTables);
 
-    // --- Populate Dropdowns ---
     const uniqueTeams = [...new Set(allPlayerAverages.map(p => p.teamName))].sort();
     const uniqueDivisions = [...new Set(allPlayerAverages.map(p => p.division))].sort();
     const uniqueLeagues = [...new Set(allPlayerAverages.map(p => p.league))].sort();
 
     headerContainer.innerHTML = `
-        <div class="stats-key">
-            <table class="key-table">
-                <thead>
-                    <tr>
-                        <th>Key</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="division-leader">
-                        <td>Club Leader</td>
-                    </tr>
-                    <tr class="ineligible-player">
-                        <td>Ineligible Player</td>
-                    </tr>
-                    <tr>
-                        <td><span class="key-example">[X]</span> Team Games Played</td>
-                    </tr>
-                    <tr>
-                        <td><span class="key-example">X (Y)</span> Filtered Rank (Overall Rank)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
         <div class="filters-container">
             <div class="filter-dropdowns">
                 <select id="team-filter" class="form-select">
@@ -287,6 +300,15 @@ async function displayAverages() {
                 Show eligible players only
             </label>
         </div>
+        <details class="stats-key">
+            <summary>Key</summary>
+            <div class="key-items-container">
+                <div class="key-item division-leader">Club Leader</div>
+                <div class="key-item ineligible-player">Ineligible Player</div>
+                <div class="key-item"><span class="key-example">[X]</span> Team Games Played</div>
+                <div class="key-item"><span class="key-example">X (Y)</span> Filtered Rank (Overall Rank)</div>
+            </div>
+        </details>
     `;
 
     const teamFilter = document.getElementById('team-filter');
@@ -312,7 +334,7 @@ async function displayAverages() {
         let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr>
                         <th>Rank</th><th class="player-col">Player</th><th class="team-col">Team</th>
                         <th colspan="2" class="divisions-header">Divisions</th>
-                        <th>PLD</th><th>Total Pins</th><th class="main-stat">Average</th>
+                        <th>PLD</th><th class="total-pins-header">Total Pins</th><th class="main-stat">Average</th><th>Movement</th>
                         </tr></thead><tbody>`;
         let lastAverage = null;
         filteredPlayers.forEach((player, index) => {
@@ -330,6 +352,24 @@ async function displayAverages() {
             if (player.isDivisionLeader) {
                 rowClass += ' division-leader';
             }
+            
+            const weeklyScoreEl = player.pinsThisWeek.length > 0
+                ? `<span class="weekly-score-value">+${player.pinsThisWeek.join(' +')}</span>`
+                : `<span class="weekly-score-value"></span>`; // Empty span to maintain alignment
+
+            const pinsCellContent = `<div class="total-pins-cell"><span class="total-pins-value">${player.totalPins.toLocaleString()}</span>${weeklyScoreEl}</div>`;
+
+            let movementDisplay = '-';
+            let movementClass = '';
+            if (player.averageMovement > 0.0001) {
+                movementDisplay = `+${player.averageMovement.toFixed(2)}`;
+                movementClass = 'movement-positive';
+            } else if (player.averageMovement < -0.0001) {
+                movementDisplay = player.averageMovement.toFixed(2);
+                movementClass = 'movement-negative';
+            }
+
+
             tableHTML += `<tr class="${rowClass.trim()}">
                 <td>${rankDisplay}</td>
                 <td class="player-col">${player.name}</td>
@@ -337,8 +377,9 @@ async function displayAverages() {
                 <td class="division-col">${player.division}</td>
                 <td class="league-col">${player.league}</td>
                 <td>${player.gamesPlayed} <span class="team-games-played">[${player.totalTeamGames}]</span></td>
-                <td>${player.totalPins.toLocaleString()}</td>
+                <td>${pinsCellContent}</td>
                 <td class="main-stat">${player.average}</td>
+                <td class="movement-cell ${movementClass}">${movementDisplay}</td>
             </tr>`;
             lastAverage = player.average;
         });
@@ -354,9 +395,11 @@ async function displayAverages() {
     render();
 }
 
+
 async function displaySpareCounts() {
     const container = document.getElementById('spares-content');
     container.innerHTML = '<p>Calculating...</p>';
+    document.getElementById('stats-header-container').innerHTML = '';
     const [{ players, teams }, { matches }] = await Promise.all([fetchAllData(), fetchCurrentSeasonData()]);
     if (matches.length === 0) { container.innerHTML = '<p>No match results found.</p>'; return; }
 
@@ -389,6 +432,7 @@ async function displaySpareCounts() {
 async function displayHighScores() {
     const container = document.getElementById('high-scores-content');
     container.innerHTML = '<p>Calculating...</p>';
+    document.getElementById('stats-header-container').innerHTML = '';
     const [{ players, teams }, { matches }] = await Promise.all([fetchAllData(), fetchCurrentSeasonData()]);
     if (matches.length === 0) { container.innerHTML = '<p>No match results found.</p>'; return; }
 
@@ -412,16 +456,22 @@ async function displayHighScores() {
         let rank = index + 1;
         if (lastScore && player.score === lastScore) rank = `=`;
         tableHTML += `<tr><td>${rank}</td><td class="player-col">${player.name}</td><td class="team-col">${player.teamName}</td><td class="main-stat">${player.score}</td><td>${formatDate(player.date)}</td><td class="opponent-col">vs ${player.opponent}</td></tr>`;
-        lastScore = player;
+        lastScore = player.score;
     });
     tableHTML += `</tbody></table></div>`;
     container.innerHTML = narrativeHTML + tableHTML;
 }
 
 // --- Tab Setup and Initialization ---
-function setupTabs() {
+function setupTabsAndFilters() {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
+    const tabsToggleBtn = document.getElementById('tabs-toggle-btn');
+    const filterToggleBtn = document.getElementById('filter-toggle-btn');
+    const tabsContainer = document.getElementById('tabs-container');
+    const filtersContainer = document.getElementById('filters-container-collapsible');
+    const mobileControls = document.querySelector('.mobile-controls');
+    const isMobile = window.innerWidth <= 768;
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -429,17 +479,41 @@ function setupTabs() {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             tabPanes.forEach(pane => pane.id === `${tabName}-content` ? pane.classList.add('active') : pane.classList.remove('active'));
+            
+            const isAveragesTab = tabName === 'averages';
+            document.getElementById('stats-header-container').style.display = isAveragesTab ? 'block' : 'none';
+            if(isMobile) {
+                mobileControls.style.display = isAveragesTab ? 'flex' : 'none';
+            }
+
 
             if (tabName === 'spares') displaySpareCounts();
             if (tabName === 'high-scores') displayHighScores();
             if (tabName === 'averages') displayAverages();
         });
     });
+
+    tabsToggleBtn.addEventListener('click', () => {
+        tabsContainer.classList.toggle('visible');
+    });
+
+    filterToggleBtn.addEventListener('click', () => {
+        filtersContainer.classList.toggle('visible');
+    });
 }
 
 async function initializePage() {
-    setupTabs();
+    setupTabsAndFilters();
     const activeTab = document.querySelector('.tab-link.active')?.dataset.tab;
+
+    const isAveragesTab = activeTab === 'averages';
+    const isMobile = window.innerWidth <= 768;
+    document.getElementById('stats-header-container').style.display = isAveragesTab ? 'block' : 'none';
+    if(isMobile) {
+        document.querySelector('.mobile-controls').style.display = isAveragesTab ? 'flex' : 'none';
+    }
+
+
     if (activeTab === 'spares') await displaySpareCounts();
     if (activeTab === 'high-scores') await displayHighScores();
     if (activeTab === 'averages') await displayAverages();

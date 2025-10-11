@@ -1,4 +1,40 @@
 /* --- Fixtures/Results Page Specific Styles --- */
+
+.page-header {
+    position: relative; /* Needed for absolute positioning of the mobile controls */
+}
+
+.mobile-controls {
+    display: none; /* Hidden by default */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: flex-start;
+    padding: 0 var(--spacing-md);
+    margin-bottom: 0;
+}
+
+.mobile-controls .icon-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: transparent;
+    border: 1px solid var(--light-grey);
+    border-bottom: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    margin-bottom: -1px; /* Overlaps the border */
+}
+
+.mobile-controls .icon-btn.active {
+    background-color: var(--off-white);
+    border-color: var(--light-grey);
+    border-bottom: 1px solid var(--off-white);
+}
+
+
 #filters-container {
     display: flex;
     flex-wrap: wrap;
@@ -8,6 +44,11 @@
     border-radius: var(--border-radius);
     margin-bottom: var(--spacing-lg);
     align-items: flex-end;
+    border: 1px solid var(--light-grey);
+    border-top: none;
+    position: relative;
+    z-index: 0;
+    margin-top: 0;
 }
 
 .filter-group {
@@ -41,18 +82,56 @@
 }
 
 #results-container {
-    overflow-y: auto;
     flex-grow: 1;
 }
 
 .results-table {
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed; /* Corrected from auto to fixed */
 }
 
 .results-table th, .results-table td {
+    padding: var(--spacing-xs);
     white-space: nowrap;
-    padding: 0.6rem 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.date-col { width: 13%; }
+.time-col { width: 9%; }
+.home-team-col { width: 20%; }
+.away-team-col { width: 20%; }
+.score-col { width: 8%; text-align: center;}
+.status-col { width: 10%; text-align: center;}
+.competition-col { width: 15%; }
+.round-col { width: 12%; }
+
+
+.results-table th.score-col,
+.results-table th.status-col {
+    text-align: center;
+}
+
+/* --- Fix for rounded corners on tables inside a bordered container --- */
+.results-table tr:last-child td:first-child {
+    border-bottom-left-radius: calc(var(--border-radius) - 1px);
+}
+
+.results-table tr:last-child td:last-child {
+    border-bottom-right-radius: calc(var(--border-radius) - 1px);
+}
+
+
+.week-details {
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+    background-color: var(--pure-white);
+}
+
+.week-details[open] {
+    border-color: var(--club-green);
 }
 
 .week-header {
@@ -60,7 +139,16 @@
     background-color: var(--club-green);
     color: var(--club-yellow);
     font-weight: bold;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    transition: background-color var(--transition-speed);
+    list-style-type: none; /* Remove default marker */
 }
+.week-details[open] .week-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 
 .week-header.is-cup-week {
     background-color: var(--club-yellow);
@@ -75,10 +163,19 @@
     background-color: var(--darker-yellow);
 }
 
-.week-header .arrow {
+.week-header::-webkit-details-marker {
+    display: none;
+}
+
+.week-header::before {
+    content: '►';
     display: inline-block;
     width: 1.5em;
     transition: transform 0.2s;
+}
+
+.week-details[open] > .week-header::before {
+    transform: rotate(90deg);
 }
 
 .score, .status-cell {
@@ -108,8 +205,17 @@
     background-color: hsla(39, 100%, 90%, 1); /* Light Orange */
 }
 
-.status-cell span {
+.status-rescheduled {
+    background-color: hsla(200, 100%, 90%, 1); /* Light Blue */
+}
+
+.status-postponed-text {
     color: var(--danger);
+    font-size: 0.8rem;
+}
+
+.status-rescheduled-text {
+    color: var(--info);
     font-size: 0.8rem;
 }
 
@@ -124,56 +230,37 @@
     text-align: center;
 }
 
-/* Responsive adjustments */
+/* --- Responsive Styles --- */
 @media (max-width: 768px) {
-    #results-container {
+    .mobile-controls {
+        display: flex;
+    }
+    
+    .table-container {
         overflow-x: auto;
     }
-    
-    .results-table thead th {
-        position: sticky;
-        top: 0;
-        z-index: 6;
-        background-color: var(--club-green);
-    }
-    
-    .results-table .week-header td {
-        position: sticky;
-        top: 40px; /* Height of the header row */
-        z-index: 4;
+
+    .results-table {
+        width: 800px; /* Force table to be wide, activating scroll */
     }
 
-    .results-table th, .results-table td {
-        min-width: 120px;
+    #filters-container {
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
+        align-items: stretch;
+        border-top-left-radius: 0;
     }
 
-    /* --- Define column widths and sticky positions --- */
-    .results-table th:nth-child(1), .results-table td:nth-child(1) {
-        min-width: 85px;
-        position: sticky;
-        left: 0;
-        z-index: 3;
-    }
-    .results-table th:nth-child(2), .results-table td:ň-child(2) {
-        min-width: 65px;
-        position: sticky;
-        left: 85px; /* Width of the first column */
-        z-index: 3;
+    #filters-container.visible {
+        display: flex; /* Shown when toggled */
     }
 
-    /* --- Handle backgrounds for sticky elements --- */
-    .results-table tbody td {
-        background-color: var(--pure-white);
-    }
-    
-    .results-table tbody tr:hover td {
-        background-color: hsl(120, 100%, 95%);
+    .filter-group-right {
+        margin-left: 0;
+        justify-content: center;
     }
 
-    .results-table .week-header:hover td {
-        background-color: var(--darker-green) !important;
-    }
-    .results-table .week-header.is-cup-week:hover td {
-        background-color: var(--darker-yellow) !important;
+    .page-header {
+      padding-bottom: 3rem; /* Add padding to make space for the hanging button */
     }
 }

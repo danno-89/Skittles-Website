@@ -201,24 +201,21 @@ const renderScoreProgressionChart = (view) => {
     let awayCumulative = 0;
     const homeData = [0];
     const awayData = [0];
-    let labels = [];
     const battleData = [0];
+    let labels = ['Start'];
 
     if (view === 'simultaneous' || view === 'battle') {
-        labels = ['Start', 'Hand 1', 'Hand 2', 'Hand 3', 'Hand 4', 'Hand 5'];
-        const getHandTotal = (scores, handIndex) => {
-            return scores.reduce((total, player) => total + (player.hands[handIndex] || 0), 0);
-        };
-
-        for (let i = 0; i < 5; i++) {
-            homeCumulative += getHandTotal(homeScores, i);
-            awayCumulative += getHandTotal(awayScores, i);
-            homeData.push(homeCumulative);
-            awayData.push(awayCumulative);
-            battleData.push(homeCumulative - awayCumulative);
+        for (let handIndex = 0; handIndex < 5; handIndex++) {
+            for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
+                homeCumulative += homeScores[playerIndex]?.hands[handIndex] || 0;
+                awayCumulative += awayScores[playerIndex]?.hands[handIndex] || 0;
+                homeData.push(homeCumulative);
+                awayData.push(awayCumulative);
+                battleData.push(homeCumulative - awayCumulative);
+                labels.push('');
+            }
         }
     } else { // 'progression' view
-        labels = ['Start'];
         const firstTeamScores = bowledFirst === 'home' ? homeScores : awayScores;
         const secondTeamScores = bowledFirst === 'home' ? awayScores : homeScores;
         
@@ -254,9 +251,11 @@ const renderScoreProgressionChart = (view) => {
         {
             label: 'Lead',
             data: battleData,
-            borderColor: '#FFA500',
-            backgroundColor: 'rgba(255, 165, 0, 0.1)',
-            fill: true,
+            segment: {
+                borderColor: ctx => ctx.p1.raw >= 0 ? '#006400' : '#FFC107',
+                backgroundColor: ctx => ctx.p1.raw >= 0 ? 'rgba(0, 100, 0, 0.1)' : 'rgba(255, 193, 7, 0.1)',
+            },
+            fill: 'origin',
         }
     ] : [
         {
@@ -269,8 +268,8 @@ const renderScoreProgressionChart = (view) => {
         {
             label: awayTeamName,
             data: awayData,
-            borderColor: '#DC3545',
-            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            borderColor: '#FFC107',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
             fill: true,
         }
     ];
@@ -284,18 +283,47 @@ const renderScoreProgressionChart = (view) => {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        generateLabels: function(chart) {
+                            if (view === 'battle') {
+                                return [
+                                    {
+                                        text: `${homeTeamName} Lead`,
+                                        fillStyle: 'rgba(0, 100, 0, 0.1)',
+                                        strokeStyle: '#006400',
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: 0
+                                    },
+                                    {
+                                        text: `${awayTeamName} Lead`,
+                                        fillStyle: 'rgba(255, 193, 7, 0.1)',
+                                        strokeStyle: '#FFC107',
+                                        lineWidth: 1,
+                                        hidden: false,
+                                        index: 1
+                                    }
+                                ];
+                            }
+                            return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                        }
+                    }
+                }
+            },
             scales: {
                 x: {
-                    title: { display: true, text: view === 'simultaneous' ? 'After Each Hand' : 'Player Turn' },
+                    title: { display: true, text: 'Player Turn' },
                     grid: {
                         color: (context) => {
-                            if (view === 'progression' && context.index > 0 && context.index % 6 === 1) {
+                            if (context.index > 0 && context.index % 6 === 0) {
                                 return 'rgba(0, 0, 0, 0.5)';
                             }
                             return 'rgba(0, 0, 0, 0.1)';
                         }
                     },
-                    ticks: { display: view !== 'progression' }
+                    ticks: { display: false }
                 },
                 y: {
                     title: { display: true, text: view === 'battle' ? 'Point Difference' : 'Cumulative Score' },
@@ -309,12 +337,20 @@ const renderScoreProgressionChart = (view) => {
 const setupTabNavigation = () => {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
+    const graphControls = document.querySelector('.graph-controls');
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const targetTab = tab.dataset.tab;
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             tabPanes.forEach(pane => pane.id === `${targetTab}-content` ? pane.classList.add('active') : pane.classList.remove('active'));
+
+            if (targetTab === 'graph') {
+                graphControls.style.display = 'block';
+            } else {
+                graphControls.style.display = 'none';
+            }
         });
     });
 };

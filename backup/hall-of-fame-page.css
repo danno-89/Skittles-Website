@@ -11,10 +11,9 @@
 }
 
 #hall-of-fame-container {
-    background-color: var(--off-white);
+    background-color: var(--pure-white);
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
-    box-shadow: var(--shadow-elevation-low);
 }
 
 .sidebar {
@@ -139,36 +138,99 @@
 }
 
 /* --- Division Winner Table Styles --- */
-.division-winner-table {
-    margin-top: var(--spacing-md);
+.winners-table-container {
+    overflow: hidden;
+    border: 1px solid var(--club-green);
+    border-radius: var(--border-radius);
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    margin-block-start: var(--spacing-lg); /* Restores space below the tabs */
 }
 
-.division-winner-table th {
+.winners-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.winners-table th,
+.winners-table td {
+    padding: var(--spacing-xs);; /* Increased padding for better readability */
     text-align: center;
-    font-size: 0.9rem;
-    white-space: nowrap;
+    white-space: nowrap; /* Prevent headers and cells from wrapping */
 }
 
-.division-winner-table td {
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-.division-winner-table tbody tr td:first-child {
-    font-weight: bold;
-    color: var(--darker-green);
+.winners-table th:not(:first-child),
+.winners-table td:not(:first-child) {
     text-align: left;
 }
 
-/* --- Division Standings Table Styles --- */
-.division-standings-table th, .division-standings-table td {
-    text-align: center;
+.winners-table th {
+    padding: var(--spacing-sm);
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
-.division-standings-table tbody tr td:first-child {
-    font-weight: bold;
-    color: var(--darker-green);
+/* --- Top Corner Rounding --- */
+.winners-table th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+.winners-table th:last-child {
+    border-top-right-radius: var(--border-radius);
+}
+
+/* --- Bottom Corner Rounding --- */
+.winners-table tr:last-child td:first-child {
+    border-bottom-left-radius: calc(var(--border-radius) - 1px);
+}
+
+.winners-table tr:last-child td:last-child {
+    border-bottom-right-radius: calc(var(--border-radius) - 1px);
+}
+
+
+.winners-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* --- Sticky Column for Team Name --- */
+.team-name {
     text-align: left;
+    font-weight: bold;
+    position: sticky;
+    left: 0;
+    background-color: var(--pure-white); /* Match the row background */
+    z-index: 1;
+}
+
+/* Ensure the sticky header has a higher z-index */
+.winners-table th.team-name {
+    z-index: 3;
+}
+
+/* Alternate row color for sticky column */
+.winners-table tbody tr:nth-child(even) .team-name {
+    background-color: #f2f2f2;
+}
+
+/* Add a subtle shadow to indicate scrollable content */
+.team-name::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10px;
+    bottom: 0;
+    width: 10px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+}
+
+
+.winners-table .club-leader {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    font-weight: bold;
 }
 
 /* --- Responsive adjustment for hall of fame --- */
@@ -180,5 +242,18 @@
         position: static;
         top: auto;
         margin-top: var(--spacing-xl);
+    }
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 768px) {
+    .winners-table th,
+    .winners-table td {
+        padding: 6px 8px; /* Reduce padding on smaller screens */
+        font-size: 0.85rem; /* Slightly smaller font for mobile */
+    }
+
+    .division-filter-container {
+        justify-content: center; /* Center the division filter on mobile */
     }
 }

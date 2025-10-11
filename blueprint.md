@@ -1,153 +1,70 @@
-# Project Blueprint
+# Skittles Club App Blueprint
 
 ## Overview
 
-This document outlines the plan for developing a web application that includes a header with dynamic counters for pins, matches, and postponements. The application will feature a modular front-end structure with separate files for HTML, CSS, and JavaScript.
+This document outlines the features and design of the Skittles Club application. The app provides players and administrators with tools to manage league information, track statistics, and view match results.
 
-## Phase 1: Header Implementation (Revised)
+## Implemented Features
 
-The initial implementation caused styling issues with the header. A new approach has been taken to dynamically inject the counters using JavaScript, leaving the original `header.html` untouched.
+### Player Statistics Page
 
-### `statistics.js`
+-   **Averages Section:**
+    -   Displays player averages, total pins, and games played.
+    -   **Total Pins Column:** Shows the total pins for the season, with the current week's score in parentheses. A "-" indicates no games played in the current week. This resets weekly on Monday morning.
+    -   **Average Column:** Shows the player's current season average.
+    -   **Movement Column:** Displays the change in a player's average based on the current week's performance. A `+` indicates an increase, and a `-` indicates a decrease. The movement is color-coded for easy visualization (green for positive, red for negative).
+-   **High Scores Section:** Lists the highest individual scores achieved in the league.
+-   **Spares and Extra Pins Section:** Ranks players by the number of spares and extra pins.
+-   **Filtering:** Allows users to filter statistics by division, gender, and team, and set a minimum number of games played.
 
-A new file, `public/statistics.js`, is created to handle the logic for fetching and calculating the statistics from the Firebase Firestore database.
+### Admin Page - Results Input
 
-```javascript
-import { db, collection, getDocs } from './firebase.config.js';
+- **"Name to be confirmed" Player Option:**
+    - In the results input scorecard, each player dropdown now contains a "Name to be confirmed" option.
+    - Selecting this option reveals a text input field, allowing an administrator to enter the name of a player who may not be officially registered or whose name on the scorecard is a nickname.
+    - When results are submitted, this player's name is saved with their scores for the match. This allows for processing match results even when full player details aren't immediately available.
+    - The system is designed to handle this temporary data, ensuring that it does not interfere with regular player statistics until the name can be officially matched to a registered player.
 
-async function getStatistics() {
-    const matchResultsCollection = collection(db, 'match_results');
-    const matchResultsSnapshot = await getDocs(matchResultsCollection);
+### Scoreboard & Social Play Hub
 
-    let pins = 0;
-    let matches = 0;
-    let postponements = 0;
+-   **Purpose:** Provides a centralized hub for live scorekeeping for both official club matches and social events.
+-   **Location:** All related files are located in the `/public/scoreboard/` directory.
 
-    matchResultsSnapshot.forEach(doc => {
-        const data = doc.data();
-        matches++;
-        if (data.homeScore && data.awayScore) {
-            pins += data.homeScore + data.awayScore;
-        }
-        if (data.status === 'postponed') {
-            postponements++;
-        }
-    });
+#### Landing Page (`ui.html`)
+-   **Layout:** A modern, two-column interface that serves as the entry point for all scoreboard-related activities.
+-   **Upcoming Fixtures:** The left column dynamically loads and displays the next three scheduled fixtures from the Firestore database. A button at the bottom links to the main fixtures and results page.
+-   **Match Types:** The right column features a selection of match types, including "Standard Match," "Killer," and "Knockout," allowing users to easily start a new game.
 
-    return { pins, matches, postponements };
-}
+#### Live Scoreboard (`input.html` & `display.html`)
+-   **Control Page (`input.html`):** A page for creating a new match and updating the scores. It allows the user to set team names and then provides buttons to increment, decrement, and reset scores. It also has an "End Match" button, which deletes the scoreboard data.
+-   **Display Page (`display.html`):** A read-only display page that shows the live scores for a specific match. The match is identified by a `matchId` in the URL. This page automatically updates in real-time as the scores change.
 
-export { getStatistics };
-```
+#### Design and Styling
+-   **Unified Look and Feel:** All pages within the scoreboard hub share a consistent, modern, dark-themed design, defined in a single stylesheet (`style.css`). This ensures a cohesive user experience.
 
-### `main.js` Integration
+#### Open Access
+-   **Firestore Rules:** The scoreboard data is stored in a separate Firestore collection (`scoreboards`) with open read/write rules. This allows non-authenticated users to create and manage scoreboards for social gatherings without needing to log in.
 
-The `public/main.js` file is modified to import the `getStatistics` function and dynamically create and inject the counters into the header after the HTML includes are loaded.
+### Standard Game
+- **Player Sorting Logic:** In `standard-game.html`, the player sorting logic has been corrected. Previously, players were sorted alphabetically by their first name. The logic has been updated to sort players based on their player number in the Firestore document, ensuring that they appear in the order they were added to the game.
 
-```javascript
-// main.js
-import { auth } from './firebase.config.js';
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { authReady } from './auth-manager.js';
-import { getStatistics } from './statistics.js';
 
-// ... (existing code)
+## Current Task: Standard Game Setup Screen
 
-async function displayStatistics() {
-    const stats = await getStatistics();
-    const headerContent = document.querySelector('.header-content');
+### Plan
 
-    if (headerContent) {
-        const countersContainer = document.createElement('div');
-        countersContainer.className = 'counters-container';
-        countersContainer.style.display = 'flex';
-        countersContainer.style.gap = '20px';
-        countersContainer.style.alignItems = 'center';
+1.  **Create `standard-setup.html`:**
+    -   A new HTML file in `public/scoreboard/` for the standard game setup screen.
 
-        countersContainer.innerHTML = `
-            <div class="counter">
-                <span>Pins:</span>
-                <span class="value">${stats.pins}</span>
-            </div>
-            <div class="counter">
-                <span>Matches:</span>
-                <span class="value">${stats.matches}</span>
-            </div>
-            <div class="counter">
-                <span>Postponements:</span>
-                <span class="value">${stats.postponements}</span>
-            </div>
-        `;
+2.  **Create `standard-setup.js`:**
+    -   This script will fetch data from the `scoreboard/standardGame` document in Firestore.
+    -   It will display the following information for both the home and away teams:
+        -   Team name
+        -   Number of players
+        -   A list of player names.
 
-        headerContent.appendChild(countersContainer);
-    }
-}
+3.  **Create `standard-setup.css`:**
+    -   A stylesheet for the setup screen.
 
-document.addEventListener('htmlIncludesLoaded', () => {
-    setupSignOutListeners();
-    setupMenuToggle();
-    displayStatistics();
-});
-
-// ... (existing code)
-```
-
-## Admin Page Enhancements
-
-### Player Document Updates on Result Submission
-
-The `public/admin.js` file has been enhanced to automatically update player documents in the `players_public` collection when match results are submitted.
-
-**Features:**
-*   **`recentFixture` Update**: When match results are submitted, the `recentFixture` field for each player who participated in the match will be updated with the `scheduledDate` of the match (as a Firestore Timestamp).
-*   **`registerExpiry` Update**: The `registerExpiry` field for participating players will be updated to a date 365 days after the `recentFixture` date (also as a Firestore Timestamp).
-
-### "6th Player" Option in Scorecard Dropdowns
-
-The player selection dropdowns in the results input tab (`admin.html`) have been modified in `public/admin.js`.
-
-**Features:**
-*   **Added "6th Player" Option**: An additional option with the value `"sixthPlayer"` and display text "6th Player" has been added to each player selection dropdown in the scorecards. This allows for a generic placeholder when a specific player is not available or known for the 6th spot.
-
-### Prevent Duplicate Player Selections in Scorecard Dropdowns
-
-Further enhancements have been made to the player selection dropdowns in the results input tab (`admin.html`) in `public/admin.js` to prevent duplicate player selections within a single scorecard.
-
-**Features:**
-*   **Dynamic Option Filtering**: When a player is selected in one dropdown, the options in all other player dropdowns within the same scorecard are dynamically updated. Players already selected are removed from the available options in other dropdowns.
-*   **Maintain Current Selection**: A player's current selection remains in their respective dropdown even if they are selected. This prevents accidental deselection.
-*   **Real-time Updates**: Changes to any player selection dropdown trigger an immediate refresh of all other dropdowns on the same scorecard, ensuring the lists of available players are always accurate.
-
-### Amend Player Tab Functionality
-
-A new tab, "Amend Player", has been implemented in `public/admin.html` and `public/admin.js` to allow committee members to view detailed information for any player.
-
-**Features:**
-*   **Horizontal Layout**: The "Select Team" and "Select Player" dropdowns are now horizontally aligned for improved user experience, matching the layout of the "Results Input" tab.
-*   **Team Selection Dropdown**: A dropdown (`amend-team-select`) is populated with all available teams, *excluding any teams that do not have associated players*. This provides a more focused and relevant list of teams. The teams are sorted alphabetically.
-*   **Player Selection Dropdown**: A second dropdown (`amend-player-select`) is dynamically populated with players belonging to the currently selected team. Players are sorted alphabetically by their full name.
-*   **"Get Data" Button**: A button (`get-player-data-btn`) is enabled when a player is selected. Clicking this button fetches and displays the chosen player's data.
-*   **Display Player Data**: All data from both the `players_public` and `players_private` Firestore documents for the selected player is fetched and displayed in a dedicated section (`player-data-display`).
-*   **Data Formatting**: Fetched data, including Firestore `Timestamp` objects and other complex objects, is formatted for human readability.
-*   **Authorization**: This functionality is only accessible to authenticated users with `committee` permissions.
-
-### User-Friendly Editable Player Data Interface
-
-The "Amend Player" tab has been enhanced with a more user-friendly, four-column layout for editing player data.
-
-**Features:**
-*   **Four-Column Table**: When player data is fetched, it is now displayed in a table with four columns: "Field," "Description," "Current Value," and "New Value." This provides a clear, side-by-side view of the data, its meaning, and the proposed changes.
-*   **User-Friendly Descriptions**: A new "Description" column provides clear, human-readable labels for each data field, making the interface more intuitive.
-*   **Formatted Dates and Times**: All dates and times are now displayed in a consistent `d mmm yyyy h:mm AM/PM` format for improved readability.
-*   **Editable Input Fields**: The "New Value" column contains blank `<input>` fields, allowing for easy data entry.
-*   **"Submit Changes" Button**: A "Submit Changes" button is available to save any modifications.
-*   **Selective Updates**: Only fields with new values are updated, preserving the original data for all other fields.
-*   **Data Type Handling**: The system correctly handles various data types, ensuring data integrity upon submission.
-*   **User Feedback and Data Refresh**: The interface provides clear success or error messages and automatically refreshes the data on a successful update.
-
-This provides a robust tool for committee members to inspect and manage player information efficiently.
-
-## Next Steps
-
-1.  **Testing**: Thoroughly test the implementation to ensure the counters are updating correctly and the display is consistent across different browsers. Additionally, verify that the "Amend Player" tab correctly displays player data for both public and private documents, and that teams without players are excluded from the dropdown. Finally, test the new editable data interface to ensure that data can be updated correctly and that the user feedback and data refresh mechanisms are working as expected.
-2.  **Deployment**: Deploy the updated application to the production environment.
+4.  **Update `index.html`:**
+    -   Link the "Standard Game (5 Hands)" button to the new `standard-setup.html` page.

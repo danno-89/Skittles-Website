@@ -2,7 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // --- Scoreboard ---
+    // Allow public read/write access for the scoreboard functionality,
+    // enabling its use for social events by non-authenticated users.
+    match /scoreboard/{gameId} {
+      allow read, write: if true;
+    }
+
     // --- Publicly Readable Data ---
     match /{collection}/{docId=**} {
       allow read: if collection in ['competitions', 'teams', 'seasons', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners'];

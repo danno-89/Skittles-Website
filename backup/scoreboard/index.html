@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Scoreboard</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="scoreboard.css">
+</head>
+<body class="scoreboard-page">
+
+    <div id="scaling-content">
+        <header>
+            <div class="header-content">
+                <h1>Skittles Scoreboard</h1>
+            </div>
+        </header>
+
+        <div class="container">
+            <main>
+                <section id="scoreboard-section">
+                    <div class="scoreboard-container">
+                        <div class="left-buttons"></div>
+                        <div class="divider"></div>
+                        <div class="right-buttons">
+                            <a href="standard-setup.html" class="card-link">
+                                <div class="fixture-card">
+                                    <div class="fixture-teams"><span class="team-name">Standard Game (5 Hands)</span></div>
+                                    <div class="fixture-description"><p>Each player plays 5 hands. The team with the highest total pinfall wins.</p></div>
+                                </div>
+                            </a>
+                            <div class="fixture-card">
+                                <div class="fixture-teams"><span class="team-name">Killer (Lives)</span></div>
+                                <div class="fixture-description"><p>Players start with lives and lose them if they don't hit the target. Last one standing wins.</p></div>
+                            </div>
+                            <div class="fixture-card">
+                                <div class="fixture-teams"><span class="team-name">Knockout Skittles</span></div>
+                                <div class="fixture-description"><p>A high-stakes tournament format where players are eliminated each round.</p></div>
+                            </div>
+                            <div class="fixture-card">
+                                <div class="fixture-teams"><span class="team-name">Killer (Scores)</span></div>
+                                <div class="fixture-description"><p>A variation on Killer focusing on achieving the highest score rather than eliminating opponents.</p></div>
+                            </div>
+                            <div class="fixture-card">
+                                <div class="fixture-teams"><span class="team-name">Round Robin</span></div>
+                                <div class="fixture-description"><p>All teams play each other in a league format. Points are awarded for wins and draws.</p></div>
+                            </div>
+                            <div class="fixture-card">
+                                <div class="fixture-teams"><span class="team-name">Royal Table</span></div>
+                                <div class="fixture-description"><p>A traditional game where players aim to knock down all the pins for the highest score.</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="../main.js"></script>
+    <script type="module" src="../firebase.config.js"></script>
+    <script type="module" src="../auth-manager.js"></script>
+    <script type="module" src="scoreboard.js"></script>
+</body>
+</html>

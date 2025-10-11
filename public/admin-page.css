@@ -1,62 +1,38 @@
-/* Styling for the Admin Page */
+/* --- Admin Page Specific Styles --- */
 
-.tabs-main {
-    margin-bottom: 1.5rem;
-}
-
-.tab-pane {
-    padding: 1.5rem;
-    border: 1px solid var(--light-grey);
-    border-top: none;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-    background-color: var(--off-white);
-}
-
-.form-section-row {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-section {
-    flex-grow: 1;
-    margin-bottom: 1.5rem;
-}
-
+/* --- Scorecard and Results Input --- */
 .scores-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
 }
 
 .scorecard-container {
-    background-color: var(--pure-white);
     border: 1px solid var(--light-grey);
     border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
 }
 
 .scorecard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background-color: var(--club-yellow);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
     border-bottom: 2px solid var(--club-green);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .scorecard-header h3 {
     margin: 0;
     color: var(--club-green);
-    font-size: 1.5rem;
 }
 
-.scorecard-header .bowled-first-section {
+.bowled-first-section {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin: 0;
+    gap: var(--spacing-xs);
 }
 
 .team-total-display {
@@ -71,61 +47,141 @@
 }
 
 .scorecard th, .scorecard td {
-    padding: 0.5rem;
+    padding: var(--spacing-xs);
     text-align: center;
     border: 1px solid var(--light-grey);
 }
 
 .scorecard th {
-    background-color: var(--club-green);
-    color: var(--pure-white);
-}
-
-.scorecard .player-name-col {
-    text-align: left;
-    width: 30%;
-}
-
-.scorecard .hand-score-col input {
-    width: 40px;
-    text-align: center;
-}
-
-.scorecard .total-score-col {
-    font-weight: bold;
-    background-color: var(--club-green);
-    color: var(--club-yellow);
-    font-size: 1.2rem; /* Increased font size */
-}
-
-.scorecard tfoot td {
-    font-weight: bold;
     background-color: var(--light-grey);
 }
 
-/* --- Modern Form Input Styles for Scorecard --- */
-.scorecard .player-select,
-.scorecard .hand-score-col input {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.9rem;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--light-grey);
-    border-radius: var(--border-radius);
-    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+.player-name-col {
+    width: 40%;
+    text-align: left !important;
 }
 
-.scorecard .player-select {
+.total-score-col {
+    font-weight: bold;
+}
+
+.hand-score-col {
+    width: 8%;
+}
+
+.hand-score {
     width: 100%;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.6rem center;
-    background-size: 16px 12px;
+    padding: var(--spacing-xs);
+    box-sizing: border-box;
+    border: 1px solid var(--medium-grey);
+    border-radius: var(--border-radius);
+    text-align: center;
 }
 
-.scorecard .player-select:focus,
-.scorecard .hand-score-col input:focus {
-    border-color: var(--club-green);
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem hsla(120, 100%, 20%, 0.25);
+.tbc-player-name {
+    width: calc(100% - 10px);
+    margin-top: 5px;
+}
+
+/* --- Amend Player Tab --- */
+.data-display-section {
+    margin-top: var(--spacing-lg);
+}
+
+.data-edit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+}
+
+.data-edit-table th, .data-edit-table td {
+    border: 1px solid var(--light-grey);
+    padding: var(--spacing-sm);
+    text-align: left;
+}
+
+.data-edit-table th {
+    background-color: var(--off-white);
+}
+
+.table-section-header {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    font-weight: bold;
+    text-align: center !important;
+}
+
+.edit-input {
+    width: 100%;
+}
+
+.status-message {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+}
+
+/* --- Responsive Styles for Admin Page --- */
+
+.mobile-header-icons {
+    display: none; /* Hidden by default on desktop */
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .mobile-header-icons {
+        display: flex;
+        align-items: center;
+    }
+    
+    .icon-btn {
+        padding: var(--spacing-sm);
+        border-radius: var(--border-radius);
+        background-color: var(--off-white);
+        border: 1px solid var(--light-grey);
+    }
+
+    .icon-btn .material-symbols-outlined {
+        font-size: 1.5rem;
+        color: var(--club-green);
+    }
+    
+    /* Make tabs container collapsible */
+    #tabs-container {
+        display: none;
+    }
+
+    #tabs-container.visible {
+        display: block;
+        background-color: var(--off-white);
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    /* Stack tabs vertically */
+    .tabs-main {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+        border-bottom: none;
+    }
+    .tab-link {
+        text-align: center;
+        border-bottom: 1px solid var(--light-grey);
+    }
+    .tab-link.active {
+        border-bottom-color: var(--club-yellow);
+    }
 }

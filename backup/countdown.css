@@ -4,7 +4,7 @@
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-elevation-low);
     box-sizing: border-box;
-    width: 100%; /* Ensure it takes the width of the sidebar column */
+    width: 100%; 
 }
 
 #countdown-card h2 {
@@ -19,34 +19,41 @@
 #countdown-card h3 {
     text-align: center;
     margin-top: 0;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 0.25rem; /* Reduced bottom margin */
     font-size: 1.1rem;
     color: var(--text-color);
+}
+
+.competition-date-time {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
 }
 
 #countdown {
     display: flex;
     justify-content: center;
-    gap: 0.5rem; /* Reduced gap */
+    gap: 0.5rem; 
     margin-top: 1rem;
 }
 
 #countdown div {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: var(--border-radius-sm);
-    padding: 0.5rem; /* Reduced padding */
-    flex: 1;
-    min-width: 0; /* Remove min-width to allow shrinking */
+    background-color: var(--darker-green);
+    color: var(--off-white);
+    padding: 0.75rem; /* Reduced padding by 25% */
+    border-radius: 6px; /* Reduced border-radius */
     text-align: center;
-    font-size: 1.5rem; /* Reduced font size */
-    font-weight: bold;
-    color: var(--dark-green);
+    min-width: 45px; /* Reduced min-width */
+    font-size: 1.5rem; /* Reduced font-size by 25% */
+    line-height: 1.2;
+    font-weight: 700;
 }
 
 #countdown div span {
     display: block;
-    font-size: .7rem; /* Reduced font size */
-    font-weight: normal;
-    color: var(--text-color-light);
+    font-size: 0.6rem; /* Reduced font-size */
+    text-transform: uppercase;
+    margin-top: 0.25rem;
 }

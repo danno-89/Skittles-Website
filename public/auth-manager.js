@@ -1,4 +1,5 @@
 import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, collection, query, where, getDocs } from './firebase.config.js';
+import { updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let resolveAuthReady;
 export const authReady = new Promise(resolve => {
@@ -55,6 +56,25 @@ document.addEventListener('htmlIncludesLoaded', () => {
         let userProfile = null;
         if (user) {
             userProfile = await fetchUserProfile(user.uid);
+
+            // If profile not found, try to link account
+            if (!userProfile && user.email) {
+                try {
+                    const privatePlayersRef = collection(db, "players_private");
+                    const q = query(privatePlayersRef, where("email", "==", user.email));
+                    const privateQuerySnapshot = await getDocs(q);
+
+                    if (!privateQuerySnapshot.empty) {
+                        const privateDoc = privateQuerySnapshot.docs[0];
+                        if (!privateDoc.data().authId) {
+                            await updateDoc(privateDoc.ref, { authId: user.uid });
+                            userProfile = await fetchUserProfile(user.uid); // Re-fetch profile
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error trying to link account:", error);
+                }
+            }
 
             // If the user is a committee member, ensure their status is reflected
             // in the 'users' collection for security rule validation.
