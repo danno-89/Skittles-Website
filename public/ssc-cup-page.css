@@ -1,0 +1,53 @@
+/* ssc-cup-page.css */
+
+/* Reusing styles from league-tables-page.css for consistency */
+@import url("league-tables-page.css");
+@import url("fixtures-results-page.css");
+
+/* Add any additional styles specific to the SSC Cup page here */
+.fixtures-container {
+    margin-top: 1.5rem; /* Give a bit of space after the narrative */
+}
+
+.group-fixtures-subheader {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--club-green);
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: 0.5rem;
+}
+
+.handicap-narrative {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+.handicap-narrative p {
+    margin-bottom: 0.5rem; /* Space between paragraphs */
+}
+
+.week-summary {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    padding: var(--spacing-sm);
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    margin-bottom: 2px;
+}
+
+#ssc-cup-page .league-standings-table td:nth-child(2),
+#ssc-cup-page .results-table .team-name {
+    font-weight: normal !important;
+}
+
+.score-balance-col {
+    text-align: center;
+    width: 180px;
+    font-style: italic;
+    color: #555;
+}

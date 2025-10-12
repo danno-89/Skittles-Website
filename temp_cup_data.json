@@ -1,0 +1,58 @@
+{
+    "Group_A": {
+        "standings": [
+            { "teamName": "wizards" },
+            { "teamName": "ott" },
+            { "teamName": "les-pins" },
+            { "teamName": "ufos" },
+            { "teamName": "technocrats" }
+        ]
+    },
+    "Group_B": {
+        "standings": [
+            { "teamName": "oberlands" },
+            { "teamName": "p-ds" },
+            { "teamName": "sappers" },
+            { "teamName": "titons" },
+            { "teamName": "irregulars" }
+        ]
+    },
+    "Group_C": {
+        "standings": [
+            { "teamName": "wild-stallions" },
+            { "teamName": "dolphins" },
+            { "teamName": "taste-the-rainbow" },
+            { "teamName": "canaccord-pinvestors" },
+            { "teamName": "clippers" }
+        ]
+    },
+    "Group_D": {
+        "standings": [
+            { "teamName": "longshots" },
+            { "teamName": "chalkers" },
+            { "teamName": "johnnie-walkers" },
+            { "teamName": "desperados" }
+        ]
+    },
+    "teamAverages": {
+        "OTT": 222,
+        "Longshots": 234.4,
+        "Dolphins": 230.8,
+        "Taste the Rainbow": 217.1,
+        "Wild Stallions": 221.7,
+        "Johnnie Walkers": 207.9,
+        "Les Pins": 206,
+        "Technocrats": 217.4,
+        "UFOs": 206.2,
+        "Clippers": 209.1,
+        "P&D's": 190.7,
+        "Irregulars": 228.6,
+        "Wizards": 201.8,
+        "Chalkers": 211.6,
+        "Sappers": 197,
+        "Oberlands": 196.7,
+        "Titons": 220.4,
+        "Desperados": 204.2,
+        "Cannacord Pinvestors": 202.2
+    }
+}

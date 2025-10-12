@@ -1,70 +1,61 @@
-# Skittles Club App Blueprint
+# SSC Cup Page
 
 ## Overview
 
-This document outlines the features and design of the Skittles Club application. The app provides players and administrators with tools to manage league information, track statistics, and view match results.
+This document outlines the plan for creating a new "SSC Cup" page on the Sarnia Skittles Club website. The page will display group standings and fixtures for the SSC Cup competition, reusing existing styles and components for a consistent user experience.
 
-## Implemented Features
+## Features
 
-### Player Statistics Page
+*   **Season Selector:** Users can select a season to view the corresponding SSC Cup data.
+*   **Group Tabs:** The page will have tabs for each of the four groups in the competition.
+*   **Group Standings:** Each tab will display a table with the standings for the teams in that group. The table will show Position, Team, Played, Won, Lost, and Points.
+*   **Fixtures/Results:** Below the standings table, a section will display the fixtures and results for that group, organized by date.
 
--   **Averages Section:**
-    -   Displays player averages, total pins, and games played.
-    -   **Total Pins Column:** Shows the total pins for the season, with the current week's score in parentheses. A "-" indicates no games played in the current week. This resets weekly on Monday morning.
-    -   **Average Column:** Shows the player's current season average.
-    -   **Movement Column:** Displays the change in a player's average based on the current week's performance. A `+` indicates an increase, and a `-` indicates a decrease. The movement is color-coded for easy visualization (green for positive, red for negative).
--   **High Scores Section:** Lists the highest individual scores achieved in the league.
--   **Spares and Extra Pins Section:** Ranks players by the number of spares and extra pins.
--   **Filtering:** Allows users to filter statistics by division, gender, and team, and set a minimum number of games played.
+## File Structure
 
-### Admin Page - Results Input
+The following files will be created:
 
-- **"Name to be confirmed" Player Option:**
-    - In the results input scorecard, each player dropdown now contains a "Name to be confirmed" option.
-    - Selecting this option reveals a text input field, allowing an administrator to enter the name of a player who may not be officially registered or whose name on the scorecard is a nickname.
-    - When results are submitted, this player's name is saved with their scores for the match. This allows for processing match results even when full player details aren't immediately available.
-    - The system is designed to handle this temporary data, ensuring that it does not interfere with regular player statistics until the name can be officially matched to a registered player.
+*   `public/ssc_cup.html`: The main HTML file for the SSC Cup page.
+*   `public/ssc-cup-page.css`: A new CSS file for styles specific to the SSC Cup page. It will import the styles from `league-tables-page.css` to maintain consistency.
+*   `public/ssc_cup.js`: A new JavaScript file to handle the logic for fetching and displaying the SSC Cup data from Firestore.
 
-### Scoreboard & Social Play Hub
+## Implementation Steps
 
--   **Purpose:** Provides a centralized hub for live scorekeeping for both official club matches and social events.
--   **Location:** All related files are located in the `/public/scoreboard/` directory.
+1.  **Create `public/ssc_cup.html`:**
+    *   Copy the structure from `public/league_tables.html`.
+    *   Change the title to "Sarnia Skittles Club - SSC Cup".
+    *   Update the CSS link to `ssc-cup-page.css`.
+    *   Change the JavaScript include to `ssc_cup.js`.
+    *   Update the main content area to have containers for group tabs (`group-tabs-container`) and group content (`group-container`).
 
-#### Landing Page (`ui.html`)
--   **Layout:** A modern, two-column interface that serves as the entry point for all scoreboard-related activities.
--   **Upcoming Fixtures:** The left column dynamically loads and displays the next three scheduled fixtures from the Firestore database. A button at the bottom links to the main fixtures and results page.
--   **Match Types:** The right column features a selection of match types, including "Standard Match," "Killer," and "Knockout," allowing users to easily start a new game.
+2.  **Create `public/ssc-cup-page.css`:**
+    *   Import the styles from `public/league-tables-page.css`.
+    *   Add styles for the fixtures and results section.
 
-#### Live Scoreboard (`input.html` & `display.html`)
--   **Control Page (`input.html`):** A page for creating a new match and updating the scores. It allows the user to set team names and then provides buttons to increment, decrement, and reset scores. It also has an "End Match" button, which deletes the scoreboard data.
--   **Display Page (`display.html`):** A read-only display page that shows the live scores for a specific match. The match is identified by a `matchId` in the URL. This page automatically updates in real-time as the scores change.
+3.  **Create `public/ssc_cup.js`:**
+    *   Adapt the JavaScript from `public/league_tables.js`.
+    *   Fetch data from the `ssc_cup` collection in Firestore.
+    *   Populate the season selector.
+    *   Dynamically create tabs for each group.
+    *   For each group, render a standings table and a fixtures/results section.
+    *   Implement tab switching functionality.
 
-#### Design and Styling
--   **Unified Look and Feel:** All pages within the scoreboard hub share a consistent, modern, dark-themed design, defined in a single stylesheet (`style.css`). This ensures a cohesive user experience.
+## Data Structure (Firestore)
 
-#### Open Access
--   **Firestore Rules:** The scoreboard data is stored in a separate Firestore collection (`scoreboards`) with open read/write rules. This allows non-authenticated users to create and manage scoreboards for social gatherings without needing to log in.
+The data for the SSC Cup will be stored in a collection named `ssc_cup`. Each document in this collection will represent a season (e.g., "2023-2024").
 
-### Standard Game
-- **Player Sorting Logic:** In `standard-game.html`, the player sorting logic has been corrected. Previously, players were sorted alphabetically by their first name. The logic has been updated to sort players based on their player number in the Firestore document, ensuring that they appear in the order they were added to the game.
+Each season document will contain fields for each group (e.g., "Group_A", "Group_B", etc.). Each group field will be an object with the following structure:
 
-
-## Current Task: Standard Game Setup Screen
-
-### Plan
-
-1.  **Create `standard-setup.html`:**
-    -   A new HTML file in `public/scoreboard/` for the standard game setup screen.
-
-2.  **Create `standard-setup.js`:**
-    -   This script will fetch data from the `scoreboard/standardGame` document in Firestore.
-    -   It will display the following information for both the home and away teams:
-        -   Team name
-        -   Number of players
-        -   A list of player names.
-
-3.  **Create `standard-setup.css`:**
-    -   A stylesheet for the setup screen.
-
-4.  **Update `index.html`:**
-    -   Link the "Standard Game (5 Hands)" button to the new `standard-setup.html` page.
+```json
+{
+  "standings": [
+    { "teamName": "Team A", "played": 2, "won": 2, "lost": 0, "points": 4 },
+    { "teamName": "Team B", "played": 2, "won": 1, "lost": 1, "points": 2 },
+    { "teamName": "Team C", "played": 2, "won": 0, "lost": 2, "points": 0 }
+  ],
+  "fixtures": [
+    { "date": "2023-10-20", "homeTeam": "Team A", "awayTeam": "Team B", "homeScore": 5, "awayScore": 3 },
+    { "date": "2023-10-27", "homeTeam": "Team C", "awayTeam": "Team A", "homeScore": 2, "awayScore": 6 }
+  ]
+}
+```
