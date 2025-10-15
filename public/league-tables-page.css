@@ -2,6 +2,8 @@
 
 /* This is the container that will have the green border and rounded corners */
 .league-standings-container {
+    max-width: 900px;
+    margin: 0 auto;
     overflow-x: auto; /* Allow horizontal scrolling */
     border: 1px solid var(--club-green);
     border-radius: var(--border-radius);
@@ -10,14 +12,14 @@
 }
 
 .league-standings-table {
-    width: 100%;
+    width: auto;
+    min-width: 100%;
     border-collapse: collapse;
 }
 
 .league-standings-table th,
 .league-standings-table td {
     padding: var(--spacing-xs);; /* Increased padding for better readability */
-    text-align: center;
     white-space: nowrap; /* Prevent headers and cells from wrapping */
 }
 
@@ -53,28 +55,35 @@
     background-color: #f2f2f2;
 }
 
-/* --- Sticky Column for Team Name --- */
-.team-name {
+/* --- Column Specific Styling --- */
+.team-name-col {
     text-align: left;
     font-weight: bold;
+    min-width: 250px;
     position: sticky;
     left: 0;
     background-color: var(--pure-white); /* Match the row background */
     z-index: 1;
 }
 
+.number-col {
+    text-align: center;
+    width: 70px;
+}
+
+
 /* Ensure the sticky header has a higher z-index */
-.league-standings-table th.team-name {
+.league-standings-table th.team-name-col {
     z-index: 3;
 }
 
 /* Alternate row color for sticky column */
-.league-standings-table tbody tr:nth-child(even) .team-name {
+.league-standings-table tbody tr:nth-child(even) .team-name-col {
     background-color: #f2f2f2;
 }
 
 /* Add a subtle shadow to indicate scrollable content */
-.team-name::after {
+.team-name-col::after {
     content: '';
     position: absolute;
     top: 0;

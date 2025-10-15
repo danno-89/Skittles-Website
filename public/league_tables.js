@@ -63,9 +63,18 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         table.innerHTML = `
             <thead>
                 <tr>
-                    <th>Pos</th><th>Team</th><th>Pld</th><th>W</th><th>D</th><th>L</th>
-                    <th>Pts</th><th>F</th><th>A</th><th>Win%</th><th>Ave</th>
-                    ${hasMaxScore ? '<th>Max</th>' : ''}
+                    <th class="number-col">Pos</th>
+                    <th class="team-name-col">Team</th>
+                    <th class="number-col">Pld</th>
+                    <th class="number-col">W</th>
+                    <th class="number-col">D</th>
+                    <th class="number-col">L</th>
+                    <th class="number-col">Pts</th>
+                    <th class="number-col">F</th>
+                    <th class="number-col">A</th>
+                    <th class="number-col">Win%</th>
+                    <th class="number-col">Ave</th>
+                    ${hasMaxScore ? '<th class="number-col">Max</th>' : ''}
                 </tr>
             </thead>
             <tbody></tbody>
@@ -97,18 +106,18 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '0.0';
 
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${team.teamName}</td>
-                <td>${team.played === 0 ? '-' : team.played}</td>
-                <td>${team.won === 0 ? '-' : team.won}</td>
-                <td>${team.drawn === 0 ? '-' : team.drawn}</td>
-                <td>${team.lost === 0 ? '-' : team.lost}</td>
-                <td>${team.points === 0 ? '-' : team.points}</td>
-                <td>${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
-                <td>${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
-                <td>${winPercentage === '0.0%' ? '-' : winPercentage}</td>
-                <td>${avgScore === '0.0' ? '-' : avgScore}</td>
-                ${hasMaxScore ? `<td>${team.max_score === 0 ? '-' : team.max_score}</td>` : ''}
+                <td class="number-col">${index + 1}</td>
+                <td class="team-name-col">${team.teamName}</td>
+                <td class="number-col">${team.played === 0 ? '-' : team.played}</td>
+                <td class="number-col">${team.won === 0 ? '-' : team.won}</td>
+                <td class="number-col">${team.drawn === 0 ? '-' : team.drawn}</td>
+                <td class="number-col">${team.lost === 0 ? '-' : team.lost}</td>
+                <td class="number-col">${team.points === 0 ? '-' : team.points}</td>
+                <td class="number-col">${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
+                <td class="number-col">${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
+                <td class="number-col">${winPercentage === '0.0%' ? '-' : winPercentage}</td>
+                <td class="number-col">${avgScore === '0.0' ? '-' : avgScore}</td>
+                ${hasMaxScore ? `<td class="number-col">${team.max_score === 0 ? '-' : team.max_score}</td>` : ''}
             `;
             tbody.appendChild(row);
         });
