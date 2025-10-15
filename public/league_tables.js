@@ -70,10 +70,10 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                     <th class="number-col">D</th>
                     <th class="number-col">L</th>
                     <th class="number-col">Pts</th>
-                    <th class="number-col">F</th>
-                    <th class="number-col">A</th>
-                    <th class="number-col">Win%</th>
-                    <th class="number-col">Ave</th>
+                    <th class="number-col col-pins-for">F</th>
+                    <th class="number-col col-pins-against">A</th>
+                    <th class="number-col col-win-percentage">Win%</th>
+                    <th class="number-col col-average">Ave</th>
                     ${hasMaxScore ? '<th class="number-col">Max</th>' : ''}
                 </tr>
             </thead>
@@ -113,10 +113,10 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                 <td class="number-col">${team.drawn === 0 ? '-' : team.drawn}</td>
                 <td class="number-col">${team.lost === 0 ? '-' : team.lost}</td>
                 <td class="number-col">${team.points === 0 ? '-' : team.points}</td>
-                <td class="number-col">${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
-                <td class="number-col">${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
-                <td class="number-col">${winPercentage === '0.0%' ? '-' : winPercentage}</td>
-                <td class="number-col">${avgScore === '0.0' ? '-' : avgScore}</td>
+                <td class="number-col col-pins-for">${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
+                <td class="number-col col-pins-against">${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
+                <td class="number-col col-win-percentage">${winPercentage === '0.0%' ? '-' : winPercentage}</td>
+                <td class="number-col col-average">${avgScore === '0.0' ? '-' : avgScore}</td>
                 ${hasMaxScore ? `<td class="number-col">${team.max_score === 0 ? '-' : team.max_score}</td>` : ''}
             `;
             tbody.appendChild(row);

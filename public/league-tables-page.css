@@ -3,7 +3,6 @@
 /* This is the container that will have the green border and rounded corners */
 .league-standings-container {
     max-width: 900px;
-    margin: 0 auto;
     overflow-x: auto; /* Allow horizontal scrolling */
     border: 1px solid var(--club-green);
     border-radius: var(--border-radius);
@@ -103,5 +102,29 @@
 
     .division-filter-container {
         justify-content: center; /* Center the division filter on mobile */
+    }
+}
+
+@media (max-width: 600px) {
+    .col-win-percentage {
+        display: none;
+    }
+}
+
+@media (max-width: 550px) {
+    .col-pins-against {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .col-average {
+        display: none;
+    }
+}
+
+@media (max-width: 450px) {
+    .col-pins-for {
+        display: none;
     }
 }
