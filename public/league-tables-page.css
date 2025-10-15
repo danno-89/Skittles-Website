@@ -55,12 +55,19 @@
 }
 
 /* --- Column Specific Styling --- */
+.pos-col {
+    position: sticky;
+    left: 0;
+    background-color: var(--pure-white);
+    z-index: 1;
+}
+
 .team-name-col {
     text-align: left;
     font-weight: bold;
     min-width: 150px;
     position: sticky;
-    left: 0;
+    left: 40px; /* Adjust this value based on the width of the pos-col */
     background-color: var(--pure-white); /* Match the row background */
     z-index: 1;
 }
@@ -72,24 +79,15 @@
 
 
 /* Ensure the sticky header has a higher z-index */
+.league-standings-table th.pos-col,
 .league-standings-table th.team-name-col {
     z-index: 3;
 }
 
 /* Alternate row color for sticky column */
+.league-standings-table tbody tr:nth-child(even) .pos-col,
 .league-standings-table tbody tr:nth-child(even) .team-name-col {
     background-color: #f2f2f2;
-}
-
-/* Add a subtle shadow to indicate scrollable content */
-.team-name-col::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -10px;
-    bottom: 0;
-    width: 10px;
-    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
 }
 
 /* --- Mobile Adjustments --- */
