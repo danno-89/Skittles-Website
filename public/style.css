@@ -541,6 +541,7 @@ footer a:hover {
     align-items: flex-end;
     border-top: 2px solid var(--club-green);
     padding-top: var(--spacing-sm);
+    margin-top: 0;
 }
 
 .tabs-main {
