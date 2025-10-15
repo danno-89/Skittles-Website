@@ -63,7 +63,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         table.innerHTML = `
             <thead>
                 <tr>
-                    <th class="pos-col">Pos</th>
+                    <th class="pos-col number-col">Pos</th>
                     <th class="team-name-col">Team</th>
                     <th class="number-col">Pld</th>
                     <th class="number-col">W</th>
@@ -106,7 +106,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '0.0';
 
             row.innerHTML = `
-                <td class="pos-col">${index + 1}</td>
+                <td class="pos-col number-col">${index + 1}</td>
                 <td class="team-name-col">${team.teamName}</td>
                 <td class="number-col">${team.played === 0 ? '-' : team.played}</td>
                 <td class="number-col">${team.won === 0 ? '-' : team.won}</td>
@@ -204,7 +204,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                             tab.classList.add('active');
                             tableContainer.style.display = 'block';
                             firstTab = false;
-_                        } else {
+                        } else {
                             tableContainer.style.display = 'none';
                         }
                     }

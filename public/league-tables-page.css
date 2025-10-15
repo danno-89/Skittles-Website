@@ -58,7 +58,6 @@
 .pos-col {
     position: sticky;
     left: 0;
-    background-color: var(--pure-white);
     z-index: 1;
 }
 
@@ -67,8 +66,7 @@
     font-weight: bold;
     min-width: 150px;
     position: sticky;
-    left: 40px; /* Adjust this value based on the width of the pos-col */
-    background-color: var(--pure-white); /* Match the row background */
+    left: 50px; /* Adjust this value to match the width of pos-col */
     z-index: 1;
 }
 
@@ -77,17 +75,26 @@
     width: 70px;
 }
 
+.league-standings-table .pos-col,
+.league-standings-table .team-name-col {
+    background-color: var(--pure-white);
+}
+
+.league-standings-table tr:nth-child(even) .pos-col,
+.league-standings-table tr:nth-child(even) .team-name-col {
+    background-color: #f2f2f2;
+}
+
+.league-standings-table tr:hover .pos-col,
+.league-standings-table tr:hover .team-name-col {
+    background-color: hsl(120 100% 95%);
+}
+
 
 /* Ensure the sticky header has a higher z-index */
 .league-standings-table th.pos-col,
 .league-standings-table th.team-name-col {
     z-index: 3;
-}
-
-/* Alternate row color for sticky column */
-.league-standings-table tbody tr:nth-child(even) .pos-col,
-.league-standings-table tbody tr:nth-child(even) .team-name-col {
-    background-color: #f2f2f2;
 }
 
 /* --- Mobile Adjustments --- */
