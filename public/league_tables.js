@@ -1,49 +1,88 @@
-import { db, collection, getDocs, doc, getDoc } from './firebase.config.js';
+import { db } from './firebase.config.js';
+import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 const leagueTableContainer = document.getElementById('league-table-container');
 const seasonFilter = document.getElementById('season-filter');
 const divisionTabsContainer = document.getElementById('division-tabs-container');
 
-if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
+const fetchCollection = async (collectionName) => {
+    const snapshot = await getDocs(collection(db, collectionName));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
-    let teamsMap = new Map();
+const createTeamMap = (teams) => {
+    return new Map(teams.map(team => [team.id, team.name]));
+};
 
-    const fetchTeams = async () => {
-        const teamsSnapshot = await getDocs(collection(db, "teams"));
-        teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
-    };
+const populateSeasons = (seasons) => {
+    seasonFilter.innerHTML = '<option value="">Select a Season</option>';
+    seasons.sort((a, b) => b.id.localeCompare(a.id)).forEach(season => {
+        const option = document.createElement('option');
+        option.value = season.id;
+        option.textContent = season.id;
+        seasonFilter.appendChild(option);
+    });
 
-    const populateSeasons = async () => {
-        try {
-            const seasonsSnapshot = await getDocs(collection(db, 'league_tables'));
-            const seasons = seasonsSnapshot.docs.map(doc => doc.id).sort((a, b) => b.localeCompare(a));
-            
-            seasonFilter.innerHTML = '<option value="">Select a Season</option>';
-            seasons.forEach(seasonId => {
-                const option = document.createElement('option');
-                option.value = seasonId;
-                option.textContent = seasonId;
-                seasonFilter.appendChild(option);
-            });
+    const defaultSeason = seasons.some(s => s.id === '2025-26') ? '2025-26' : (seasons[0]?.id || '');
+    if (defaultSeason) {
+        seasonFilter.value = defaultSeason;
+        loadLeagueData(defaultSeason);
+    }
+};
 
-            const defaultSeason = seasons.includes('2025-26') ? '2025-26' : seasons[0];
-            if (defaultSeason) {
-                seasonFilter.value = defaultSeason;
-                loadLeagueData(defaultSeason);
-            }
-        } catch (error) {
-            console.error("Error loading seasons:", error);
-        }
-    };
+const createCell = (text, classList = []) => {
+    const cell = document.createElement('td');
+    cell.textContent = text;
+    classList.forEach(c => cell.classList.add(c));
+    return cell;
+};
 
-    const renderTable = (divisionData) => {
-        const container = document.createElement('div');
-        if (!divisionData || !Array.isArray(divisionData.standings)) {
-            return container; 
-        }
-        
-        const teams = divisionData.standings.map(team => ({
-            teamId: team.teamId,
+const createHeaderCell = (text, classList = []) => {
+    const cell = document.createElement('th');
+    cell.textContent = text;
+    classList.forEach(c => cell.classList.add(c));
+    return cell;
+};
+
+const renderTable = (divisionData, teamsMap) => {
+    const container = document.createElement('div');
+    container.classList.add('table-container');
+
+    if (!divisionData || !Array.isArray(divisionData.standings)) {
+        return container;
+    }
+
+    const table = document.createElement('table');
+    table.classList.add('styled-table');
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.append(
+        createHeaderCell('Pos', ['pos-col', 'number-col']),
+        createHeaderCell('Team', ['team-name-col']),
+        createHeaderCell('Pld', ['number-col']),
+        createHeaderCell('W', ['number-col']),
+        createHeaderCell('D', ['number-col']),
+        createHeaderCell('L', ['number-col']),
+        createHeaderCell('Pts', ['number-col', 'pts-col']),
+        createHeaderCell('F', ['number-col', 'col-pins-for']),
+        createHeaderCell('A', ['number-col', 'col-pins-against']),
+        createHeaderCell('Win%', ['number-col', 'col-win-percentage']),
+        createHeaderCell('Ave', ['number-col', 'col-average'])
+    );
+
+    const hasMaxScore = divisionData.standings.some(team => team.max_score > 0);
+    if (hasMaxScore) {
+        headerRow.appendChild(createHeaderCell('Max', ['number-col']));
+    }
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    divisionData.standings
+        .map(team => ({
+            ...team,
             teamName: teamsMap.get(team.teamId) || 'N/A',
             played: team.played ?? 0,
             won: team.won ?? 0,
@@ -53,177 +92,124 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             pinsFor: team.pinsFor ?? 0,
             pinsAgainst: team.pinsAgainst ?? 0,
             max_score: team.max_score ?? 0,
-        }));
-
-        const hasMaxScore = teams.some(team => team.max_score > 0);
-
-        const table = document.createElement('table');
-        table.className = 'league-standings-table';
-        
-        table.innerHTML = `
-            <thead>
-                <tr>
-                    <th class="pos-col number-col">Pos</th>
-                    <th class="team-name-col">Team</th>
-                    <th class="number-col">Pld</th>
-                    <th class="number-col">W</th>
-                    <th class="number-col">D</th>
-                    <th class="number-col">L</th>
-                    <th class="number-col pts-col">Pts</th>
-                    <th class="number-col col-pins-for">F</th>
-                    <th class="number-col col-pins-against">A</th>
-                    <th class="number-col col-win-percentage">Win%</th>
-                    <th class="number-col col-average">Ave</th>
-                    ${hasMaxScore ? '<th class="number-col">Max</th>' : ''}
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
-        const tbody = table.querySelector('tbody');
-
-        teams.sort((a, b) => {
+        }))
+        .sort((a, b) => {
             const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
             const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
-
-            const pointsDiff = b.points - a.points;
-            if (pointsDiff !== 0) return pointsDiff;
-
-            const aveDiff = bAve - aAve;
-            if (aveDiff !== 0) return aveDiff;
-
-            const pinsForDiff = b.pinsFor - a.pinsFor;
-            if (pinsForDiff !== 0) return pinsForDiff;
-
-            const maxDiff = b.max_score - a.max_score;
-            if (maxDiff !== 0) return maxDiff;
-
+            if (b.points !== a.points) return b.points - a.points;
+            if (bAve !== aAve) return bAve - aAve;
+            if (b.pinsFor !== a.pinsFor) return b.pinsFor - a.pinsFor;
+            if (b.max_score !== a.max_score) return b.max_score - a.max_score;
             return a.teamName.localeCompare(b.teamName);
-        });
-        
-        teams.forEach((team, index) => {
+        })
+        .forEach((team, index) => {
             const row = document.createElement('tr');
-            const winPercentage = team.played > 0 ? `${((team.won / team.played) * 100).toFixed(1)}%` : '0.0%';
-            const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '0.0';
+            const winPercentage = team.played > 0 ? `${((team.won / team.played) * 100).toFixed(1)}%` : '-';
+            const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '-';
 
-            row.innerHTML = `
-                <td class="pos-col number-col">${index + 1}</td>
-                <td class="team-name-col">${team.teamName}</td>
-                <td class="number-col">${team.played === 0 ? '-' : team.played}</td>
-                <td class="number-col">${team.won === 0 ? '-' : team.won}</td>
-                <td class="number-col">${team.drawn === 0 ? '-' : team.drawn}</td>
-                <td class="number-col">${team.lost === 0 ? '-' : team.lost}</td>
-                <td class="number-col pts-col">${team.points === 0 ? '-' : team.points}</td>
-                <td class="number-col col-pins-for">${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
-                <td class="number-col col-pins-against">${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
-                <td class="number-col col-win-percentage">${winPercentage === '0.0%' ? '-' : winPercentage}</td>
-                <td class="number-col col-average">${avgScore === '0.0' ? '-' : avgScore}</td>
-                ${hasMaxScore ? `<td class="number-col">${team.max_score === 0 ? '-' : team.max_score}</td>` : ''}
-            `;
+            row.append(
+                createCell(index + 1, ['pos-col', 'number-col']),
+                createCell(team.teamName, ['team-name-col']),
+                createCell(team.played || '-', ['number-col']),
+                createCell(team.won || '-', ['number-col']),
+                createCell(team.drawn || '-', ['number-col']),
+                createCell(team.lost || '-', ['number-col']),
+                createCell(team.points || '-', ['number-col', 'pts-col']),
+                createCell(team.pinsFor ? team.pinsFor.toLocaleString() : '-', ['number-col', 'col-pins-for']),
+                createCell(team.pinsAgainst ? team.pinsAgainst.toLocaleString() : '-', ['number-col', 'col-pins-against']),
+                createCell(winPercentage, ['number-col', 'col-win-percentage']),
+                createCell(avgScore, ['number-col', 'col-average'])
+            );
+
+            if (hasMaxScore) {
+                row.appendChild(createCell(team.max_score || '-', ['number-col']));
+            }
+
             tbody.appendChild(row);
         });
-        container.appendChild(table);
-        return container;
-    };
 
-    const switchTab = (divisionKey) => {
-        divisionTabsContainer.querySelectorAll('.tab-link').forEach(tab => tab.classList.remove('active'));
-        leagueTableContainer.querySelectorAll('.division-table').forEach(table => table.style.display = 'none');
+    table.appendChild(tbody);
+    container.appendChild(table);
+    return container;
+};
 
-        const activeTab = divisionTabsContainer.querySelector(`[data-division="${divisionKey}"]`);
-        const activeTable = leagueTableContainer.querySelector(`[data-division-content="${divisionKey}"]`);
-        
-        if (activeTab) activeTab.classList.add('active');
-        if (activeTable) activeTable.style.display = 'block';
+const switchTab = (divisionKey) => {
+    divisionTabsContainer.querySelectorAll('.tab-link').forEach(tab => tab.classList.remove('active'));
+    leagueTableContainer.querySelectorAll('.division-table').forEach(table => table.style.display = 'none');
+
+    const activeTab = divisionTabsContainer.querySelector(`[data-division="${divisionKey}"]`);
+    const activeTable = leagueTableContainer.querySelector(`[data-division-content="${divisionKey}"]`);
+    
+    if (activeTab) activeTab.classList.add('active');
+    if (activeTable) activeTable.style.display = 'block';
+};
+
+const loadLeagueData = async (seasonId) => {
+    leagueTableContainer.innerHTML = '<p>Loading table...</p>';
+    divisionTabsContainer.innerHTML = '';
+
+    if (!seasonId) {
+        leagueTableContainer.innerHTML = '';
+        return;
     }
 
-    const loadLeagueData = async (seasonId) => {
-        leagueTableContainer.innerHTML = '<p>Loading table...</p>';
-        divisionTabsContainer.innerHTML = '';
-        if (!seasonId) {
+    try {
+        const docSnap = await getDoc(doc(db, 'league_tables', seasonId));
+        if (docSnap.exists()) {
+            const leagueData = docSnap.data();
+            const teamsMap = await fetchCollection('teams').then(createTeamMap);
+
+            const getDivisionRank = (key) => {
+                const lowerKey = key.toLowerCase();
+                if (lowerKey.includes('premier')) return 0;
+                if (lowerKey.includes('first') || lowerKey.includes('1')) return 1;
+                if (lowerKey.includes('second') || lowerKey.includes('2')) return 2;
+                if (lowerKey.includes('third') || lowerKey.includes('3')) return 3;
+                if (lowerKey.includes('fourth') || lowerKey.includes('4')) return 4;
+                if (lowerKey.includes('fifth') || lowerKey.includes('5')) return 5;
+                if (lowerKey.includes('ladies')) return 99;
+                return 100;
+            };
+
+            const sortedDivisionKeys = Object.keys(leagueData)
+                .filter(key => key !== 'season' && !leagueData[key].leagueName.toLowerCase().includes('knockout'))
+                .sort((a, b) => getDivisionRank(a) - getDivisionRank(b) || a.localeCompare(b));
+
             leagueTableContainer.innerHTML = '';
-            return;
+
+            sortedDivisionKeys.forEach((divisionKey, index) => {
+                const divisionData = leagueData[divisionKey];
+                const tableContainer = renderTable(divisionData, teamsMap);
+                tableContainer.classList.add('division-table');
+                tableContainer.dataset.divisionContent = divisionKey;
+                tableContainer.style.display = index === 0 ? 'block' : 'none';
+                leagueTableContainer.appendChild(tableContainer);
+
+                const tab = document.createElement('button');
+                tab.className = 'tab-link';
+                if (index === 0) {
+                    tab.classList.add('active');
+                }
+                tab.dataset.division = divisionKey;
+                tab.textContent = divisionData.leagueName || divisionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                tab.onclick = () => switchTab(divisionKey);
+                divisionTabsContainer.appendChild(tab);
+            });
+        } else {
+            leagueTableContainer.innerHTML = `<p>No league data found for the ${seasonId} season.</p>`;
         }
+    } catch (error) {
+        console.error("Error loading league tables:", error);
+        leagueTableContainer.innerHTML = "<p>Error loading league table data.</p>";
+    }
+};
 
-        try {
-            const docSnap = await getDoc(doc(db, 'league_tables', seasonId));
-            
-            if (docSnap.exists()) {
-                const leagueData = docSnap.data();
-                
-                const getDivisionRank = (key) => {
-                    const lowerKey = key.toLowerCase();
-                    if (lowerKey.includes('premier')) return 0;
-                    if (lowerKey.includes('first') || lowerKey.includes('1')) return 1;
-                    if (lowerKey.includes('second') || lowerKey.includes('2')) return 2;
-                    if (lowerKey.includes('third') || lowerKey.includes('3')) return 3;
-                    if (lowerKey.includes('fourth') || lowerKey.includes('4')) return 4;
-                    if (lowerKey.includes('fifth') || lowerKey.includes('5')) return 5;
-                    if (lowerKey.includes('ladies')) return 99;
-                    return 100;
-                };
+const init = async () => {
+    if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
+        const seasons = await fetchCollection('league_tables');
+        populateSeasons(seasons);
+        seasonFilter.addEventListener('change', (e) => loadLeagueData(e.target.value));
+    }
+};
 
-                const sortedDivisionKeys = Object.keys(leagueData).sort((a, b) => {
-                    if (a === 'season') return 1;
-                    if (b === 'season') return -1;
-                    
-                    const rankA = getDivisionRank(a);
-                    const rankB = getDivisionRank(b);
-
-                    if (rankA !== rankB) {
-                        return rankA - rankB;
-                    }
-                    
-                    return a.localeCompare(b);
-                });
-                
-                leagueTableContainer.innerHTML = ''; 
-
-                let firstTab = true;
-                sortedDivisionKeys.forEach((divisionKey) => {
-                    if (divisionKey !== 'season') {
-                        const divisionData = leagueData[divisionKey];
-                        const leagueName = divisionData.leagueName || divisionKey;
-
-                        if (leagueName.toLowerCase().includes('knockout')) {
-                            return; 
-                        }
-
-                        const tableContainer = renderTable(leagueData[divisionKey]);
-                        tableContainer.classList.add('division-table', 'league-standings-container');
-                        tableContainer.dataset.divisionContent = divisionKey;
-                        leagueTableContainer.appendChild(tableContainer);
-                        
-                        const tab = document.createElement('button');
-                        tab.className = 'tab-link';
-                        tab.dataset.division = divisionKey;
-                        tab.textContent = leagueData[divisionKey].leagueName || divisionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        tab.onclick = () => switchTab(divisionKey);
-                        divisionTabsContainer.appendChild(tab);
-
-                        if (firstTab) {
-                            tab.classList.add('active');
-                            tableContainer.style.display = 'block';
-                            firstTab = false;
-                        } else {
-                            tableContainer.style.display = 'none';
-                        }
-                    }
-                });
-            } else {
-                leagueTableContainer.innerHTML = `<p>No league data found for the ${seasonId} season.</p>`;
-            }
-        } catch (error) {
-            console.error("Error loading league tables:", error);
-            leagueTableContainer.innerHTML = "<p>Error loading league table data.</p>";
-        }
-    };
-
-    seasonFilter.addEventListener('change', (e) => {
-        loadLeagueData(e.target.value);
-    });
-
-    (async () => {
-        await fetchTeams();
-        await populateSeasons();
-    })();
-}
+init();

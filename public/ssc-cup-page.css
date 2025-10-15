@@ -1,7 +1,7 @@
 /* ssc-cup-page.css */
 
 /* Reusing styles from league-tables-page.css for consistency */
-@import url("league-tables-page.css");
+@import url("tables.css");
 @import url("fixtures-results-page.css");
 
 /* Add any additional styles specific to the SSC Cup page here */
