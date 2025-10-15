@@ -59,6 +59,7 @@
     position: sticky;
     left: 0;
     z-index: 1;
+    width: 50px;
 }
 
 .team-name-col {
@@ -75,18 +76,18 @@
     width: 70px;
 }
 
-.league-standings-table .pos-col,
-.league-standings-table .team-name-col {
+.league-standings-table td.pos-col,
+.league-standings-table td.team-name-col {
     background-color: var(--pure-white);
 }
 
-.league-standings-table tr:nth-child(even) .pos-col,
-.league-standings-table tr:nth-child(even) .team-name-col {
+.league-standings-table tr:nth-child(even) td.pos-col,
+.league-standings-table tr:nth-child(even) td.team-name-col {
     background-color: #f2f2f2;
 }
 
-.league-standings-table tr:hover .pos-col,
-.league-standings-table tr:hover .team-name-col {
+.league-standings-table tr:hover td.pos-col,
+.league-standings-table tr:hover td.team-name-col {
     background-color: hsl(120 100% 95%);
 }
 
@@ -107,6 +108,14 @@
 
     .division-filter-container {
         justify-content: center; /* Center the division filter on mobile */
+    }
+
+    .pos-col {
+        width: 35px;
+    }
+
+    .team-name-col {
+        left: 35px;
     }
 }
 
