@@ -6,6 +6,13 @@ const divisionTabsContainer = document.getElementById('division-tabs-container')
 
 if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
 
+    let teamsMap = new Map();
+
+    const fetchTeams = async () => {
+        const teamsSnapshot = await getDocs(collection(db, "teams"));
+        teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
+    };
+
     const populateSeasons = async () => {
         try {
             const seasonsSnapshot = await getDocs(collection(db, 'league_tables'));
@@ -35,11 +42,9 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             return container; 
         }
         
-        // --- THIS IS THE DEFINITIVE FIX ---
-        // 1. Clean the data: Ensure every team has all necessary properties, defaulting to 0.
         const teams = divisionData.standings.map(team => ({
             teamId: team.teamId,
-            teamName: team.teamName ?? 'N/A',
+            teamName: teamsMap.get(team.teamId) || 'N/A',
             played: team.played ?? 0,
             won: team.won ?? 0,
             drawn: team.drawn ?? 0,
@@ -67,7 +72,6 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         `;
         const tbody = table.querySelector('tbody');
 
-        // 2. Sort the clean data using the explicit logic.
         teams.sort((a, b) => {
             const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
             const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
@@ -209,5 +213,8 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         loadLeagueData(e.target.value);
     });
 
-    populateSeasons();
+    (async () => {
+        await fetchTeams();
+        await populateSeasons();
+    })();
 }

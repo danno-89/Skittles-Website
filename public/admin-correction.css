@@ -1,0 +1,40 @@
+.table-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.table-comparison h2 {
+    text-align: center;
+}
+
+#generate-table-btn {
+    margin-top: var(--spacing-lg);
+}
+
+#confirm-update-btn {
+    margin-top: var(--spacing-lg);
+}
+
+/* Center all table headers and cells */
+.league-standings-table th,
+.league-standings-table td {
+    text-align: center;
+}
+
+/* Override for the first column (Team Name) to be left-aligned */
+.league-standings-table th:first-child,
+.league-standings-table td:first-child {
+    text-align: left;
+}
+
+.highlight-increase {
+    background-color: #d4edda; /* Light green */
+    color: #155724;
+}
+
+.highlight-decrease {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24;
+}

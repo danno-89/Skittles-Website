@@ -101,18 +101,18 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
         `;
         const tbody = table.querySelector('tbody');
 
-        teams.sort((a, b) => b.points - a.points || a.teamName.localeCompare(b.teamName));
+        teams.sort((a, b) => b.points - a.points || b.played - a.played || a.teamName.localeCompare(b.teamName));
         
         teams.forEach((team, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${team.teamName}</td>
-                <td>${team.played}</td>
-                <td>${team.won}</td>
-                <td>${team.drawn}</td>
-                <td>${team.lost}</td>
-                <td>${team.points}</td>
+                <td>${team.played || '-'}</td>
+                <td>${team.won || '-'}</td>
+                <td>${team.drawn || '-'}</td>
+                <td>${team.lost || '-'}</td>
+                <td>${team.points || '-'}</td>
             `;
             tbody.appendChild(row);
         });
@@ -182,8 +182,8 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                 const formattedDate = fixtureDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
                 const formattedTime = fixtureDate.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-                const hasResult = typeof fixture.home_score === 'number' && typeof fixture.away_score ==='number';
-                const score = hasResult ? `${fixture.home_score} - ${fixture.away_score}` : '-';
+                const hasResult = (typeof fixture.home_score === 'number' && typeof fixture.away_score ==='number') || (typeof fixture.homeScore === 'number' && typeof fixture.awayScore ==='number');
+                const score = hasResult ? `${fixture.homeScore || fixture.home_score} - ${fixture.awayScore || fixture.away_score}` : '-';
 
                 let handicapText = '';
                 const homeAvg = teamAverages[homeTeamId];

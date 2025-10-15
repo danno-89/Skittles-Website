@@ -8,6 +8,13 @@
     margin-bottom: var(--spacing-lg);
 }
 
+.competition-header {
+    text-align: center;
+    color: var(--club-green);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
 .scorecard-container {
     border: 1px solid var(--light-grey);
     border-radius: var(--border-radius);
@@ -63,19 +70,42 @@
 
 .total-score-col {
     font-weight: bold;
+    width: 10%;
 }
 
 .hand-score-col {
-    width: 8%;
+    width: 10%;
 }
 
 .hand-score {
     width: 100%;
-    padding: var(--spacing-xs);
+    padding: 0.6rem 1rem;
     box-sizing: border-box;
     border: 1px solid var(--medium-grey);
     border-radius: var(--border-radius);
     text-align: center;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.hand-score:focus {
+    border-color: var(--club-green);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem hsla(120, 100%, 20%, 0.25);
+}
+
+/* Hide the number input spinners */
+.hand-score::-webkit-outer-spin-button,
+.hand-score::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.hand-score[type=number] {
+    -moz-appearance: textfield;
+}
+
+.player-select {
+    width: 100%;
 }
 
 .tbc-player-name {

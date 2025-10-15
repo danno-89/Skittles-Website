@@ -1,0 +1,330 @@
+[debug] [2025-10-14T21:14:36.281Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:36.287Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:36.288Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:36.288Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:36.302Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:36.303Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:36.303Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:36.304Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:36.311Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.312Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.313Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.314Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.315Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.316Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.319Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-14T21:14:36.320Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:36.388Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-14T21:14:36.389Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:36.396Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-14T21:14:36.396Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:36.503Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:36.507Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:36.507Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:36.507Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:36.513Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:36.513Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:36.513Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:36.513Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:36.516Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.517Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.517Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.518Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.519Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.519Z] Checked if tokens are valid: true, expires at: 1760478599977
+[debug] [2025-10-14T21:14:36.520Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-14T21:14:36.520Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:36.523Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-14T21:14:36.523Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:36.525Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-14T21:14:36.525Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-14T21:14:37.273Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-14T21:14:37.273Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-14T21:14:37.275Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-14T21:14:37.275Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-14T21:14:37.314Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-14T21:14:37.315Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-14T21:14:37.322Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-14T21:14:37.323Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-14T21:14:37.430Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-14T21:14:37.431Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-14T21:14:37.478Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-14T21:14:37.479Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-14T21:14:37.485Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.486Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.486Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.486Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.512Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.512Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.513Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.514Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.515Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-14T21:14:37.521Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-14T21:14:37.547Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.547Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.548Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.548Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.563Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.564Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.564Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.564Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.592Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.594Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.594Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.594Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.597Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-14T21:14:37.600Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-14T21:14:37.607Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-14T21:14:37.607Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-14T21:14:37.607Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-14T21:14:37.607Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-14T21:14:37.609Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-14T21:14:37.609Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:19:40.305Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:40.330Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:40.333Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:40.333Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:40.376Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:40.380Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:40.381Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:40.387Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:40.409Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.409Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.416Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:40.434Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:40.434Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:40.612Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.612Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.612Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:40.616Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:40.618Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:40.645Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.645Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:40.646Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:40.652Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:40.653Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.050Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:41.053Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:41.053Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:41.053Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:41.064Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:41.069Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:41.069Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:41.069Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:41.088Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.089Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.089Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:41.095Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:41.095Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.110Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.114Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.114Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:41.115Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:41.115Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.132Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.138Z] Checked if tokens are valid: false, expires at: 1760478599977
+[debug] [2025-10-15T13:19:41.138Z] > refreshing access token with scopes: []
+[debug] [2025-10-15T13:19:41.139Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-10-15T13:19:41.139Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.352Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.352Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.412Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-15T13:19:41.412Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:41.550Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.551Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.582Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-15T13:19:41.590Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:41.644Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.645Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.682Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-15T13:19:41.683Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:41.711Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.711Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.740Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-15T13:19:41.740Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:41.814Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.815Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.851Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-15T13:19:41.857Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:41.888Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-10-15T13:19:41.888Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-10-15T13:19:41.920Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-15T13:19:41.927Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:42.588Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-15T13:19:42.589Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:42.593Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-15T13:19:42.594Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:42.665Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-15T13:19:42.670Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-15T13:19:42.853Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-15T13:19:42.855Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:42.860Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-15T13:19:42.861Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-15T13:19:42.864Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-15T13:19:42.864Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:42.865Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:42.868Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:42.868Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:42.868Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:42.943Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:42.951Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:42.951Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:42.952Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:42.964Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:19:42.965Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:19:47.831Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:47.834Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:47.835Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:47.835Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:47.842Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:47.842Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:47.843Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:47.843Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:47.846Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.847Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.847Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.848Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.848Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.849Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.850Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-15T13:19:47.850Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:47.881Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-15T13:19:47.881Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:47.884Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-15T13:19:47.884Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:47.966Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:47.966Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:47.966Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:47.966Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:47.969Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:47.969Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:47.969Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:47.970Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:47.971Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.971Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.972Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.972Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.973Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.973Z] Checked if tokens are valid: true, expires at: 1760537980892
+[debug] [2025-10-15T13:19:47.974Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [none]
+[debug] [2025-10-15T13:19:47.974Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:47.977Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-15T13:19:47.977Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:47.980Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-15T13:19:47.980Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/sarnia-skittles-club
+[debug] [2025-10-15T13:19:48.703Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-15T13:19:48.705Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-15T13:19:48.721Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-15T13:19:48.724Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:48.756Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-15T13:19:48.758Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:48.770Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-15T13:19:48.771Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:48.794Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-15T13:19:48.794Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-15T13:19:48.795Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.795Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.795Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.795Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:48.839Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.847Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.847Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.847Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:48.854Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:19:48.857Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:19:48.894Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.897Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.897Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.898Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:48.919Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.919Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.919Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.919Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:48.963Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.966Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.966Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.966Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:48.970Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:19:48.971Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:19:48.994Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:19:48.996Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:19:48.996Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:19:48.996Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:19:49.004Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:19:49.005Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:19:49.041Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ 200
+[debug] [2025-10-15T13:19:49.044Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/sarnia-skittles-club/services/ [omitted]
+[debug] [2025-10-15T13:44:39.966Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:39.970Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:39.970Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:39.970Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:39.987Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:39.987Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:39.987Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:39.987Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:40.044Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:40.045Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:40.045Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:40.045Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:40.047Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:44:40.051Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:44:40.069Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:40.069Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:40.069Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:40.069Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:40.071Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:44:40.071Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:44:45.767Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:45.767Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:45.767Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:45.767Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:45.769Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:45.769Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:45.769Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:45.769Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:45.837Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:45.838Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:45.838Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:45.838Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:45.840Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:44:45.841Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)
+[debug] [2025-10-15T13:44:45.865Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"source"}
+[debug] [2025-10-15T13:44:45.868Z] Object "/functions" in "firebase.json" is missing required property: {"missingProperty":"remoteSource"}
+[debug] [2025-10-15T13:44:45.869Z] Field "/functions" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-10-15T13:44:45.869Z] Field "/functions" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-15T13:44:45.871Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-15T13:44:45.872Z] > authorizing via signed-in user (daniel.hainsworth89@googlemail.com)

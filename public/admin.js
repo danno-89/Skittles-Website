@@ -12,7 +12,7 @@
  * the HTML is fully loaded before any code attempts to interact with the DOM.
  */
 
-import { db, collection, doc, getDocs, updateDoc, query, where, orderBy, getDoc, Timestamp } from './firebase.config.js';
+import { db, collection, doc, getDocs, updateDoc, query, where, orderBy, getDoc, Timestamp, runTransaction } from './firebase.config.js';
 import { authReady } from './auth-manager.js';
 import { initAdminEditFixture } from './admin-edit-fixture.js';
 import { initRescheduleFixture } from './admin-reschedule.js';
@@ -22,6 +22,7 @@ import { initNewsManagement } from './news-management.js';
 const teamsMap = new Map();
 let allFixtures = [];
 let allPlayersData = new Map();
+let teamAverages = {};
 
 // --- Main Initialisation on DOM Ready ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,6 +101,55 @@ async function fetchAllPlayersData() {
             allPlayersData.set(doc.id, { id: doc.id, private: doc.data() });
         }
     });
+}
+
+/**
+ * Fetches team averages for handicap calculation from the ssc_cup collection.
+ * @param {string} season - The season to fetch averages for.
+ */
+async function fetchTeamAverages(season) {
+    try {
+        const docRef = doc(db, 'ssc_cup', season);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            teamAverages = docSnap.data().teamAverages || {};
+        } else {
+            console.warn(`No ssc_cup data found for season: ${season}`);
+            teamAverages = {};
+        }
+    } catch (error) {
+        console.error("Error fetching team averages:", error);
+        teamAverages = {};
+    }
+}
+
+/**
+ * Fetches the name of a competition from Firestore and displays it.
+ * @param {string} competitionId - The ID of the competition document.
+ * @param {string} elementId - The ID of the HTML element to display the name in.
+ */
+async function fetchAndDisplayCompetitionName(competitionId, elementId) {
+    const competitionNameElem = document.getElementById(elementId);
+    if (!competitionNameElem) return;
+
+    if (!competitionId) {
+        competitionNameElem.textContent = '';
+        return;
+    }
+
+    try {
+        const competitionRef = doc(db, "competitions", competitionId);
+        const competitionSnap = await getDoc(competitionRef);
+
+        if (competitionSnap.exists()) {
+            competitionNameElem.textContent = competitionSnap.data().name;
+        } else {
+            competitionNameElem.textContent = "Competition details not found.";
+        }
+    } catch (error) {
+        console.error("Error fetching competition name:", error);
+        competitionNameElem.textContent = "Error loading competition name.";
+    }
 }
 
 
@@ -257,6 +307,7 @@ function initializeResultsInput() {
     dateSelect.addEventListener('change', () => {
         matchSelect.innerHTML = '<option value="">Select a match</option>';
         resultsFormContainer.style.display = 'none';
+        fetchAndDisplayCompetitionName(null, 'competition-name');
         const matchesOnDate = allFixtures.filter(f => f.scheduledDate.toDate().toISOString().split('T')[0] === dateSelect.value);
         
         matchesOnDate.forEach(fixture => {
@@ -271,18 +322,26 @@ function initializeResultsInput() {
         matchSelect.disabled = !matchesOnDate.length;
     });
 
-    matchSelect.addEventListener('change', () => {
+    matchSelect.addEventListener('change', async () => {
         resultsFormContainer.style.display = 'none';
         const fixture = allFixtures.find(f => f.id === matchSelect.value);
         if (fixture) {
+            await fetchAndDisplayCompetitionName(fixture.division, 'competition-name');
+
+            if (fixture.division === 'ssc-cup') {
+                await fetchTeamAverages(fixture.season);
+            }
+
             document.getElementById('home-team-name-header').textContent = teamsMap.get(fixture.homeTeamId);
             document.getElementById('away-team-name-header').textContent = teamsMap.get(fixture.awayTeamId);
             document.getElementById('home-bowled-first').value = fixture.homeTeamId;
             document.getElementById('away-bowled-first').value = fixture.awayTeamId;
             
-            renderScorecard(fixture.homeTeamId, document.getElementById('home-team-scorecard'), allPlayers);
-            renderScorecard(fixture.awayTeamId, document.getElementById('away-team-scorecard'), allPlayers);
+            renderScorecard('home', fixture, allPlayers);
+            renderScorecard('away', fixture, allPlayers);
             resultsFormContainer.style.display = 'block';
+        } else {
+            fetchAndDisplayCompetitionName(null, 'competition-name');
         }
     });
 
@@ -290,11 +349,12 @@ function initializeResultsInput() {
         const fixtureId = matchSelect.value;
         const getScores = (containerId) => {
             return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => {
+                if (row.id.endsWith('-handicap-row')) return null;
                 const playerId = row.querySelector('.player-select').value;
                 const hands = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
                 const score = hands.reduce((a, b) => a + b, 0);
                 return { playerId, hands, score };
-            }).filter(s => s.playerId && s.hands.length === 5);
+            }).filter(s => s && s.playerId && s.hands.length === 5);
         };
 
         const homeScores = getScores('home-team-scorecard');
@@ -321,14 +381,22 @@ function initializeResultsInput() {
         };
 
         try {
-            await updateDoc(doc(db, "match_results", fixtureId), resultsData);
-
             const fixture = allFixtures.find(f => f.id === fixtureId);
-            if (fixture) {
-                // Future implementation: await updateLeagueTable(fixture, resultsData);
+            
+            await runTransaction(db, async (transaction) => {
+                const fixtureRef = doc(db, "match_results", fixtureId);
+                transaction.update(fixtureRef, resultsData);
+
+                if (fixture) {
+                    if (['premier-division', 'first-division'].includes(fixture.division)) {
+                        await updateLeagueTable(transaction, fixture, resultsData);
+                    } else if (fixture.division === 'ssc-cup') {
+                        await updateSscCupStandings(transaction, fixture, resultsData);
+                    }
+                }
 
                 const playersInMatch = new Set([...homeScores.map(s => s.playerId), ...awayScores.map(s => s.playerId)]);
-                playersInMatch.delete("sixthPlayer"); 
+                playersInMatch.delete("sixthPlayer");
 
                 const matchDate = fixture.scheduledDate.toDate();
                 const recentFixtureTimestamp = Timestamp.fromDate(matchDate);
@@ -337,12 +405,13 @@ function initializeResultsInput() {
                 const registerExpiryTimestamp = Timestamp.fromDate(expiryDate);
 
                 for (const playerId of playersInMatch) {
-                    await updateDoc(doc(db, "players_public", playerId), {
+                    const playerRef = doc(db, "players_public", playerId);
+                    transaction.update(playerRef, {
                         recentFixture: recentFixtureTimestamp,
-                        registerExpiry: registerExpiryTimestamp
+                        registerExpiry: registerExpiryTimestamp,
                     });
                 }
-            }
+            });
 
             alert('Results submitted successfully!');
             await fetchScheduledFixtures(); 
@@ -360,7 +429,9 @@ function initializeResultsInput() {
     })();
 }
 
-function renderScorecard(teamId, container, allPlayers) {
+function renderScorecard(teamType, fixture, allPlayers) {
+    const container = document.getElementById(`${teamType}-team-scorecard`);
+    const teamId = fixture[`${teamType}TeamId`];
     const teamPlayers = Array.from(allPlayers.values()).filter(p => p.teamId === teamId);
 
     const updateSelectOptions = (selectElement) => {
@@ -379,6 +450,28 @@ function renderScorecard(teamId, container, allPlayers) {
         selectElement.value = currentValue;
     };
 
+    let handicapRow = '';
+    let handicapValue = 0;
+    if (fixture.division === 'ssc-cup') {
+        const homeAvg = teamAverages[fixture.homeTeamId] || 0;
+        const awayAvg = teamAverages[fixture.awayTeamId] || 0;
+        const handicap = Math.round(Math.abs(homeAvg - awayAvg) * 0.95);
+        
+        if ((teamType === 'home' && homeAvg < awayAvg) || (teamType === 'away' && awayAvg < homeAvg)) {
+            handicapValue = handicap;
+        }
+
+        if (handicapValue > 0) {
+            handicapRow = `
+                <tr id="${teamType}-handicap-row">
+                    <td class="player-name-col"><strong>Handicap</strong></td>
+                    <td colspan="5"></td>
+                    <td class="total-score-col">${handicapValue}</td>
+                </tr>
+            `;
+        }
+    }
+
     container.innerHTML = `
         <thead>
             <tr>
@@ -390,11 +483,12 @@ function renderScorecard(teamId, container, allPlayers) {
         <tbody>
             ${Array(6).fill().map(() => `
                 <tr>
-                    <td class="player-name-col"><select class="player-select"></select></td>
+                    <td class="player-name-col"><select class="form-select player-select"></select></td>
                     ${Array(5).fill().map(() => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27"></td>`).join('')}
                     <td class="total-score-col">0</td>
                 </tr>
             `).join('')}
+            ${handicapRow}
         </tbody>`;
     
     const playerSelects = container.querySelectorAll('.player-select');
@@ -413,17 +507,121 @@ function renderScorecard(teamId, container, allPlayers) {
             const row = e.target.closest('tr');
             const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
             row.querySelector('.total-score-col').textContent = handScores.reduce((a, b) => a + b, 0);
-            updateTeamTotal(container);
+            updateTeamTotal(container, handicapValue);
         }
     });
+
+    updateTeamTotal(container, handicapValue);
 }
 
-function updateTeamTotal(container) {
-    const playerTotals = Array.from(container.querySelectorAll('tbody .total-score-col')).map(td => parseInt(td.textContent) || 0);
-    const teamTotal = playerTotals.reduce((a, b) => a + b, 0);
+function updateTeamTotal(container, handicap = 0) {
+    const playerTotals = Array.from(container.querySelectorAll('tbody tr:not([id*="-handicap-row"]) .total-score-col')).map(td => parseInt(td.textContent) || 0);
+    const teamTotal = playerTotals.reduce((a, b) => a + b, 0) + handicap;
     const totalDisplay = container.id.includes('home') ? document.getElementById('home-team-total-display') : document.getElementById('away-team-total-display');
     totalDisplay.textContent = teamTotal;
 }
+
+// --- League Table and Cup Standings Updates ---
+
+async function updateLeagueTable(transaction, fixture, results) {
+    const { homeTeamId, awayTeamId, division, season } = fixture;
+    const { homeScore, awayScore, bowledFirst } = results;
+
+    const leagueRef = doc(db, "league_tables", `${season}_${division}`);
+    const leagueSnap = await transaction.get(leagueRef);
+
+    if (!leagueSnap.exists()) {
+        throw new Error(`League table not found for ${season}, ${division}`);
+    }
+
+    const leagueData = leagueSnap.data();
+    const homeTeam = leagueData.teams.find(t => t.id === homeTeamId);
+    const awayTeam = leagueData.teams.find(t => t.id === awayTeamId);
+
+    // Determine winner and points
+    let homePoints = 0, awayPoints = 0;
+    if (homeScore > awayScore) {
+        homePoints = 2; // Win
+    } else if (awayScore > homeScore) {
+        awayPoints = 2; // Win
+    } else {
+        homePoints = 1; // Draw
+        awayPoints = 1;
+    }
+    
+    // Bonus point for bowled first
+    if (bowledFirst === homeTeamId && homeScore < awayScore) {
+        homePoints++;
+    } else if (bowledFirst === awayTeamId && awayScore < homeScore) {
+        awayPoints++;
+    }
+
+    // Update team stats
+    const updateTeamStats = (team, points, scoreFor, scoreAgainst) => {
+        team.played = (team.played || 0) + 1;
+        team.won = (team.won || 0) + (points >= 2 ? 1 : 0);
+        team.drawn = (team.drawn || 0) + (points === 1 ? 1 : 0);
+        team.lost = (team.lost || 0) + (points < 1 ? 1 : 0);
+        team.points = (team.points || 0) + points;
+        team.pinsFor = (team.pinsFor || 0) + scoreFor;
+        team.pinsAgainst = (team.pinsAgainst || 0) + scoreAgainst;
+    };
+
+    if (homeTeam) updateTeamStats(homeTeam, homePoints, homeScore, awayScore);
+    if (awayTeam) updateTeamStats(awayTeam, awayPoints, awayScore, homeScore);
+    
+    transaction.update(leagueRef, { teams: leagueData.teams });
+}
+
+
+async function updateSscCupStandings(transaction, fixture, results) {
+    const { homeTeamId, awayTeamId, season, round } = fixture;
+    const { homeScore, awayScore } = results;
+    
+    const cupRef = doc(db, "ssc_cup", season);
+    const cupSnap = await transaction.get(cupRef);
+
+    if (!cupSnap.exists()) {
+        throw new Error(`SSC Cup data not found for season: ${season}`);
+    }
+
+    const cupData = cupSnap.data();
+    const groupName = round.replace('Group Stage - ', 'Group_');
+    const groupData = cupData[groupName];
+
+    if (!groupData) {
+        throw new Error(`Group ${groupName} not found in SSC Cup data for season ${season}`);
+    }
+
+    const homeTeam = groupData.standings.find(t => t.teamName === homeTeamId);
+    const awayTeam = groupData.standings.find(t => t.teamName === awayTeamId);
+
+    // Determine winner and points
+    let homePoints = 0, awayPoints = 0;
+    if (homeScore > awayScore) {
+        homePoints = 2;
+    } else if (awayScore > homeScore) {
+        awayPoints = 2;
+    } else {
+        homePoints = 1;
+        awayPoints = 1;
+    }
+
+    const updateTeamStandings = (team, points) => {
+        team.played = (team.played || 0) + 1;
+        team.won = (team.won || 0) + (points === 2 ? 1 : 0);
+        team.drawn = (team.drawn || 0) + (points === 1 ? 1 : 0);
+        team.lost = (team.lost || 0) + (points === 0 ? 1 : 0);
+        team.points = (team.points || 0) + points;
+    };
+
+    if (homeTeam) updateTeamStandings(homeTeam, homePoints);
+    if (awayTeam) updateTeamStandings(awayTeam, awayPoints);
+
+    cupData[groupName] = groupData;
+    transaction.update(cupRef, cupData);
+}
+
 
 // --- Amend Player Tab ---
 
