@@ -172,7 +172,7 @@ const loadLeagueData = async (seasonId) => {
             };
 
             const sortedDivisionKeys = Object.keys(leagueData)
-                .filter(key => key !== 'season' && !leagueData[key].leagueName.toLowerCase().includes('knockout'))
+                .filter(key => key !== 'season' && leagueData[key].leagueName && !leagueData[key].leagueName.toLowerCase().includes('knockout'))
                 .sort((a, b) => getDivisionRank(a) - getDivisionRank(b) || a.localeCompare(b));
 
             leagueTableContainer.innerHTML = '';
@@ -206,7 +206,7 @@ const loadLeagueData = async (seasonId) => {
 
 const init = async () => {
     if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
-        const seasons = await fetchCollection('league_tables');
+        const seasons = await fetchCollection('seasons');
         populateSeasons(seasons);
         seasonFilter.addEventListener('change', (e) => loadLeagueData(e.target.value));
     }
