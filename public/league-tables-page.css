@@ -76,6 +76,11 @@
     width: 70px;
 }
 
+.pts-col {
+    font-weight: bold;
+    color: var(--darker-green);
+}
+
 .league-standings-table td.pos-col,
 .league-standings-table td.team-name-col {
     background-color: var(--pure-white);

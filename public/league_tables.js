@@ -69,7 +69,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                     <th class="number-col">W</th>
                     <th class="number-col">D</th>
                     <th class="number-col">L</th>
-                    <th class="number-col">Pts</th>
+                    <th class="number-col pts-col">Pts</th>
                     <th class="number-col col-pins-for">F</th>
                     <th class="number-col col-pins-against">A</th>
                     <th class="number-col col-win-percentage">Win%</th>
@@ -112,7 +112,7 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                 <td class="number-col">${team.won === 0 ? '-' : team.won}</td>
                 <td class="number-col">${team.drawn === 0 ? '-' : team.drawn}</td>
                 <td class="number-col">${team.lost === 0 ? '-' : team.lost}</td>
-                <td class="number-col">${team.points === 0 ? '-' : team.points}</td>
+                <td class="number-col pts-col">${team.points === 0 ? '-' : team.points}</td>
                 <td class="number-col col-pins-for">${team.pinsFor === 0 ? '-' : team.pinsFor.toLocaleString()}</td>
                 <td class="number-col col-pins-against">${team.pinsAgainst === 0 ? '-' : team.pinsAgainst.toLocaleString()}</td>
                 <td class="number-col col-win-percentage">${winPercentage === '0.0%' ? '-' : winPercentage}</td>
