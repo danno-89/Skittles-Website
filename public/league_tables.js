@@ -1,5 +1,9 @@
-import { db } from './firebase.config.js';
-import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { firebaseConfig } from './firebase.config.js';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const leagueTableContainer = document.getElementById('league-table-container');
 const seasonFilter = document.getElementById('season-filter');
@@ -195,7 +199,7 @@ const loadLeagueData = async (seasonId) => {
                 tab.onclick = () => switchTab(divisionKey);
                 divisionTabsContainer.appendChild(tab);
             });
-        } else {
+        } else {.
             leagueTableContainer.innerHTML = `<p>No league data found for the ${seasonId} season.</p>`;
         }
     } catch (error) {
@@ -206,7 +210,7 @@ const loadLeagueData = async (seasonId) => {
 
 const init = async () => {
     if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
-        const seasons = await fetchCollection('seasons');
+        const seasons = await fetchCollection('league_tables');
         populateSeasons(seasons);
         seasonFilter.addEventListener('change', (e) => loadLeagueData(e.target.value));
     }
