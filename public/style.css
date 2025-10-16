@@ -539,8 +539,7 @@ footer a:hover {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-top: 2px solid var(--club-green);
-    padding-top: var(--spacing-sm);
+    border-bottom: 2px solid var(--club-green);
     margin-top: 0;
 }
 
@@ -548,6 +547,7 @@ footer a:hover {
     display: flex;
     flex-wrap: wrap;
     position: relative;
+    margin-bottom: -2px;
 }
 
 .tab-link {
@@ -571,13 +571,16 @@ footer a:hover {
 .tab-link.active {
     color: var(--club-green);
     background-color: var(--pure-white);
-    margin-top: -2px;
-    border-top: 2px solid var(--pure-white);
+    border-bottom-color: var(--pure-white);
 }
 
 .tab-link:hover:not(.active) {
     color: var(--dark-grey);
     background-color: var(--off-white);
+}
+
+.season-filter-tab {
+    margin-bottom: -2px;
 }
 
 .season-filter-tab .form-select {
@@ -588,7 +591,6 @@ footer a:hover {
     font-weight: bold;
     color: var(--club-green);
     background-color: var(--pure-white);
-    margin-top: -2px;
     height: 100%;
 }
 
