@@ -1,12 +1,9 @@
+@import url('tables.css');
+
 /* --- League Tables Page Specific Styles --- */
 
 .division-filter-container {
     justify-content: center; /* Center the division filter on mobile */
-}
-
-/* Remove the green line under the tabs on this page */
-.tab-bar {
-    border-bottom: none;
 }
 
 .season-filter-tab {
