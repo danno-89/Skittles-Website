@@ -3,32 +3,21 @@ pageHeaderTemplate.innerHTML = `
   <style>
     :host {
       display: block;
+      margin-bottom: var(--spacing-md);
     }
     .page-header {
       padding-block-end: 10px;
       border-block-end: 4px solid var(--club-yellow);
-      margin-block-end: 0;
     }
     h1 {
         color: var(--club-green);
-        margin-top: 0;
-        border: none;
-        padding: 0;
         margin: 0;
-    }
-    .tab-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 2px solid var(--club-green);
-        margin-top: var(--spacing-md);
+        padding: 0;
+        font-size: 2rem;
     }
   </style>
   <div class="page-header">
     <h1><slot name="title"></slot></h1>
-  </div>
-  <div class="tab-bar">
-    <slot name="tabs"></slot>
   </div>
 `;
 

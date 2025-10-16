@@ -20,31 +20,32 @@
         <main>
             <page-header>
                 <span slot="title">Player Statistics</span>
-                <div slot="tabs">
-                    <div class="tabs-main">
-                        <button class="tab-link active" data-tab="averages">Averages</button>
-                        <button class="tab-link" data-tab="high-scores">High Scores</button>
-                        <button class="tab-link" data-tab="spares">Spares</button>
+            </page-header>
+            
+            <div class="tab-bar">
+                <div class="tabs-main">
+                    <button class="tab-link active" data-tab="averages">Averages</button>
+                    <button class="tab-link" data-tab="high-scores">High Scores</button>
+                    <button class="tab-link" data-tab="spares">Spares</button>
+                </div>
+                <div class="tabs-main">
+                    <div class="filter-tab">
+                        <select id="team-filter" class="form-select">
+                            <option value="">All Teams</option>
+                        </select>
                     </div>
-                    <div class="tabs-main">
-                        <div class="filter-tab">
-                            <select id="team-filter" class="form-select">
-                                <option value="">All Teams</option>
-                            </select>
-                        </div>
-                        <div class="filter-tab">
-                            <select id="division-filter" class="form-select">
-                                <option value="">All Divisions</option>
-                            </select>
-                        </div>
-                        <div class="filter-tab">
-                            <select id="league-filter" class="form-select">
-                                <option value="">All Leagues</option>
-                            </select>
-                        </div>
+                    <div class="filter-tab">
+                        <select id="division-filter" class="form-select">
+                            <option value="">All Divisions</option>
+                        </select>
+                    </div>
+                    <div class="filter-tab">
+                        <select id="league-filter" class="form-select">
+                            <option value="">All Leagues</option>
+                        </select>
                     </div>
                 </div>
-            </page-header>
+            </div>
 
             <div id="stats-header-container">
                 <label class="checkbox-label">
