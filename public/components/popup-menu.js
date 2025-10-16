@@ -2,8 +2,8 @@ const popupMenuTemplate = document.createElement('template');
 popupMenuTemplate.innerHTML = `
   <style>
     :host {
-      display: inline-flex; /* Align with other flex items like tabs */
-      align-items: center; /* Vertically center the icon */
+      display: inline-flex;
+      align-items: center;
       position: relative;
     }
 
@@ -11,19 +11,20 @@ popupMenuTemplate.innerHTML = `
       cursor: pointer;
       background-color: transparent;
       border: none;
-      padding: 0 0.5rem; /* Provide some clickable space */
+      padding: 0 0.5rem;
       display: flex;
       align-items: center;
-      height: 44.19px; /* Match tab height */
+      height: 44.19px;
     }
 
-    .popup-trigger img {
+    .icon-container svg {
       width: 24px;
       height: 24px;
+      fill: var(--club-green); /* Style the SVG */
     }
     
     #label {
-      display: none; /* Hide the text label as requested */
+      display: none;
     }
 
     .popup-content {
@@ -44,7 +45,7 @@ popupMenuTemplate.innerHTML = `
     }
   </style>
   <div class="popup-trigger">
-    <img id="icon" src="" alt="Menu Icon">
+    <div class="icon-container"></div>
     <span id="label"></span>
   </div>
   <div class="popup-content">
@@ -59,8 +60,8 @@ class PopupMenu extends HTMLElement {
     this.shadowRoot.appendChild(popupMenuTemplate.content.cloneNode(true));
   }
 
-  connectedCallback() {
-    const iconEl = this.shadowRoot.querySelector('#icon');
+  async connectedCallback() {
+    const iconContainer = this.shadowRoot.querySelector('.icon-container');
     const labelEl = this.shadowRoot.querySelector('#label');
     const trigger = this.shadowRoot.querySelector('.popup-trigger');
     const content = this.shadowRoot.querySelector('.popup-content');
@@ -69,7 +70,13 @@ class PopupMenu extends HTMLElement {
     const label = this.getAttribute('label');
 
     if (icon) {
-        iconEl.src = `/assets/${icon}.svg`;
+        try {
+            const response = await fetch(`/assets/${icon}.svg`);
+            const svgText = await response.text();
+            iconContainer.innerHTML = svgText;
+        } catch (error) {
+            console.error('Error loading SVG:', error);
+        }
     }
     labelEl.textContent = label;
 

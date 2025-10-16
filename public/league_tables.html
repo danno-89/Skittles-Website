@@ -21,14 +21,16 @@
         <span slot="title">League Tables</span>
     </page-header>
     <div class="tab-bar">
-        <div id="division-tabs-container" class="tabs-main">
-            <!-- Division tabs will be dynamically inserted here -->
+        <div class="tabs-main">
+            <div id="division-tabs-container" class="tabs-main">
+                <!-- Division tabs will be dynamically inserted here -->
+            </div>
+            <popup-menu icon="select" label="Season">
+                <select id="season-filter" class="form-select">
+                    <option value="">Select a Season</option>
+                </select>
+            </popup-menu>
         </div>
-        <popup-menu icon="select" label="Season">
-            <select id="season-filter" class="form-select">
-                <option value="">Select a Season</option>
-            </select>
-        </popup-menu>
     </div>
 
     <div id="league-table-container">
