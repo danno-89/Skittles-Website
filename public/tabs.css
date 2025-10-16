@@ -46,11 +46,15 @@
 .season-filter-tab {
     margin-bottom: -2px;
     height: 44.19px;
-    padding: 0; /* Override default padding to enforce exact height */
     background-color: var(--pure-white);
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* --- FINAL FIX: Specific override for the season tab to remove conflicting padding --- */
+.season-filter-tab.tab-link {
+    padding: 0;
 }
 
 .season-filter-tab .form-select {
