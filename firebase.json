@@ -16,11 +16,7 @@
     ],
     "rewrites": [
       {
-        "source": "/assets/**",
-        "destination": "/assets/**"
-      },
-      {
-        "source": "**",
+        "source": "/**",
         "destination": "/index.html"
       }
     ]
