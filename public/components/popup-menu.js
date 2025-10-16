@@ -20,7 +20,14 @@ popupMenuTemplate.innerHTML = `
     .icon-container svg {
       width: 24px;
       height: 24px;
-      fill: var(--club-green); /* Style the SVG */
+    }
+
+    /* Style the duotone SVG paths */
+    .icon-container svg path:nth-of-type(1) {
+      fill: var(--club-green);
+    }
+    .icon-container svg path:nth-of-type(2) {
+      fill: var(--club-yellow);
     }
     
     #label {
@@ -31,7 +38,7 @@ popupMenuTemplate.innerHTML = `
       display: none;
       position: absolute;
       top: 100%;
-      right: 0;
+      left: 0; /* Align popup to the left of the icon */
       background-color: var(--pure-white);
       border: 2px solid var(--club-green);
       border-radius: var(--border-radius);
@@ -71,11 +78,15 @@ class PopupMenu extends HTMLElement {
 
     if (icon) {
         try {
-            const response = await fetch(`/assets/${icon}.svg`);
+            const response = await fetch(`assets/${icon}.svg`);
+            if (!response.ok) {
+                throw new Error(`Failed to load icon: ${response.statusText}`);
+            }
             const svgText = await response.text();
             iconContainer.innerHTML = svgText;
         } catch (error) {
             console.error('Error loading SVG:', error);
+            iconContainer.innerHTML = '⚠️'; // Show an error icon
         }
     }
     labelEl.textContent = label;
