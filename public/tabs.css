@@ -40,31 +40,6 @@
     background-color: var(--off-white);
 }
 
-.filter-tab {
-    background-color: var(--pure-white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--club-green);
-    border-top: none;
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
-    margin-right: 0.5rem;
-    min-width: 150px;
-    padding: 0;
-    box-sizing: border-box;
-    height: 44.19px;
-}
-
-.filter-tab .form-select {
-    border: none;
-    background-color: transparent;
-    padding: 0 1rem;
-    font-weight: bold;
-    color: var(--club-green);
-    height: 100%;
-}
-
 .tab-pane {
     display: none;
 }

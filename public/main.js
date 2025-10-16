@@ -1,5 +1,6 @@
 // main.js
 import './components/page-header.js';
+import './components/popup-menu.js';
 import { auth, db, collection, getDocs, query, orderBy, limit } from './firebase.config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { authReady } from './auth-manager.js';
