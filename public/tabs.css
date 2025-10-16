@@ -30,6 +30,7 @@
     min-width: 150px;
     text-align: center;
     transition: color 0.3s ease, background-color 0.3s ease;
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
 .tab-link.active {
@@ -44,18 +45,18 @@
 
 .season-filter-tab {
     margin-bottom: -2px;
-    padding: 0;
     height: 44.19px;
-    box-sizing: border-box;
-    background-color: var(--pure-white); /* Set background to white */
-    display: flex; /* Align select box vertically */
-    align-items: center; /* Align select box vertically */
+    padding: 0; /* Override default padding to enforce exact height */
+    background-color: var(--pure-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .season-filter-tab .form-select {
     border: none;
     background-color: transparent;
-    padding: 0 1rem; /* Adjust padding for aesthetics */
+    padding: 0 1rem;
     font-weight: bold;
     color: var(--club-green);
     height: 100%;
