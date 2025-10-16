@@ -6,12 +6,12 @@
     justify-content: center; /* Center the division filter on mobile */
 }
 
-/* FINAL FIX: Remove the green line under the tabs on this page */
+/* Remove the green line under the tabs on this page */
 .tab-bar {
     border-bottom: none;
 }
 
-/* FINAL FIX: Correct the tab alignment to remove the overlap/gap */
+/* Correct the tab alignment to remove the overlap/gap */
 .tabs-main {
     margin-bottom: 0;
 }

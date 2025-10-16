@@ -35,7 +35,6 @@
 .tab-link.active {
     color: var(--club-green);
     background-color: var(--pure-white);
-    border-bottom-color: var(--pure-white);
 }
 
 .tab-link:hover:not(.active) {
