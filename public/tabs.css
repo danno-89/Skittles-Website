@@ -44,16 +44,20 @@
 
 .season-filter-tab {
     margin-bottom: -2px;
+    padding: 0;
+    height: 44.19px;
+    box-sizing: border-box;
+    background-color: var(--pure-white); /* Set background to white */
+    display: flex; /* Align select box vertically */
+    align-items: center; /* Align select box vertically */
 }
 
 .season-filter-tab .form-select {
-    border: 2px solid transparent;
-    border-top: none;
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+    border: none;
+    background-color: transparent;
+    padding: 0 1rem; /* Adjust padding for aesthetics */
     font-weight: bold;
     color: var(--club-green);
-    background-color: var(--pure-white);
     height: 100%;
 }
 
