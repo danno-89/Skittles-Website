@@ -48,7 +48,7 @@
 }
 
 .season-filter-tab .form-select {
-    border: 2px solid transparent; /* Make the border transparent */
+    border: 2px solid transparent;
     border-top: none;
     border-bottom-left-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
