@@ -2,42 +2,35 @@ const popupMenuTemplate = document.createElement('template');
 popupMenuTemplate.innerHTML = `
   <style>
     :host {
-      display: inline-block;
+      display: inline-flex; /* Align with other flex items like tabs */
+      align-items: center; /* Vertically center the icon */
       position: relative;
     }
 
     .popup-trigger {
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      padding: 0 0.5rem; /* Provide some clickable space */
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background-color: var(--pure-white);
-      border: 2px solid var(--club-green);
-      border-top: none;
-      border-bottom-left-radius: var(--border-radius);
-      border-bottom-right-radius: var(--border-radius);
-      padding: 0 1rem;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: var(--club-green);
-      height: 44.19px;
-      box-sizing: border-box;
-      min-width: 150px;
-      margin-right: 0.5rem;
+      height: 44.19px; /* Match tab height */
     }
 
     .popup-trigger img {
       width: 24px;
       height: 24px;
-      margin-right: 8px;
+    }
+    
+    #label {
+      display: none; /* Hide the text label as requested */
     }
 
     .popup-content {
       display: none;
       position: absolute;
       top: 100%;
-      left: 0;
+      right: 0;
       background-color: var(--pure-white);
       border: 2px solid var(--club-green);
       border-radius: var(--border-radius);
@@ -51,7 +44,7 @@ popupMenuTemplate.innerHTML = `
     }
   </style>
   <div class="popup-trigger">
-    <img id="icon" src="" alt="">
+    <img id="icon" src="" alt="Menu Icon">
     <span id="label"></span>
   </div>
   <div class="popup-content">
@@ -75,7 +68,9 @@ class PopupMenu extends HTMLElement {
     const icon = this.getAttribute('icon');
     const label = this.getAttribute('label');
 
-    iconEl.src = `/assets/${icon}.svg`;
+    if (icon) {
+        iconEl.src = `/assets/${icon}.svg`;
+    }
     labelEl.textContent = label;
 
     trigger.addEventListener('click', (e) => {
