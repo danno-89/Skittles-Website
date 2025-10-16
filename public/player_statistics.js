@@ -492,6 +492,15 @@ function setupTabsAndFilters() {
     const tabPanes = document.querySelectorAll('.tab-pane');
     const teamFilter = document.getElementById('team-filter');
     const leagueFilter = document.getElementById('league-filter');
+    const divisionFilter = document.getElementById('division-filter');
+    const eligibleFilter = document.getElementById('eligible-only-filter');
+
+    const triggerRender = () => {
+        const activeTab = document.querySelector('.tab-link.active')?.dataset.tab;
+        if (activeTab === 'spares') displaySpareCounts();
+        if (activeTab === 'high-scores') displayHighScores();
+        if (activeTab === 'averages') displayAverages();
+    };
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -503,9 +512,7 @@ function setupTabsAndFilters() {
             const isAveragesTab = tabName === 'averages';
             document.getElementById('stats-header-container').style.display = isAveragesTab ? 'block' : 'none';
 
-            if (tabName === 'spares') displaySpareCounts();
-            if (tabName === 'high-scores') displayHighScores();
-            if (tabName === 'averages') displayAverages();
+            triggerRender();
         });
     });
 
@@ -517,9 +524,17 @@ function setupTabsAndFilters() {
                 const competition = allCompetitionsData.get(team.division);
                 if (competition) {
                     leagueFilter.value = competition.shortName;
+                    leagueFilter.disabled = true;
                 }
             }
+        } else {
+            leagueFilter.disabled = false;
         }
+        triggerRender();
+    });
+
+    [divisionFilter, leagueFilter, eligibleFilter].forEach(el => {
+        el.addEventListener('change', triggerRender);
     });
 }
 
