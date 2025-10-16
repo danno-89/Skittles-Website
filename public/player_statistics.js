@@ -279,21 +279,15 @@ async function displayAverages() {
     const uniqueDivisions = [...new Set(allPlayerAverages.map(p => p.division))].sort();
     const uniqueLeagues = [...new Set(allPlayerAverages.map(p => p.league))].sort();
 
+    const teamFilter = document.getElementById('team-filter');
+    const divisionFilter = document.getElementById('division-filter');
+    const leagueFilter = document.getElementById('league-filter');
+
+    teamFilter.innerHTML = `<option value="">All Teams</option>${uniqueTeams.map(t => `<option value="${t}">${t}</option>`).join('')}`;
+    divisionFilter.innerHTML = `<option value="">All Divisions</option>${uniqueDivisions.map(d => `<option value="${d}">${d}</option>`).join('')}`;
+    leagueFilter.innerHTML = `<option value="">All Leagues</option>${uniqueLeagues.map(l => `<option value="${l}">${l}</option>`).join('')}`;
+    
     headerContainer.innerHTML = `
-        <div class="filter-dropdowns">
-            <select id="team-filter" class="form-select">
-                <option value="">All Teams</option>
-                ${uniqueTeams.map(t => `<option value="${t}">${t}</option>`).join('')}
-            </select>
-            <select id="division-filter" class="form-select">
-                <option value="">All Divisions</option>
-                ${uniqueDivisions.map(d => `<option value="${d}">${d}</option>`).join('')}
-            </select>
-            <select id="league-filter" class="form-select">
-                <option value="">All Leagues</option>
-                ${uniqueLeagues.map(l => `<option value="${l}">${l}</option>`).join('')}
-            </select>
-        </div>
         <label class="checkbox-label">
             <input type="checkbox" id="eligible-only-filter">
             Show eligible players only
@@ -309,9 +303,7 @@ async function displayAverages() {
         </details>
     `;
 
-    const teamFilter = document.getElementById('team-filter');
-    const divisionFilter = document.getElementById('division-filter');
-    const leagueFilter = document.getElementById('league-filter');
+    
     const eligibleFilter = document.getElementById('eligible-only-filter');
 
     const render = () => {
@@ -482,33 +474,8 @@ function setupTabsAndFilters() {
     });
 }
 
-async function populateSeasons() {
-    const seasonFilter = document.getElementById('season-filter');
-    try {
-        const seasonsSnapshot = await getDocs(collection(db, "seasons"));
-        const seasons = seasonsSnapshot.docs.map(doc => doc.id).sort((a, b) => b.localeCompare(a));
-        
-        seasonFilter.innerHTML = '<option value="">Select a Season</option>';
-        seasons.forEach(seasonId => {
-            const option = document.createElement('option');
-            option.value = seasonId;
-            option.textContent = seasonId;
-            seasonFilter.appendChild(option);
-        });
-
-        const currentSeason = seasons.find(id => id.includes('2024-25')); // Default to current
-        if (currentSeason) {
-            seasonFilter.value = currentSeason;
-        }
-
-    } catch (error) {
-        console.error("Error populating seasons:", error);
-    }
-}
-
 async function initializePage() {
     setupTabsAndFilters();
-    await populateSeasons();
     
     const activeTab = document.querySelector('.tab-link.active')?.dataset.tab;
     const isAveragesTab = activeTab === 'averages';

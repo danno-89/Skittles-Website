@@ -43,7 +43,7 @@
     background-color: var(--off-white);
 }
 
-.season-filter-tab {
+.filter-tab {
     margin-bottom: -2px;
     height: 44.19px;
     background-color: var(--pure-white);
@@ -52,12 +52,12 @@
     justify-content: center;
 }
 
-/* --- FINAL FIX: Specific override for the season tab to remove conflicting padding --- */
-.season-filter-tab.tab-link {
+/* --- FINAL FIX: Specific override for the filter tab to remove conflicting padding --- */
+.filter-tab.tab-link {
     padding: 0;
 }
 
-.season-filter-tab .form-select {
+.filter-tab .form-select {
     border: none;
     background-color: transparent;
     padding: 0 1rem;
