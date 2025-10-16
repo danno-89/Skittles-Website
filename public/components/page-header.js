@@ -3,7 +3,6 @@ pageHeaderTemplate.innerHTML = `
   <style>
     :host {
       display: block;
-      margin-bottom: var(--spacing-md);
     }
     .page-header {
       padding-block-end: 10px;
