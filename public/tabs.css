@@ -50,11 +50,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* --- FINAL FIX: Specific override for the filter tab to remove conflicting padding --- */
-.filter-tab.tab-link {
+    border: 2px solid var(--club-green);
+    border-top: none;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    margin-right: 0.5rem;
+    min-width: 150px;
     padding: 0;
+    box-sizing: border-box;
 }
 
 .filter-tab .form-select {
