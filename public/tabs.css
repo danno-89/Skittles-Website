@@ -1,0 +1,67 @@
+/* --- Tab Navigation --- */
+.tab-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--club-green);
+    margin-top: 0;
+}
+
+.tabs-main {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    margin-bottom: -2px;
+}
+
+.tab-link {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    border: 2px solid var(--club-green);
+    border-top: none;
+    background-color: var(--light-grey);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--medium-grey);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    margin-right: 0.5rem;
+    min-width: 150px;
+    text-align: center;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.tab-link.active {
+    color: var(--club-green);
+    background-color: var(--pure-white);
+    border-bottom-color: var(--pure-white);
+}
+
+.tab-link:hover:not(.active) {
+    color: var(--dark-grey);
+    background-color: var(--off-white);
+}
+
+.season-filter-tab {
+    margin-bottom: -2px;
+}
+
+.season-filter-tab .form-select {
+    border: 2px solid transparent; /* Make the border transparent */
+    border-top: none;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    font-weight: bold;
+    color: var(--club-green);
+    background-color: var(--pure-white);
+    height: 100%;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
