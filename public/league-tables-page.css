@@ -10,3 +10,12 @@
 .tab-bar {
     border-bottom: none;
 }
+
+.season-filter-tab {
+    padding: 0;
+}
+
+.season-filter-tab .form-select {
+    border: none;
+    padding: 0.6rem 1rem;
+}
