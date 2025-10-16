@@ -16,20 +16,19 @@
   <div w3-include-html="navigation.html"></div>
 
   <main id="ssc-cup-page">
-    <div class="page-header">
-        <h1>SSC Cup</h1>
-    </div>
-
-    <div class="tab-bar">
-        <div id="group-tabs-container" class="tabs-main">
-            <!-- Group tabs will be dynamically inserted here -->
-        </div>
-        <div class="tabs-main">
-            <div class="season-filter-tab tab-link">
-                <select id="season-filter" class="form-select"></select>
+    <page-header>
+        <span slot="title">SSC Cup</span>
+        <div slot="tabs">
+            <div id="group-tabs-container" class="tabs-main">
+                <!-- Group tabs will be dynamically inserted here -->
+            </div>
+            <div class="tabs-main">
+                <div class="filter-tab">
+                    <select id="season-filter" class="form-select"></select>
+                </div>
             </div>
         </div>
-    </div>
+    </page-header>
 
     <div id="group-container">
         <!-- The group table and fixtures for the selected group will be shown here -->

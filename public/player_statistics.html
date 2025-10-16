@@ -18,42 +18,48 @@
         <div w3-include-html="navigation.html"></div>
 
         <main>
-            <div class="page-header">
-                <h1>Player Statistics</h1>
-                <div class="mobile-header-icons">
-                    <button id="tabs-toggle-btn" class="icon-btn">
-                        <span class="material-symbols-outlined">analytics</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="tab-bar">
-                <div class="tabs-main">
-                    <button class="tab-link active" data-tab="averages">Averages</button>
-                    <button class="tab-link" data-tab="high-scores">High Scores</button>
-                    <button class="tab-link" data-tab="spares">Spares</button>
-                </div>
-                <div class="tabs-main">
-                    <div class="filter-tab">
-                        <select id="team-filter" class="form-select">
-                            <option value="">All Teams</option>
-                        </select>
+            <page-header>
+                <span slot="title">Player Statistics</span>
+                <div slot="tabs">
+                    <div class="tabs-main">
+                        <button class="tab-link active" data-tab="averages">Averages</button>
+                        <button class="tab-link" data-tab="high-scores">High Scores</button>
+                        <button class="tab-link" data-tab="spares">Spares</button>
                     </div>
-                    <div class="filter-tab">
-                        <select id="division-filter" class="form-select">
-                            <option value="">All Divisions</option>
-                        </select>
-                    </div>
-                    <div class="filter-tab">
-                        <select id="league-filter" class="form-select">
-                            <option value="">All Leagues</option>
-                        </select>
+                    <div class="tabs-main">
+                        <div class="filter-tab">
+                            <select id="team-filter" class="form-select">
+                                <option value="">All Teams</option>
+                            </select>
+                        </div>
+                        <div class="filter-tab">
+                            <select id="division-filter" class="form-select">
+                                <option value="">All Divisions</option>
+                            </select>
+                        </div>
+                        <div class="filter-tab">
+                            <select id="league-filter" class="form-select">
+                                <option value="">All Leagues</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </page-header>
 
             <div id="stats-header-container">
-                <!-- This will be populated by JS -->
+                <label class="checkbox-label">
+                    <input type="checkbox" id="eligible-only-filter">
+                    Show eligible players only
+                </label>
+                <details class="stats-key">
+                    <summary>Key</summary>
+                    <div class="key-items-container">
+                        <div class="key-item division-leader">Club Leader</div>
+                        <div class="key-item ineligible-player">Ineligible Player</div>
+                        <div class="key-item"><span class="key-example">[X]</span> Team Games Played</div>
+                        <div class="key-item"><span class="key-example">X (Y)</span> Filtered Rank (Overall Rank)</div>
+                    </div>
+                </details>
             </div>
 
             <div id="tab-content-container">
