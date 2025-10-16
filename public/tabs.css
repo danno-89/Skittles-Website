@@ -3,7 +3,6 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-bottom: 2px solid var(--club-green);
     margin-top: 0;
 }
 
