@@ -16,11 +16,10 @@
     margin-bottom: 0;
 }
 
-.season-filter-tab {
-    padding: 0;
-}
-
-.season-filter-tab .form-select {
-    border: none;
-    padding: 0.6rem 1rem;
+/* FINAL FIX: Override for the season filter tab on this page */
+#filters-container.season-filter-tab {
+    border: 2px solid var(--club-green);
+    border-top: none;
+    border-bottom-color: var(--pure-white);
+    background-color: var(--pure-white);
 }
