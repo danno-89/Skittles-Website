@@ -3,15 +3,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-bottom: 2px solid var(--club-green);
     margin-top: 0;
 }
 
 .tabs-main {
     display: flex;
     flex-wrap: wrap;
-    position: relative;
-    margin-bottom: -2px;
 }
 
 .tab-link {
@@ -30,13 +27,12 @@
     min-width: 150px;
     text-align: center;
     transition: color 0.3s ease, background-color 0.3s ease;
-    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+    box-sizing: border-box;
 }
 
 .tab-link.active {
     color: var(--club-green);
     background-color: var(--pure-white);
-    border-bottom-color: var(--pure-white);
 }
 
 .tab-link:hover:not(.active) {
@@ -45,21 +41,19 @@
 }
 
 .filter-tab {
-    margin-bottom: -2px;
-    height: 44.19px;
     background-color: var(--pure-white);
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid var(--club-green);
     border-top: none;
-    border-bottom-color: var(--pure-white); /* U-shape fix */
     border-bottom-left-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
     margin-right: 0.5rem;
     min-width: 150px;
     padding: 0;
     box-sizing: border-box;
+    height: 44.19px;
 }
 
 .filter-tab .form-select {
@@ -77,4 +71,18 @@
 
 .tab-pane.active {
     display: block;
+}
+
+/* --- OPT-IN HANGING TABS STYLE --- */
+.tab-bar.hanging-tabs {
+    border-bottom: 2px solid var(--club-green);
+}
+
+.tab-bar.hanging-tabs .tabs-main {
+    position: relative;
+    margin-bottom: -2px;
+}
+
+.tab-bar.hanging-tabs .tab-link.active {
+    border-bottom-color: var(--pure-white);
 }
