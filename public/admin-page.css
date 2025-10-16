@@ -1,5 +1,9 @@
 /* --- Admin Page Specific Styles --- */
 
+#admin-tabs-container {
+    margin-bottom: var(--spacing-lg);
+}
+
 /* --- Scorecard and Results Input --- */
 .scores-grid {
     display: grid;
