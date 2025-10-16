@@ -133,7 +133,7 @@ async function loadCompetitions() {
         
         const fixturesQuery = query(collection(db, "match_results"), where("division", "==", competition.id));
         const fixturesSnapshot = await getDocs(fixturesQuery);
-        const fixtures = fixturesSnapshot.docs.map(doc => doc.data());
+        const fixtures = fixturesSnapshot.docs..map(doc => doc.data());
         
         contentDiv.innerHTML = renderCompetitionFixtures(fixtures, competition.name);
         competitionsContainer.appendChild(contentDiv);
