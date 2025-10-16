@@ -51,3 +51,8 @@
     font-style: italic;
     color: #555;
 }
+
+/* Remove the green line under the tabs on this page */
+.tab-bar {
+    border-bottom: none;
+}

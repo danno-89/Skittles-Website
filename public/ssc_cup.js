@@ -289,7 +289,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                         
                         groupContainer.appendChild(contentContainer);
                         
-                        const tab = document.createElement('button');
+                        const tab = document.createElement('a');
                         tab.className = 'tab-link';
                         tab.dataset.group = groupKey;
                         tab.textContent = groupKey.replace(/_/g, ' ');
