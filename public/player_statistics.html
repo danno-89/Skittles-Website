@@ -6,6 +6,7 @@
     <title>Player Statistics - Skittles Club Hub</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tabs.css">
     <link rel="stylesheet" href="player-statistics-page.css">
     <link rel="icon" type="image/png" href="SSC%20Logo.png">
 </head>
@@ -26,24 +27,21 @@
                 </div>
             </div>
 
-            <div class="mobile-controls">
-                <button id="filter-toggle-btn" class="icon-btn">
-                    <span class="material-symbols-outlined">tune</span>
-                </button>
-            </div>
-
-            <div id="tabs-container" class="collapsible-section">
+            <div class="tab-bar">
                 <div class="tabs-main">
                     <button class="tab-link active" data-tab="averages">Averages</button>
                     <button class="tab-link" data-tab="high-scores">High Scores</button>
                     <button class="tab-link" data-tab="spares">Spares</button>
                 </div>
+                <div class="tabs-main">
+                    <div class="season-filter-tab tab-link">
+                        <select id="season-filter" class="form-select"></select>
+                    </div>
+                </div>
             </div>
 
-            <div id="filters-container-collapsible" class="collapsible-section">
-                <div id="stats-header-container">
-                    <!-- This will be populated by JS -->
-                </div>
+            <div id="stats-header-container">
+                <!-- This will be populated by JS -->
             </div>
 
             <div id="tab-content-container">

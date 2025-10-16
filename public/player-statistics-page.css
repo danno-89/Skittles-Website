@@ -74,23 +74,6 @@
 }
 
 
-.filters-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.filter-dropdowns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-}
-
-.filter-dropdowns .form-select {
-    flex: 1 1 200px;
-}
-
-
 .stats-table-container {
     overflow-x: auto;
 }
@@ -272,4 +255,12 @@ tr.division-leader td.movement-negative {
 
 .movement-negative {
     color: var(--danger-red, #dc3545);
+}
+
+.tab-bar {
+    border-bottom: none;
+}
+
+.tabs-main {
+    margin-bottom: 0;
 }

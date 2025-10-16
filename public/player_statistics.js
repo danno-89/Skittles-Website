@@ -280,26 +280,24 @@ async function displayAverages() {
     const uniqueLeagues = [...new Set(allPlayerAverages.map(p => p.league))].sort();
 
     headerContainer.innerHTML = `
-        <div class="filters-container">
-            <div class="filter-dropdowns">
-                <select id="team-filter" class="form-select">
-                    <option value="">All Teams</option>
-                    ${uniqueTeams.map(t => `<option value="${t}">${t}</option>`).join('')}
-                </select>
-                <select id="division-filter" class="form-select">
-                    <option value="">All Divisions</option>
-                    ${uniqueDivisions.map(d => `<option value="${d}">${d}</option>`).join('')}
-                </select>
-                <select id="league-filter" class="form-select">
-                    <option value="">All Leagues</option>
-                    ${uniqueLeagues.map(l => `<option value="${l}">${l}</option>`).join('')}
-                </select>
-            </div>
-            <label class="checkbox-label">
-                <input type="checkbox" id="eligible-only-filter">
-                Show eligible players only
-            </label>
+        <div class="filter-dropdowns">
+            <select id="team-filter" class="form-select">
+                <option value="">All Teams</option>
+                ${uniqueTeams.map(t => `<option value="${t}">${t}</option>`).join('')}
+            </select>
+            <select id="division-filter" class="form-select">
+                <option value="">All Divisions</option>
+                ${uniqueDivisions.map(d => `<option value="${d}">${d}</option>`).join('')}
+            </select>
+            <select id="league-filter" class="form-select">
+                <option value="">All Leagues</option>
+                ${uniqueLeagues.map(l => `<option value="${l}">${l}</option>`).join('')}
+            </select>
         </div>
+        <label class="checkbox-label">
+            <input type="checkbox" id="eligible-only-filter">
+            Show eligible players only
+        </label>
         <details class="stats-key">
             <summary>Key</summary>
             <div class="key-items-container">
@@ -466,12 +464,6 @@ async function displayHighScores() {
 function setupTabsAndFilters() {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
-    const tabsToggleBtn = document.getElementById('tabs-toggle-btn');
-    const filterToggleBtn = document.getElementById('filter-toggle-btn');
-    const tabsContainer = document.getElementById('tabs-container');
-    const filtersContainer = document.getElementById('filters-container-collapsible');
-    const mobileControls = document.querySelector('.mobile-controls');
-    const isMobile = window.innerWidth <= 768;
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -482,37 +474,45 @@ function setupTabsAndFilters() {
             
             const isAveragesTab = tabName === 'averages';
             document.getElementById('stats-header-container').style.display = isAveragesTab ? 'block' : 'none';
-            if(isMobile) {
-                mobileControls.style.display = isAveragesTab ? 'flex' : 'none';
-            }
-
 
             if (tabName === 'spares') displaySpareCounts();
             if (tabName === 'high-scores') displayHighScores();
             if (tabName === 'averages') displayAverages();
         });
     });
+}
 
-    tabsToggleBtn.addEventListener('click', () => {
-        tabsContainer.classList.toggle('visible');
-    });
+async function populateSeasons() {
+    const seasonFilter = document.getElementById('season-filter');
+    try {
+        const seasonsSnapshot = await getDocs(collection(db, "seasons"));
+        const seasons = seasonsSnapshot.docs.map(doc => doc.id).sort((a, b) => b.localeCompare(a));
+        
+        seasonFilter.innerHTML = '<option value="">Select a Season</option>';
+        seasons.forEach(seasonId => {
+            const option = document.createElement('option');
+            option.value = seasonId;
+            option.textContent = seasonId;
+            seasonFilter.appendChild(option);
+        });
 
-    filterToggleBtn.addEventListener('click', () => {
-        filtersContainer.classList.toggle('visible');
-    });
+        const currentSeason = seasons.find(id => id.includes('2024-25')); // Default to current
+        if (currentSeason) {
+            seasonFilter.value = currentSeason;
+        }
+
+    } catch (error) {
+        console.error("Error populating seasons:", error);
+    }
 }
 
 async function initializePage() {
     setupTabsAndFilters();
+    await populateSeasons();
+    
     const activeTab = document.querySelector('.tab-link.active')?.dataset.tab;
-
     const isAveragesTab = activeTab === 'averages';
-    const isMobile = window.innerWidth <= 768;
     document.getElementById('stats-header-container').style.display = isAveragesTab ? 'block' : 'none';
-    if(isMobile) {
-        document.querySelector('.mobile-controls').style.display = isAveragesTab ? 'flex' : 'none';
-    }
-
 
     if (activeTab === 'spares') await displaySpareCounts();
     if (activeTab === 'high-scores') await displayHighScores();
