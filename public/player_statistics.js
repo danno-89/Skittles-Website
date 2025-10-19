@@ -288,8 +288,6 @@ function calculateHighScores(matches, players, teams) {
 // --- Rendering Functions ---
 async function displayAverages() {
     const container = document.getElementById('averages-content');
-    const headerContainer = document.getElementById('stats-header-container');
-    headerContainer.innerHTML = ''; 
 
     let tableContainer = container.querySelector('.stats-table-container');
     if (!tableContainer) {
@@ -320,23 +318,6 @@ async function displayAverages() {
     teamFilter.innerHTML = `<option value="">All Teams</option>${uniqueTeams.map(t => `<option value="${t}">${t}</option>`).join('')}`;
     divisionFilter.innerHTML = `<option value="">All Divisions</option>${uniqueDivisions.map(d => `<option value="${d}">${d}</option>`).join('')}`;
     leagueFilter.innerHTML = `<option value="">All Leagues</option>${uniqueLeagues.map(l => `<option value="${l}">${l}</option>`).join('')}`;
-    
-    headerContainer.innerHTML = `
-        <label class="checkbox-label">
-            <input type="checkbox" id="eligible-only-filter">
-            Show eligible players only
-        </label>
-        <details class="stats-key">
-            <summary>Key</summary>
-            <div class="key-items-container">
-                <div class="key-item division-leader">Club Leader</div>
-                <div class="key-item ineligible-player">Ineligible Player</div>
-                <div class="key-item"><span class="key-example">[X]</span> Team Games Played</div>
-                <div class="key-item"><span class="key-example">X (Y)</span> Filtered Rank (Overall Rank)</div>
-            </div>
-        </details>
-    `;
-
     
     const eligibleFilter = document.getElementById('eligible-only-filter');
 
@@ -423,7 +404,6 @@ async function displayAverages() {
 async function displaySpareCounts() {
     const container = document.getElementById('spares-content');
     container.innerHTML = '<p>Calculating...</p>';
-    document.getElementById('stats-header-container').innerHTML = '';
     const [{ players, teams }, { matches }] = await Promise.all([fetchAllData(), fetchCurrentSeasonData()]);
     if (matches.length === 0) { container.innerHTML = '<p>No match results found.</p>'; return; }
 
@@ -456,7 +436,6 @@ async function displaySpareCounts() {
 async function displayHighScores() {
     const container = document.getElementById('high-scores-content');
     container.innerHTML = '<p>Calculating...</p>';
-    document.getElementById('stats-header-container').innerHTML = '';
     const [{ players, teams }, { matches }] = await Promise.all([fetchAllData(), fetchCurrentSeasonData()]);
     if (matches.length === 0) { container.innerHTML = '<p>No match results found.</p>'; return; }
 
@@ -534,7 +513,7 @@ function setupTabsAndFilters() {
     });
 
     [divisionFilter, leagueFilter, eligibleFilter].forEach(el => {
-        el.addEventListener('change', triggerRender);
+        if(el) el.addEventListener('change', triggerRender);
     });
 }
 

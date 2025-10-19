@@ -14,12 +14,11 @@ popupMenuTemplate.innerHTML = `
       padding: 0 0.5rem;
       display: flex;
       align-items: center;
-      height: 44.19px;
     }
 
     .icon-container svg {
-      width: 24px;
-      height: 24px;
+      width: 1em;
+      height: 1em;
     }
 
     /* Style the duotone SVG paths */
@@ -38,7 +37,7 @@ popupMenuTemplate.innerHTML = `
       display: none;
       position: absolute;
       top: 100%;
-      left: 0; /* Align popup to the left of the icon */
+      right: 0; /* Align popup to the right */
       background-color: var(--pure-white);
       border: 2px solid var(--club-green);
       border-radius: var(--border-radius);

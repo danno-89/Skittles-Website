@@ -73,7 +73,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
     const renderTable = (groupData) => {
         const container = document.createElement('div');
-        container.className = 'league-standings-container'; 
+        container.className = 'league-table-container'; 
 
         if (!groupData || !Array.isArray(groupData.standings)) {
             return container; 
