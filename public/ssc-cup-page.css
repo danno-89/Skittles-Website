@@ -3,12 +3,37 @@
 /* Reusing styles for consistency */
 @import url("tables.css");
 @import url("fixtures-results-page.css");
-@import url("league-tables-page.css");
-
 
 /* Add any additional styles specific to the SSC Cup page here */
 .fixtures-container {
     margin-top: 1.5rem; /* Give a bit of space after the narrative */
+}
+
+.week-details {
+    border: 1px solid var(--club-green); /* Thinner border */
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.week-summary {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    padding: var(--spacing-sm);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.results-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Override the table header style for this page */
+.results-table thead th {
+    background-color: var(--pure-white);
+    color: var(--charcoal);
+    font-weight: bold;
 }
 
 #group-container {
@@ -36,16 +61,6 @@
     margin-bottom: 0.5rem; /* Space between paragraphs */
 }
 
-.week-summary {
-    background-color: var(--club-yellow);
-    color: var(--club-green);
-    padding: var(--spacing-sm);
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: var(--border-radius);
-    margin-bottom: 2px;
-}
-
 .score-balance-col {
     text-align: center;
     width: 180px;
@@ -60,9 +75,4 @@
 
 #group-tabs-container .tab-link {
     min-width: 100px;
-}
-
-#ssc-cup-page .styled-table th, 
-#ssc-cup-page .styled-table td {
-    padding: 4px 12px;
 }
