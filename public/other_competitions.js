@@ -20,7 +20,7 @@ const parseDate = (dateInput) => {
 
 const fetchAndRenderTabs = async () => {
     const tabList = document.createElement('div');
-    tabList.className = 'tabs main-tabs';
+    tabList.className = 'tabs-main';
 
     const overviewTab = document.createElement('button');
     overviewTab.className = 'tab-link active';
@@ -69,6 +69,7 @@ const fetchAndRenderTabs = async () => {
 };
 
 const fetchCompetitionDates = async () => {
+    if(!competitionDatesContainer) return;
     competitionDatesContainer.innerHTML = '<h2>Competition Dates</h2>';
     try {
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
@@ -110,6 +111,7 @@ const renderCompetitionEvents = (eventDocs) => {
 };
 
 const fetchWinners = async (competitionId, competitionName) => {
+    if(!competitionDatesContainer) return;
     competitionDatesContainer.innerHTML = `<h2>Past Winners</h2>`;
     try {
         const docSnap = await getDoc(doc(db, "winners", competitionId));
@@ -153,6 +155,7 @@ const renderWinners = (history, competitionName) => {
 };
 
 const fetchCompetitionDetails = async (competitionName) => {
+    if(!competitionContentContainer) return;
     competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Loading details...</p>`;
     try {
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
@@ -207,12 +210,12 @@ const switchTab = (competitionId, competitionName) => {
     });
 
     if (competitionId === "overview") {
-        overviewContent.style.display = 'block';
-        competitionContentContainer.style.display = 'none';
+        if (overviewContent) overviewContent.style.display = 'block';
+        if (competitionContentContainer) competitionContentContainer.style.display = 'none';
         fetchCompetitionDates();
     } else {
-        overviewContent.style.display = 'none';
-        competitionContentContainer.style.display = 'block';
+        if (overviewContent) overviewContent.style.display = 'none';
+        if (competitionContentContainer) competitionContentContainer.style.display = 'block';
         fetchCompetitionDetails(competitionName);
         fetchWinners(competitionId, competitionName);
     }

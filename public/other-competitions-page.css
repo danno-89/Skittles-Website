@@ -1,11 +1,137 @@
-/* other-competitions-page.css */
-@import url("tables.css");
-@import url("fixtures-results-page.css");
+/* --- Other Competitions Page Specific Styles --- */
+.hall-of-fame-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-xl);
+    align-items: flex-start;
+}
 
-.tab-bar {
+#competition-tabs-container {
+    margin-bottom: var(--spacing-lg);
+}
+
+#competitions-main-content {
+    background-color: var(--off-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-elevation-low);
+}
+
+.sidebar {
+    position: sticky;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+#competition-dates-container {
+    background-color: var(--pure-white);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+}
+
+#competition-dates-container h2 {
+    margin-top: 0;
+    color: var(--darker-green);
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: 0.5rem;
+}
+
+#competition-dates-container h3 {
+    text-align: center;
+    color: var(--darker-green);
+    margin: 0 0 var(--spacing-md) 0;
+}
+
+.competition-dates-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.competition-dates-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--light-grey);
+    line-height: 1.4;
+}
+
+.competition-dates-list li:last-child {
     border-bottom: none;
 }
 
-.tabs-main {
-    margin-bottom: 0;
+.competition-dates-list strong {
+    color: var(--charcoal);
+    padding-right: var(--spacing-md);
+}
+
+.competition-dates-list span {
+    font-weight: bold;
+    color: var(--club-green);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.winners-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.winners-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--light-grey);
+    line-height: 1.4;
+}
+
+.winners-list li:last-child {
+    border-bottom: none;
+}
+
+.season {
+    font-weight: bold;
+    color: var(--medium-grey);
+    flex-shrink: 0;
+}
+
+.winner {
+    font-weight: bold;
+    color: var(--club-green);
+    text-align: right;
+    padding-left: var(--spacing-md);
+}
+
+.competition-details {
+    background-color: var(--off-white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-top: var(--spacing-md);
+}
+
+.competition-details p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.competition-details strong {
+    color: var(--darker-green);
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 992px) {
+    .hall-of-fame-layout {
+        grid-template-columns: 1fr;
+    }
+    .sidebar {
+        position: static;
+        top: auto;
+        margin-top: var(--spacing-xl);
+    }
 }
