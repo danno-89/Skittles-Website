@@ -18,6 +18,9 @@
   <main id="ssc-cup-page">
     <page-header>
         <span slot="title">SSC Cup</span>
+        <popup-menu slot="icon" icon="select" label="Season">
+            <select id="season-filter" class="form-select"></select>
+        </popup-menu>
     </page-header>
     
     <div class="tab-bar">
@@ -25,9 +28,6 @@
             <div id="group-tabs-container" class="tabs-main">
                 <!-- Group tabs will be dynamically inserted here -->
             </div>
-            <popup-menu icon="select" label="Season">
-                <select id="season-filter" class="form-select"></select>
-            </popup-menu>
         </div>
     </div>
 

@@ -73,7 +73,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
     const renderTable = (groupData) => {
         const container = document.createElement('div');
-        container.className = 'league-table-container'; 
+        container.className = 'table-container'; 
 
         if (!groupData || !Array.isArray(groupData.standings)) {
             return container; 
@@ -89,12 +89,18 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
         }));
 
         const table = document.createElement('table');
-        table.className = 'league-standings-table';
+        table.className = 'league-standings-table styled-table';
         
         table.innerHTML = `
             <thead>
                 <tr>
-                    <th>Pos</th><th>Team</th><th>Pld</th><th>W</th><th>D</th><th>L</th><th>Pts</th>
+                    <th class="pos-col">Pos</th>
+                    <th class="team-name-col">Team</th>
+                    <th class="number-col">Pld</th>
+                    <th class="number-col">W</th>
+                    <th class="number-col">D</th>
+                    <th class="number-col">L</th>
+                    <th class="pts-col number-col">Pts</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -106,13 +112,13 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
         teams.forEach((team, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${team.teamName}</td>
-                <td>${team.played || '-'}</td>
-                <td>${team.won || '-'}</td>
-                <td>${team.drawn || '-'}</td>
-                <td>${team.lost || '-'}</td>
-                <td>${team.points || '-'}</td>
+                <td class="pos-col">${index + 1}</td>
+                <td class="team-name-col">${team.teamName}</td>
+                <td class="number-col">${team.played || '-'}</td>
+                <td class="number-col">${team.won || '-'}</td>
+                <td class="number-col">${team.drawn || '-'}</td>
+                <td class="number-col">${team.lost || '-'}</td>
+                <td class="pts-col number-col">${team.points || '-'}</td>
             `;
             tbody.appendChild(row);
         });
@@ -158,7 +164,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
             html += `<details class="week-details" open>`;
             html += `<summary class="week-summary">Week Commencing: ${weekCommencing}</summary>`;
             html += `<div class="table-container">`;
-            html += `<table class="results-table">
+            html += `<table class="results-table league-standings-table styled-table">
                         <thead>
                             <tr>
                                 <th class="date-col">Date</th>

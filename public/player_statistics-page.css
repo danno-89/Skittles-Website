@@ -266,21 +266,4 @@ tr.division-leader td.movement-negative {
 
 .filter-group label {
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.filter-group .form-select,
-.filter-group .checkbox-label {
-    font-size: 0.9rem;
-}
-
-#clear-filters-btn {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    background-color: var(--club-yellow);
-    color: var(--club-green);
-}
-#clear-filters-btn:hover {
-    background-color: var(--darker-yellow);
 }

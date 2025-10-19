@@ -11,6 +11,10 @@
     margin-top: 1.5rem; /* Give a bit of space after the narrative */
 }
 
+#group-container {
+    margin-top: 1.5rem;
+}
+
 .group-fixtures-subheader {
     margin-top: 2rem;
     margin-bottom: 1rem;
@@ -42,11 +46,6 @@
     margin-bottom: 2px;
 }
 
-#ssc-cup-page .league-standings-table td:nth-child(2),
-#ssc-cup-page .results-table .team-name {
-    font-weight: normal !important;
-}
-
 .score-balance-col {
     text-align: center;
     width: 180px;
@@ -57,4 +56,13 @@
 /* Remove the green line under the tabs on this page */
 .tab-bar {
     border-bottom: none;
+}
+
+#group-tabs-container .tab-link {
+    min-width: 100px;
+}
+
+#ssc-cup-page .styled-table th, 
+#ssc-cup-page .styled-table td {
+    padding: 4px 12px;
 }

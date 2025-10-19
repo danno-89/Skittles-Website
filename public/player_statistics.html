@@ -20,6 +20,32 @@
         <main>
             <page-header>
                 <span slot="title">Player Statistics</span>
+                <popup-menu slot="icon" icon="select" label="Filters">
+                    <div class="filter-group">
+                        <select id="team-filter" class="form-select">
+                            <option value="">All Teams</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="division-filter" class="form-select">
+                            <option value="">All Divisions</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="league-filter" class="form-select">
+                            <option value="">All Leagues</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="checkbox-label" for="hide-ineligible-filter">
+                            <input type="checkbox" id="hide-ineligible-filter" checked>
+                            Hide ineligible players
+                        </label>
+                    </div>
+                    <div class="filter-group">
+                        <button id="clear-filters-btn" class="btn">Clear Filters</button>
+                    </div>
+                </popup-menu>
             </page-header>
             
             <div class="tab-bar">
@@ -28,30 +54,9 @@
                     <button class="tab-link" data-tab="high-scores">High Scores</button>
                     <button class="tab-link" data-tab="spares">Spares</button>
                 </div>
-                <div class="tabs-main">
-                    <div class="filter-tab">
-                        <select id="team-filter" class="form-select">
-                            <option value="">All Teams</option>
-                        </select>
-                    </div>
-                    <div class="filter-tab">
-                        <select id="division-filter" class="form-select">
-                            <option value="">All Divisions</option>
-                        </select>
-                    </div>
-                    <div class="filter-tab">
-                        <select id="league-filter" class="form-select">
-                            <option value="">All Leagues</option>
-                        </select>
-                    </div>
-                </div>
             </div>
 
             <div id="stats-header-container">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="eligible-only-filter">
-                    Show eligible players only
-                </label>
                 <details class="stats-key">
                     <summary>Key</summary>
                     <div class="key-items-container">
