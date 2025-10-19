@@ -17,6 +17,7 @@ import { authReady } from './auth-manager.js';
 import { initAdminEditFixture } from './admin-edit-fixture.js';
 import { initRescheduleFixture } from './admin-reschedule.js';
 import { initNewsManagement } from './news-management.js';
+import { initCorrectionTool } from './admin-correction.js';
 
 // --- Globals for Admin Page Data ---
 const teamsMap = new Map();
@@ -65,6 +66,7 @@ async function initializeAdminPage() {
         initAdminEditFixture();
         initRescheduleFixture(teamsMap);
         initNewsManagement();
+        initCorrectionTool();
 
     } catch (error) {
         console.error("An error occurred during admin page initialisation:", error);
@@ -161,10 +163,9 @@ async function fetchAndDisplayCompetitionName(competitionId, elementId) {
 function initializeTabs() {
     const tabsContainer = document.getElementById('admin-tabs-container');
     const tabContentContainer = document.getElementById('tab-content-container');
-    const tabsToggleBtn = document.getElementById('tabs-toggle-btn');
 
-    if (!tabsContainer || !tabContentContainer || !tabsToggleBtn) {
-        console.error("Tab containers or toggle button not found. Tab functionality will be disabled.");
+    if (!tabsContainer || !tabContentContainer) {
+        console.error("Tab containers not found. Tab functionality will be disabled.");
         return;
     }
 
@@ -179,15 +180,7 @@ function initializeTabs() {
             tabPanes.forEach(pane => {
                 pane.classList.toggle('active', pane.id === `${tabName}-content`);
             });
-            if (window.innerWidth <= 768) {
-                tabsContainer.classList.remove('visible');
-            }
         });
-    });
-
-    tabsToggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        tabsContainer.classList.toggle('visible');
     });
 }
 

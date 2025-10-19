@@ -192,11 +192,11 @@
     }
     
     /* Make tabs container collapsible */
-    #tabs-container {
+    #admin-tabs-container {
         display: none;
     }
 
-    #tabs-container.visible {
+    #admin-tabs-container.visible {
         display: block;
         background-color: var(--off-white);
         padding: var(--spacing-md);

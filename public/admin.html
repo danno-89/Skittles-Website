@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="admin-page.css">
     <link rel="stylesheet" href="news-management.css">
     <link rel="stylesheet" href="tabs.css">
+    <link rel="stylesheet" href="admin-correction.css">
     <link rel="icon" type="image/png" href="SSC%20Logo.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -23,7 +24,7 @@
                 <span slot="title">Admin</span>
             </page-header>
             
-            <div class="tab-bar hanging-tabs">
+            <div id="admin-tabs-container" class="tab-bar hanging-tabs">
                 <div class="tabs-main">
                     <button class="tab-link active" data-tab="results-input">Results Input</button>
                     <button class="tab-link" data-tab="edit-fixture">Edit Fixture</button>
@@ -31,12 +32,13 @@
                     <button class="tab-link" data-tab="postpone-fixture">Postpone Fixture</button>
                     <button class="tab-link" data-tab="reschedule-fixture">Reschedule Fixture</button>
                     <button class="tab-link" data-tab="news-management">News</button>
-                    <a href="admin-correction.html" class="tab-link">Correction Tool</a>
+                    <button class="tab-link" data-tab="correction-tool">Correction Tool</button>
                 </div>
             </div>
 
             <div id="tab-content-container">
                 <div id="results-input-content" class="tab-pane active">
+                    <h2>Results Input</h2>
                     <div class="form-section-row">
                         <div class="form-section">
                             <label for="date-select">Select Date:</label>
@@ -79,6 +81,7 @@
                     </div>
                 </div>
                 <div id="edit-fixture-content" class="tab-pane">
+                    <h2>Edit Fixture</h2>
                     <div class="form-section-row">
                         <div class="form-section">
                             <label for="edit-date-select">Select Date:</label>
@@ -180,6 +183,35 @@
                     </div>
                 </div>
                 <div id="news-management-content" class="tab-pane" w3-include-html="news-management.html"></div>
+                <div id="correction-tool-content" class="tab-pane">
+                    <h2>League Table Correction Tool</h2>
+                    <div class="form-section-row">
+                        <div class="form-section">
+                            <label for="season-select">Select Season:</label>
+                            <select id="season-select" class="form-select"></select>
+                        </div>
+                        <div class="form-section">
+                            <label for="division-select">Select Division:</label>
+                            <select id="division-select" class="form-select"></select>
+                        </div>
+                    </div>
+        
+                    <button id="generate-table-btn" class="btn btn-primary">Generate Corrected Table</button>
+        
+                    <div id="correction-container" style="display: none;">
+                        <div class="table-comparison">
+                            <div id="current-table-container">
+                                <h2>Current Table</h2>
+                                <div id="current-table"></div>
+                            </div>
+                            <div id="corrected-table-container">
+                                <h2>Corrected Table</h2>
+                                <div id="corrected-table"></div>
+                            </div>
+                        </div>
+                        <button id="confirm-update-btn" class="btn btn-success" style="display: none;">Confirm and Update Table</button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -193,6 +225,7 @@
     <script type="module" src="admin-edit-fixture.js"></script>
     <script type="module" src="admin-reschedule.js"></script>
     <script type="module" src="news-management.js"></script>
+    <script type="module" src="admin-correction.js"></script>
 
 </body>
 </html>
