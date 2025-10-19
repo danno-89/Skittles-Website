@@ -377,25 +377,43 @@ function initializeResultsInput() {
             const fixture = allFixtures.find(f => f.id === fixtureId);
             
             await runTransaction(db, async (transaction) => {
-                const fixtureRef = doc(db, "match_results", fixtureId);
-                transaction.update(fixtureRef, resultsData);
-
-                if (fixture) {
-                    if (['premier-division', 'first-division'].includes(fixture.division)) {
-                        await updateLeagueTable(transaction, fixture, resultsData);
-                    } else if (fixture.division === 'ssc-cup') {
-                        await updateSscCupStandings(transaction, fixture, resultsData);
-                    }
+                // Phase 1: READS
+                let leagueRef, leagueSnap, cupRef, cupSnap;
+                if (['premier-division', 'first-division'].includes(fixture.division)) {
+                    leagueRef = doc(db, "league_tables", `${fixture.season}_${fixture.division}`);
+                    leagueSnap = await transaction.get(leagueRef);
+                } else if (fixture.division === 'ssc-cup') {
+                    cupRef = doc(db, "ssc_cup", fixture.season);
+                    cupSnap = await transaction.get(cupRef);
                 }
 
+                // Phase 2: LOGIC/CALCULATIONS
+                const fixtureRef = doc(db, "match_results", fixtureId);
                 const playersInMatch = new Set([...homeScores.map(s => s.playerId), ...awayScores.map(s => s.playerId)]);
                 playersInMatch.delete("sixthPlayer");
-
                 const matchDate = fixture.scheduledDate.toDate();
                 const recentFixtureTimestamp = Timestamp.fromDate(matchDate);
                 const expiryDate = new Date(matchDate);
                 expiryDate.setFullYear(expiryDate.getFullYear() + 1);
                 const registerExpiryTimestamp = Timestamp.fromDate(expiryDate);
+
+                let updatedLeagueData, updatedCupData;
+                if (leagueRef && leagueSnap.exists()) {
+                    updatedLeagueData = updateLeagueTable(fixture, resultsData, leagueSnap.data());
+                }
+                if (cupRef && cupSnap.exists()) {
+                    updatedCupData = updateSscCupStandings(fixture, resultsData, cupSnap.data());
+                }
+
+                // Phase 3: WRITES
+                transaction.update(fixtureRef, resultsData);
+
+                if (updatedLeagueData) {
+                    transaction.update(leagueRef, { teams: updatedLeagueData });
+                }
+                if (updatedCupData) {
+                    transaction.update(cupRef, updatedCupData);
+                }
 
                 for (const playerId of playersInMatch) {
                     const playerRef = doc(db, "players_public", playerId);
@@ -516,18 +534,10 @@ function updateTeamTotal(container, handicap = 0) {
 
 // --- League Table and Cup Standings Updates ---
 
-async function updateLeagueTable(transaction, fixture, results) {
-    const { homeTeamId, awayTeamId, division, season } = fixture;
+function updateLeagueTable(fixture, results, leagueData) {
+    const { homeTeamId, awayTeamId } = fixture;
     const { homeScore, awayScore, bowledFirst } = results;
 
-    const leagueRef = doc(db, "league_tables", `${season}_${division}`);
-    const leagueSnap = await transaction.get(leagueRef);
-
-    if (!leagueSnap.exists()) {
-        throw new Error(`League table not found for ${season}, ${division}`);
-    }
-
-    const leagueData = leagueSnap.data();
     const homeTeam = leagueData.teams.find(t => t.id === homeTeamId);
     const awayTeam = leagueData.teams.find(t => t.id === awayTeamId);
 
@@ -563,28 +573,16 @@ async function updateLeagueTable(transaction, fixture, results) {
     if (homeTeam) updateTeamStats(homeTeam, homePoints, homeScore, awayScore);
     if (awayTeam) updateTeamStats(awayTeam, awayPoints, awayScore, homeScore);
     
-    transaction.update(leagueRef, { teams: leagueData.teams });
+    return leagueData.teams;
 }
 
 
-async function updateSscCupStandings(transaction, fixture, results) {
-    const { homeTeamId, awayTeamId, season, round } = fixture;
+function updateSscCupStandings(fixture, results, cupData) {
+    const { homeTeamId, awayTeamId, round } = fixture;
     const { homeScore, awayScore } = results;
     
-    const cupRef = doc(db, "ssc_cup", season);
-    const cupSnap = await transaction.get(cupRef);
-
-    if (!cupSnap.exists()) {
-        throw new Error(`SSC Cup data not found for season: ${season}`);
-    }
-
-    const cupData = cupSnap.data();
     const groupName = round.replace('Group Stage - ', 'Group_');
     const groupData = cupData[groupName];
-
-    if (!groupData) {
-        throw new Error(`Group ${groupName} not found in SSC Cup data for season ${season}`);
-    }
 
     const homeTeam = groupData.standings.find(t => t.teamName === homeTeamId);
     const awayTeam = groupData.standings.find(t => t.teamName === awayTeamId);
@@ -612,7 +610,7 @@ async function updateSscCupStandings(transaction, fixture, results) {
     if (awayTeam) updateTeamStandings(awayTeam, awayPoints);
 
     cupData[groupName] = groupData;
-    transaction.update(cupRef, cupData);
+    return cupData;
 }
 
 
