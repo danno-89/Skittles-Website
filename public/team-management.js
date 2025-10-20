@@ -24,7 +24,7 @@ onAuthStateChanged(auth, async (user) => {
 
 // --- TAB HANDLING ---
 function setupTabs() {
-    const tabLinks = document.querySelectorAll('.tabs-main .tab-link');
+    const tabLinks = document.querySelectorAll('.tabs-header .tab-link');
     const tabPanes = document.querySelectorAll('#tab-content-container .tab-pane');
 
     tabLinks.forEach(link => {
@@ -213,7 +213,7 @@ async function loadTeamResults(teamId) {
             return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && fixture.homeScore && fixture.awayScore;
         });
         
-        playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.scheduledDate.toDate());
+        playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.toDate());
 
         if (playedFixtures.length === 0) {
             resultsContainer.innerHTML = "<p>No results found for the current season.</p>";
