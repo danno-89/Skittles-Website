@@ -157,10 +157,7 @@
     background: radial-gradient(circle at 50% 0%, hsl(55, 100%, 80%), hsl(55, 90%, 60%) 80%);
 }
 
-.winner-icon {
-    width: 1.2rem;
-    height: 1.2rem;
-    color: gold;
-    vertical-align: middle;
-    margin-left: 5px;
+.rank-one {
+    font-weight: bold;
+    color: var(--club-yellow);
 }

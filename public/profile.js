@@ -139,8 +139,6 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
             const competitionsSnapshot = await getDocs(competitionsQuery);
             competitionsSnapshot.forEach(doc => competitionsMap.set(doc.id, doc.data().name));
         }
-        
-        const crownIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="currentColor" class="winner-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>`;
 
         tableContainer.innerHTML = `
             <div class="table-container">
@@ -169,8 +167,8 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                                     <td>${formatDate(s.date)}</td>
                                     ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
                                     <td><strong>${s.score}</strong></td>
-                                    <td>${s.teamRank}${s.teamRank === 1 ? crownIcon : ''}</td>
-                                    <td>${s.matchRank}${s.matchRank === 1 ? crownIcon : ''}</td>
+                                    <td>${s.teamRank === 1 ? `<span class="rank-one">1</span>` : s.teamRank}</td>
+                                    <td>${s.matchRank === 1 ? `<span class="rank-one">1</span>` : s.matchRank}</td>
                                     <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
                                     <td>${competitionsMap.get(s.competitionId) || 'N/A'}</td>
                                 </tr>
