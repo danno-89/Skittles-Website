@@ -183,7 +183,7 @@ const renderStatistics = (homeStats, awayStats, homeTeamName, awayTeamName) => {
         </tr>`;
     }).join('');
 
-    return `<div class="statistics-container"><table class="statistics-table"><thead><tr>
+    return `<div class="statistics-container"><table class="statistics-table"><colgroup><col><col><col></colgroup><thead><tr>
             <th class="home-header">${homeTeamName}</th><th>Metric</th><th class="away-header">${awayTeamName}</th>
             </tr></thead><tbody>${rows}</tbody></table></div>`;
 };
@@ -337,7 +337,7 @@ const renderScoreProgressionChart = (view) => {
 const setupTabNavigation = () => {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
-    const graphControls = document.querySelector('.graph-controls');
+    const graphControlsContainer = document.querySelector('.graph-controls-container');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -347,9 +347,9 @@ const setupTabNavigation = () => {
             tabPanes.forEach(pane => pane.id === `${targetTab}-content` ? pane.classList.add('active') : pane.classList.remove('active'));
 
             if (targetTab === 'graph') {
-                graphControls.style.display = 'block';
+                graphControlsContainer.style.display = 'block';
             } else {
-                graphControls.style.display = 'none';
+                graphControlsContainer.style.display = 'none';
             }
         });
     });

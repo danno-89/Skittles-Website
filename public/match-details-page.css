@@ -30,7 +30,7 @@
 }
 
 .result-display .team-name {
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     font-weight: bold;
     flex: 1;
     text-align: center;
@@ -124,6 +124,11 @@
 
 .statistics-table {
     width: 100%;
+    table-layout: fixed; /* Ensures equal column widths */
+}
+
+.statistics-table col {
+    width: 33.33%; /* Equal width for all 3 columns */
 }
 
 .statistics-table th,
@@ -177,18 +182,15 @@
 }
 
 /* --- Graph Styles --- */
-.main-tabs {
-    display: flex;
-    align-items: center;
+.graph-controls-container {
+    display: none; /* Hidden by default */
+    padding: var(--spacing-md) 0;
+    min-height: 60px; /* Example height, adjust as needed */
+    box-sizing: border-box;
 }
 
 .graph-controls {
-    display: none;
-    margin-left: auto;
-}
-
-.main-tabs.graph-active .graph-controls {
-    display: block;
+    display: block; /* No longer a flex item of the tab header */
 }
 
 #graph-view-select {
@@ -201,6 +203,7 @@
     height: 500px;
     width: 100%;
 }
+
 
 /* --- Responsive Styles --- */
 @media (max-width: 992px) {
