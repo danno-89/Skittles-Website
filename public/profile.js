@@ -77,6 +77,7 @@ async function fetchPlayerStats(playerId, teamId) {
     processSnapshot(homeSnapshot, true);
     processSnapshot(awaySnapshot, false);
 
+    // Sort matches by date, newest first. This is important for "current streak".
     allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
     return allScores;
 }
@@ -84,33 +85,35 @@ async function fetchPlayerStats(playerId, teamId) {
 const getStreakMetrics = (allHands, threshold) => {
     let total = 0;
     let bestStreak = 0;
-    let currentStreak = 0;
+    let currentStreakForBest = 0;
 
-    // Calculate best streak across all hands
-    for (const hand of allHands) {
+    // Create a reversed copy for chronological calculation of best streak
+    const chronologicalHands = [...allHands].reverse();
+
+    for (const hand of chronologicalHands) {
         if (hand >= threshold) {
-            currentStreak++;
+            currentStreakForBest++;
         } else {
-            if (currentStreak > bestStreak) {
-                bestStreak = currentStreak;
+            if (currentStreakForBest > bestStreak) {
+                bestStreak = currentStreakForBest;
             }
-            currentStreak = 0;
+            currentStreakForBest = 0;
         }
         if (hand === threshold) {
             total++;
         }
     }
-    if (currentStreak > bestStreak) {
-        bestStreak = currentStreak;
+    if (currentStreakForBest > bestStreak) {
+        bestStreak = currentStreakForBest;
     }
-    
-    // Calculate current streak from the most recent hands
+
+    // Calculate current streak from the most recent hands (newest to oldest)
     let finalCurrentStreak = 0;
-    for (const hand of allHands) { // allHands is already sorted newest to oldest
+    for (const hand of allHands) { // allHands is sorted newest to oldest
         if (hand >= threshold) {
             finalCurrentStreak++;
         } else {
-            break;
+            break; // Stop at the first hand that doesn't meet the threshold
         }
     }
 
@@ -137,6 +140,7 @@ function calculateSummaryStats(scores) {
     const leagueTotalPins = leagueScores.reduce((acc, s) => acc + s.score, 0);
     const leagueAverage = leagueScores.length > 0 ? (leagueTotalPins / leagueScores.length).toFixed(2) : 'N/A';
 
+    // Scores are newest to oldest, so hands will be too.
     const allHands = scores.flatMap(s => s.hands);
 
     return {
@@ -172,9 +176,9 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     `;
 
     streakStatsContainer.innerHTML = `
-        <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak (>=9):</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak (>=9):</strong> ${summary.nines.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak (>=8):</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak (>=8):</strong> ${summary.eights.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak (>=7):</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak (>=7):</strong> ${summary.sevens.currentStreak}</p></div>
+        <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak:</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.nines.currentStreak}</p></div>
+        <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak:</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.eights.currentStreak}</p></div>
+        <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.sevens.currentStreak}</p></div>
     `;
 
 
