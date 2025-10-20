@@ -213,7 +213,7 @@ async function loadTeamResults(teamId) {
             return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && fixture.homeScore && fixture.awayScore;
         });
         
-        playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.toDate());
+        playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.scheduledDate.toDate());
 
         if (playedFixtures.length === 0) {
             resultsContainer.innerHTML = "<p>No results found for the current season.</p>";
