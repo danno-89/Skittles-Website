@@ -49,7 +49,14 @@ async function fetchPlayerStats(playerId, teamId) {
             const opponentTeamId = isHomeTeam ? match.awayTeamId : match.homeTeamId;
             const playerScore = scores.find(s => s.playerId === playerId);
             if (playerScore) {
-                allScores.push({ ...playerScore, date: match.scheduledDate, opponent: opponentTeamId, matchId: doc.id });
+                allScores.push({ 
+                    ...playerScore, 
+                    date: match.scheduledDate, 
+                    opponent: opponentTeamId, 
+                    matchId: doc.id,
+                    teamScore: isHomeTeam ? match.homeScore : match.awayScore,
+                    opponentScore: isHomeTeam ? match.awayScore : match.homeScore
+                });
             }
         });
     };
@@ -60,6 +67,7 @@ async function fetchPlayerStats(playerId, teamId) {
     allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
     return allScores;
 }
+
 
 function calculateSummaryStats(scores) {
     if (scores.length === 0) {
@@ -109,6 +117,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                 <table>
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Date</th>
                             <th>Opponent</th>
                             <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th>
@@ -116,14 +125,21 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${scores.map(s => `
-                            <tr>
-                                <td>${formatDate(s.date)}</td>
-                                <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
-                                ${s.hands.map(h => `<td>${h}</td>`).join('')}
-                                <td><strong>${s.score}</strong></td>
-                            </tr>
-                        `).join('')}
+                        ${scores.map(s => {
+                            let resultClass = 'draw';
+                            if (s.teamScore > s.opponentScore) resultClass = 'win';
+                            if (s.teamScore < s.opponentScore) resultClass = 'loss';
+
+                            return `
+                                <tr>
+                                    <td><span class="result-indicator ${resultClass}"></span></td>
+                                    <td>${formatDate(s.date)}</td>
+                                    <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
+                                    ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
+                                    <td><strong>${s.score}</strong></td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>

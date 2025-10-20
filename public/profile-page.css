@@ -109,7 +109,46 @@
     color: var(--pure-white);
 }
 
-.stats-results-table td:first-child,
-.stats-results-table td:nth-child(2) {
+.stats-results-table td:nth-child(1), 
+.stats-results-table td:nth-child(2),
+.stats-results-table td:nth-child(3) {
     text-align: left;
+}
+
+.stats-results-table th:nth-child(n+4),
+.stats-results-table td:nth-child(n+4) {
+    width: 60px; /* Uniform width for hand scores and total */
+}
+
+.highlight-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    font-weight: bold;
+    color: var(--darker-green);
+    box-shadow: 0 0 4px 1px var(--club-yellow);
+}
+
+.result-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    vertical-align: middle;
+}
+
+.result-indicator.win {
+    background: radial-gradient(circle at 50% 0%, hsl(120, 80%, 80%), hsl(120, 60%, 40%) 80%);
+}
+
+.result-indicator.loss {
+    background: radial-gradient(circle at 50% 0%, hsl(0, 80%, 80%), hsl(0, 70%, 50%) 80%);
+}
+
+.result-indicator.draw {
+    background: radial-gradient(circle at 50% 0%, hsl(55, 100%, 80%), hsl(55, 90%, 60%) 80%);
 }
