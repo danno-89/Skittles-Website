@@ -69,19 +69,24 @@ async function fetchPlayerStats(playerId, teamId) {
     return allScores;
 }
 
-
 function calculateSummaryStats(scores) {
     if (scores.length === 0) {
-        return { fixturesPlayed: 0, totalPins: 0, averageScore: 0, highScore: 0, totalSpares: 0 };
+        return { fixturesPlayed: 0, totalPins: 0, averageScore: 'N/A', leagueAverageScore: 'N/A', highScore: 0, totalSpares: 0 };
     }
+    
     const totalPins = scores.reduce((acc, s) => acc + s.score, 0);
     const highScore = Math.max(...scores.map(s => s.score));
     const totalSpares = scores.reduce((acc, s) => acc + s.hands.filter(h => h >= 10).length, 0);
     
+    const leagueScores = scores.filter(s => s.competitionId === 'premier-division' || s.competitionId === 'first-division');
+    const leagueTotalPins = leagueScores.reduce((acc, s) => acc + s.score, 0);
+    const leagueAverage = leagueScores.length > 0 ? (leagueTotalPins / leagueScores.length).toFixed(2) : 'N/A';
+
     return {
         fixturesPlayed: scores.length,
         totalPins,
         averageScore: (totalPins / scores.length).toFixed(2),
+        leagueAverageScore: leagueAverage,
         highScore,
         totalSpares
     };
@@ -98,7 +103,8 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     summaryContainer.innerHTML = `
         <div class="stat-box"><h4>Fixtures Played</h4><p>${summary.fixturesPlayed}</p></div>
         <div class="stat-box"><h4>Total Pins</h4><p>${summary.totalPins}</p></div>
-        <div class="stat-box"><h4>Average Score</h4><p>${summary.averageScore}</p></div>
+        <div class="stat-box"><h4>Overall Average</h4><p>${summary.averageScore}</p></div>
+        <div class="stat-box"><h4>League Average</h4><p>${summary.leagueAverageScore}</p></div>
         <div class="stat-box"><h4>High Score</h4><p>${summary.highScore}</p></div>
         <div class="stat-box"><h4>Spares</h4><p>${summary.totalSpares}</p></div>
     `;
