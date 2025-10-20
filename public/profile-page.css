@@ -102,6 +102,7 @@
     padding: var(--spacing-sm) var(--spacing-md);
     border-bottom: 1px solid var(--light-grey);
     text-align: center;
+    white-space: nowrap;
 }
 
 .stats-results-table th {
@@ -110,17 +111,17 @@
 }
 
 .stats-results-table th:nth-child(2),
-.stats-results-table th:nth-child(3),
-.stats-results-table th:nth-child(4),
 .stats-results-table td:nth-child(2),
-.stats-results-table td:nth-child(3),
-.stats-results-table td:nth-child(4) {
+.stats-results-table th:nth-child(11),
+.stats-results-table td:nth-child(11),
+.stats-results-table th:last-child,
+.stats-results-table td:last-child {
     text-align: left;
 }
 
-.stats-results-table th:nth-child(n+5),
-.stats-results-table td:nth-child(n+5) {
-    width: 60px; /* Uniform width for hand scores and total */
+.stats-results-table th:nth-child(n+3):nth-child(-n+10),
+.stats-results-table td:nth-child(n+3):nth-child(-n+10) {
+    width: 45px;
 }
 
 .highlight-score {
@@ -154,4 +155,12 @@
 
 .result-indicator.draw {
     background: radial-gradient(circle at 50% 0%, hsl(55, 100%, 80%), hsl(55, 90%, 60%) 80%);
+}
+
+.winner-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: gold;
+    vertical-align: middle;
+    margin-left: 5px;
 }

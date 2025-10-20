@@ -45,10 +45,20 @@ async function fetchPlayerStats(playerId, teamId) {
     const processSnapshot = (snapshot, isHomeTeam) => {
         snapshot.forEach(doc => {
             const match = doc.data();
-            const scores = isHomeTeam ? match.homeScores : match.awayScores;
+            const teamScores = isHomeTeam ? match.homeScores : match.awayScores;
             const opponentTeamId = isHomeTeam ? match.awayTeamId : match.homeTeamId;
-            const playerScore = scores.find(s => s.playerId === playerId);
+            const playerScore = teamScores.find(s => s.playerId === playerId);
+            
             if (playerScore) {
+                const allMatchScores = [...match.homeScores, ...match.awayScores].map(s => s.score);
+                const teamPlayerScores = teamScores.map(s => s.score);
+
+                allMatchScores.sort((a, b) => b - a);
+                teamPlayerScores.sort((a, b) => b - a);
+
+                const matchRank = allMatchScores.indexOf(playerScore.score) + 1;
+                const teamRank = teamPlayerScores.indexOf(playerScore.score) + 1;
+
                 allScores.push({ 
                     ...playerScore, 
                     date: match.scheduledDate, 
@@ -56,7 +66,9 @@ async function fetchPlayerStats(playerId, teamId) {
                     matchId: doc.id,
                     teamScore: isHomeTeam ? match.homeScore : match.awayScore,
                     opponentScore: isHomeTeam ? match.awayScore : match.homeScore,
-                    competitionId: match.division 
+                    competitionId: match.division,
+                    teamRank,
+                    matchRank
                 });
             }
         });
@@ -68,6 +80,7 @@ async function fetchPlayerStats(playerId, teamId) {
     allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
     return allScores;
 }
+
 
 function calculateSummaryStats(scores) {
     if (scores.length === 0) {
@@ -126,6 +139,8 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
             const competitionsSnapshot = await getDocs(competitionsQuery);
             competitionsSnapshot.forEach(doc => competitionsMap.set(doc.id, doc.data().name));
         }
+        
+        const crownIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="currentColor" class="winner-icon"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"></path></svg>`;
 
         tableContainer.innerHTML = `
             <div class="table-container">
@@ -134,10 +149,12 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                         <tr>
                             <th></th>
                             <th>Date</th>
-                            <th>Opponent</th>
-                            <th>Competition</th>
                             <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th>
                             <th>Total</th>
+                            <th>Team Rank</th>
+                            <th>Match Rank</th>
+                            <th>Opponent</th>
+                            <th>Competition</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,10 +167,12 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                                 <tr>
                                     <td><span class="result-indicator ${resultClass}"></span></td>
                                     <td>${formatDate(s.date)}</td>
-                                    <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
-                                    <td>${competitionsMap.get(s.competitionId) || 'N/A'}</td>
                                     ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
                                     <td><strong>${s.score}</strong></td>
+                                    <td>${s.teamRank}${s.teamRank === 1 ? crownIcon : ''}</td>
+                                    <td>${s.matchRank}${s.matchRank === 1 ? crownIcon : ''}</td>
+                                    <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
+                                    <td>${competitionsMap.get(s.competitionId) || 'N/A'}</td>
                                 </tr>
                             `;
                         }).join('')}
