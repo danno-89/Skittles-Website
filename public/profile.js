@@ -30,23 +30,32 @@ const setupTabs = () => {
 };
 
 // --- Statistics Functions ---
-async function fetchPlayerStats(playerId) {
+async function fetchPlayerStats(playerId, teamId) {
+    if (!teamId || !playerId) return [];
     const allScores = [];
-    const matchResultsQuery = query(collection(db, "match_results"), where("status", "==", "completed"));
-    const querySnapshot = await getDocs(matchResultsQuery);
 
-    querySnapshot.forEach(doc => {
-        const match = doc.data();
-        const homePlayer = match.homeScores.find(s => s.playerId === playerId);
-        const awayPlayer = match.awayScores.find(s => s.playerId === playerId);
+    const homeQuery = query(collection(db, "match_results"), where("homeTeamId", "==", teamId), where("status", "==", "completed"));
+    const awayQuery = query(collection(db, "match_results"), where("awayTeamId", "==", teamId), where("status", "==", "completed"));
 
-        if (homePlayer) {
-            allScores.push({ ...homePlayer, date: match.scheduledDate, opponent: match.awayTeamId, matchId: doc.id });
-        }
-        if (awayPlayer) {
-            allScores.push({ ...awayPlayer, date: match.scheduledDate, opponent: match.homeTeamId, matchId: doc.id });
-        }
-    });
+    const [homeSnapshot, awaySnapshot] = await Promise.all([
+        getDocs(homeQuery),
+        getDocs(awayQuery)
+    ]);
+
+    const processSnapshot = (snapshot, isHomeTeam) => {
+        snapshot.forEach(doc => {
+            const match = doc.data();
+            const scores = isHomeTeam ? match.homeScores : match.awayScores;
+            const opponentTeamId = isHomeTeam ? match.awayTeamId : match.homeTeamId;
+            const playerScore = scores.find(s => s.playerId === playerId);
+            if (playerScore) {
+                allScores.push({ ...playerScore, date: match.scheduledDate, opponent: opponentTeamId, matchId: doc.id });
+            }
+        });
+    };
+
+    processSnapshot(homeSnapshot, true);
+    processSnapshot(awaySnapshot, false);
 
     allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
     return allScores;
@@ -69,11 +78,11 @@ function calculateSummaryStats(scores) {
     };
 }
 
-async function renderStatistics(playerId, playerName, teamName) {
+async function renderStatistics(playerId, playerName, teamId, teamName) {
     document.getElementById('stats-player-name').textContent = playerName;
     document.getElementById('stats-team-name').textContent = teamName;
     
-    const scores = await fetchPlayerStats(playerId);
+    const scores = await fetchPlayerStats(playerId, teamId);
     const summary = calculateSummaryStats(scores);
 
     const summaryContainer = document.querySelector('.stats-summary-grid');
@@ -133,6 +142,7 @@ async function displayProfileData(user, publicData, privateData) {
     };
 
     let teamNameStr = 'N/A';
+    let teamId = null;
     if (publicData) {
         populateField('first-name', publicData.firstName);
         populateField('last-name', publicData.lastName);
@@ -142,7 +152,8 @@ async function displayProfileData(user, publicData, privateData) {
         populateField('division', publicData.division);
 
         if (publicData.teamId) {
-            const teamDocSnap = await getDoc(doc(db, 'teams', publicData.teamId));
+            teamId = publicData.teamId;
+            const teamDocSnap = await getDoc(doc(db, 'teams', teamId));
             if (teamDocSnap.exists()) {
                 teamNameStr = teamDocSnap.data().name;
                 populateField('team-name', teamNameStr);
@@ -156,7 +167,7 @@ async function displayProfileData(user, publicData, privateData) {
             populateField('days-to-expiry', daysRemaining > 0 ? daysRemaining : 'Expired');
         }
 
-        await renderStatistics(user.uid, `${publicData.firstName} ${publicData.lastName}`, teamNameStr);
+        await renderStatistics(publicData.publicId, `${publicData.firstName} ${publicData.lastName}`, teamId, teamNameStr);
     }
     
     if (privateData) {
