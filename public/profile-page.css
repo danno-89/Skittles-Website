@@ -32,7 +32,6 @@
     color: var(--medium-grey);
 }
 
-/* --- THIS IS THE FIX --- */
 .address-block {
     display: flex;
     justify-content: space-between;
@@ -43,4 +42,74 @@
     flex-direction: column;
     text-align: right;
 }
-/* --- END FIX --- */
+
+/* --- Statistics Tab Styles --- */
+.stats-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.stats-header h2 {
+    margin-bottom: 0;
+    font-size: 2rem;
+    color: var(--darker-green);
+}
+
+.stats-header p {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--medium-grey);
+}
+
+.stats-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-box {
+    background-color: var(--off-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--shadow-elevation-low);
+}
+
+.stat-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-grey);
+}
+
+.stat-box p {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--club-green);
+}
+
+.stats-results-table .table-container {
+    overflow-x: auto;
+}
+
+.stats-results-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-results-table th,
+.stats-results-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--light-grey);
+    text-align: center;
+}
+
+.stats-results-table th {
+    background-color: var(--darker-green);
+    color: var(--pure-white);
+}
+
+.stats-results-table td:first-child,
+.stats-results-table td:nth-child(2) {
+    text-align: left;
+}
