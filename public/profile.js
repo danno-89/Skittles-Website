@@ -55,7 +55,8 @@ async function fetchPlayerStats(playerId, teamId) {
                     opponent: opponentTeamId, 
                     matchId: doc.id,
                     teamScore: isHomeTeam ? match.homeScore : match.awayScore,
-                    opponentScore: isHomeTeam ? match.awayScore : match.homeScore
+                    opponentScore: isHomeTeam ? match.awayScore : match.homeScore,
+                    competitionId: match.division 
                 });
             }
         });
@@ -105,11 +106,19 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     const tableContainer = document.querySelector('.stats-results-table');
     if (scores.length > 0) {
         const teamsMap = new Map();
+        const competitionsMap = new Map();
         const teamIds = [...new Set(scores.map(s => s.opponent))];
+        const competitionIds = [...new Set(scores.map(s => s.competitionId))];
+
         if (teamIds.length > 0) {
             const teamsQuery = query(collection(db, "teams"), where("__name__", "in", teamIds));
             const teamsSnapshot = await getDocs(teamsQuery);
             teamsSnapshot.forEach(doc => teamsMap.set(doc.id, doc.data().name));
+        }
+        if (competitionIds.length > 0) {
+            const competitionsQuery = query(collection(db, "competitions"), where("__name__", "in", competitionIds));
+            const competitionsSnapshot = await getDocs(competitionsQuery);
+            competitionsSnapshot.forEach(doc => competitionsMap.set(doc.id, doc.data().name));
         }
 
         tableContainer.innerHTML = `
@@ -120,6 +129,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                             <th></th>
                             <th>Date</th>
                             <th>Opponent</th>
+                            <th>Competition</th>
                             <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th>
                             <th>Total</th>
                         </tr>
@@ -135,6 +145,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                                     <td><span class="result-indicator ${resultClass}"></span></td>
                                     <td>${formatDate(s.date)}</td>
                                     <td>${teamsMap.get(s.opponent) || 'Unknown'}</td>
+                                    <td>${competitionsMap.get(s.competitionId) || 'N/A'}</td>
                                     ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
                                     <td><strong>${s.score}</strong></td>
                                 </tr>

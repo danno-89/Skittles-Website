@@ -109,14 +109,17 @@
     color: var(--pure-white);
 }
 
-.stats-results-table td:nth-child(1), 
+.stats-results-table th:nth-child(2),
+.stats-results-table th:nth-child(3),
+.stats-results-table th:nth-child(4),
 .stats-results-table td:nth-child(2),
-.stats-results-table td:nth-child(3) {
+.stats-results-table td:nth-child(3),
+.stats-results-table td:nth-child(4) {
     text-align: left;
 }
 
-.stats-results-table th:nth-child(n+4),
-.stats-results-table td:nth-child(n+4) {
+.stats-results-table th:nth-child(n+5),
+.stats-results-table td:nth-child(n+5) {
     width: 60px; /* Uniform width for hand scores and total */
 }
 
