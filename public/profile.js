@@ -159,18 +159,24 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     const scores = await fetchPlayerStats(playerId, teamId);
     const summary = calculateSummaryStats(scores);
 
-    const summaryContainer = document.querySelector('.stats-summary-grid');
-    summaryContainer.innerHTML = `
+    const mainStatsContainer = document.getElementById('main-stats-grid');
+    const streakStatsContainer = document.getElementById('streak-stats-grid');
+
+    mainStatsContainer.innerHTML = `
         <div class="stat-box"><h4>Fixtures Played</h4><p>${summary.fixturesPlayed}</p></div>
         <div class="stat-box"><h4>Total Pins</h4><p>${summary.totalPins}</p></div>
         <div class="stat-box"><h4>High Score</h4><p>${summary.highScore}</p></div>
         <div class="stat-box"><h4>Overall Average</h4><p>${summary.averageScore}</p></div>
         <div class="stat-box"><h4>League Average</h4><p>${summary.leagueAverageScore}</p></div>
         <div class="stat-box"><h4>Spares</h4><p>${summary.totalSpares}</p></div>
+    `;
+
+    streakStatsContainer.innerHTML = `
         <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak (>=9):</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak (>=9):</strong> ${summary.nines.currentStreak}</p></div>
         <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak (>=8):</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak (>=8):</strong> ${summary.eights.currentStreak}</p></div>
         <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak (>=7):</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak (>=7):</strong> ${summary.sevens.currentStreak}</p></div>
     `;
+
 
     const tableContainer = document.querySelector('.stats-results-table');
     if (scores.length > 0) {
