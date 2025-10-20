@@ -1,5 +1,9 @@
 /* Styling for the Team Management Page */
 
+#tab-content-container {
+    margin-top: var(--spacing-lg);
+}
+
 .captain-badge {
     background-color: var(--club-yellow);
     color: var(--charcoal);
