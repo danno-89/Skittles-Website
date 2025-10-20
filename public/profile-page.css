@@ -45,7 +45,7 @@
 
 /* --- Statistics Tab Styles --- */
 .stats-header {
-    text-align: center;
+    text-align: left;
     margin-bottom: var(--spacing-xl);
 }
 
@@ -87,6 +87,20 @@
     font-weight: bold;
     color: var(--club-green);
 }
+
+.detailed-stat p {
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--medium-grey);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.detailed-stat p strong {
+    color: var(--dark-grey);
+}
+
 
 .stats-results-table .table-container {
     overflow-x: auto;

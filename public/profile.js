@@ -81,10 +81,52 @@ async function fetchPlayerStats(playerId, teamId) {
     return allScores;
 }
 
+const getStreakMetrics = (allHands, threshold) => {
+    let total = 0;
+    let bestStreak = 0;
+    let currentStreak = 0;
+
+    // Calculate best streak across all hands
+    for (const hand of allHands) {
+        if (hand >= threshold) {
+            currentStreak++;
+        } else {
+            if (currentStreak > bestStreak) {
+                bestStreak = currentStreak;
+            }
+            currentStreak = 0;
+        }
+        if (hand === threshold) {
+            total++;
+        }
+    }
+    if (currentStreak > bestStreak) {
+        bestStreak = currentStreak;
+    }
+    
+    // Calculate current streak from the most recent hands
+    let finalCurrentStreak = 0;
+    for (const hand of allHands) { // allHands is already sorted newest to oldest
+        if (hand >= threshold) {
+            finalCurrentStreak++;
+        } else {
+            break;
+        }
+    }
+
+    return { total, bestStreak, currentStreak: finalCurrentStreak };
+};
+
 
 function calculateSummaryStats(scores) {
     if (scores.length === 0) {
-        return { fixturesPlayed: 0, totalPins: 0, averageScore: 'N/A', leagueAverageScore: 'N/A', highScore: 0, totalSpares: 0 };
+        return { 
+            fixturesPlayed: 0, totalPins: 0, averageScore: 'N/A', 
+            leagueAverageScore: 'N/A', highScore: 0, totalSpares: 0,
+            sevens: { total: 0, bestStreak: 0, currentStreak: 0 },
+            eights: { total: 0, bestStreak: 0, currentStreak: 0 },
+            nines: { total: 0, bestStreak: 0, currentStreak: 0 }
+        };
     }
     
     const totalPins = scores.reduce((acc, s) => acc + s.score, 0);
@@ -95,13 +137,18 @@ function calculateSummaryStats(scores) {
     const leagueTotalPins = leagueScores.reduce((acc, s) => acc + s.score, 0);
     const leagueAverage = leagueScores.length > 0 ? (leagueTotalPins / leagueScores.length).toFixed(2) : 'N/A';
 
+    const allHands = scores.flatMap(s => s.hands);
+
     return {
         fixturesPlayed: scores.length,
         totalPins,
         averageScore: (totalPins / scores.length).toFixed(2),
         leagueAverageScore: leagueAverage,
         highScore,
-        totalSpares
+        totalSpares,
+        sevens: getStreakMetrics(allHands, 7),
+        eights: getStreakMetrics(allHands, 8),
+        nines: getStreakMetrics(allHands, 9)
     };
 }
 
@@ -116,10 +163,13 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     summaryContainer.innerHTML = `
         <div class="stat-box"><h4>Fixtures Played</h4><p>${summary.fixturesPlayed}</p></div>
         <div class="stat-box"><h4>Total Pins</h4><p>${summary.totalPins}</p></div>
+        <div class="stat-box"><h4>High Score</h4><p>${summary.highScore}</p></div>
         <div class="stat-box"><h4>Overall Average</h4><p>${summary.averageScore}</p></div>
         <div class="stat-box"><h4>League Average</h4><p>${summary.leagueAverageScore}</p></div>
-        <div class="stat-box"><h4>High Score</h4><p>${summary.highScore}</p></div>
         <div class="stat-box"><h4>Spares</h4><p>${summary.totalSpares}</p></div>
+        <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak (>=9):</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak (>=9):</strong> ${summary.nines.currentStreak}</p></div>
+        <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak (>=8):</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak (>=8):</strong> ${summary.eights.currentStreak}</p></div>
+        <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak (>=7):</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak (>=7):</strong> ${summary.sevens.currentStreak}</p></div>
     `;
 
     const tableContainer = document.querySelector('.stats-results-table');
