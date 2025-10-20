@@ -477,7 +477,7 @@ function renderScorecard(teamType, fixture, allPlayers) {
                 <tr id="${teamType}-handicap-row">
                     <td class="player-name-col"><strong>Handicap</strong></td>
                     <td colspan="5"></td>
-                    <td class="total-score-col">${handicapValue}</td>
+                    <td class.total-score-col">${handicapValue}</td>
                 </tr>
             `;
         }
@@ -538,8 +538,8 @@ function updateLeagueTable(fixture, results, leagueData) {
     const { homeTeamId, awayTeamId } = fixture;
     const { homeScore, awayScore, bowledFirst } = results;
 
-    const homeTeam = leagueData.teams.find(t => t.id === homeTeamId);
-    const awayTeam = leagueData.teams.find(t => t.id === awayTeamId);
+    const homeTeam = leagueData.teams.find(t => t.teamId === homeTeamId);
+    const awayTeam = leagueData.teams.find(t => t.teamId === awayTeamId);
 
     // Determine winner and points
     let homePoints = 0, awayPoints = 0;
