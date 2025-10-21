@@ -12,6 +12,17 @@ const formatDate = (timestamp) => {
     return `${day} ${month} ${year}`;
 };
 
+const formatTime = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return 'N/A';
+    const date = timestamp.toDate();
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    return `${hours}:${minutes} ${ampm}`;
+};
+
 const setupTabs = () => {
     const tabs = document.querySelectorAll('.tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -31,7 +42,7 @@ const setupTabs = () => {
 
 // --- Statistics Functions ---
 async function fetchPlayerStats(playerId, teamId) {
-    if (!teamId || !playerId) return [];
+    if (!teamId || !playerId) return { chronologicalScores: [], reversedScores: [] };
     const allScores = [];
 
     const homeQuery = query(collection(db, "match_results"), where("homeTeamId", "==", teamId), where("status", "==", "completed"));
@@ -77,19 +88,18 @@ async function fetchPlayerStats(playerId, teamId) {
     processSnapshot(homeSnapshot, true);
     processSnapshot(awaySnapshot, false);
 
-    // Sort matches by date, newest first. This is important for "current streak".
-    allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
-    return allScores;
+    // Sort matches by date, OLDEST first.
+    allScores.sort((a, b) => a.date.toDate() - b.date.toDate());
+    
+    // Create a reversed copy for the results table display (newest first)
+    const reversedScoresForDisplay = [...allScores].reverse();
+    return { chronologicalScores: allScores, reversedScores: reversedScoresForDisplay };
 }
 
-const getStreakMetrics = (allHands, threshold) => {
-    let total = 0;
+const getStreakData = (chronologicalHands, threshold) => {
+    // --- Best Streak (chronological) ---
     let bestStreak = 0;
     let currentStreakForBest = 0;
-
-    // Create a reversed copy for chronological calculation of best streak
-    const chronologicalHands = [...allHands].reverse();
-
     for (const hand of chronologicalHands) {
         if (hand >= threshold) {
             currentStreakForBest++;
@@ -99,27 +109,24 @@ const getStreakMetrics = (allHands, threshold) => {
             }
             currentStreakForBest = 0;
         }
-        if (hand === threshold) {
-            total++;
-        }
     }
-    if (currentStreakForBest > bestStreak) {
+    if (currentStreakForBest > bestStreak) { // Check one last time after the loop
         bestStreak = currentStreakForBest;
     }
 
-    // Calculate current streak from the most recent hands (newest to oldest)
-    let finalCurrentStreak = 0;
-    for (const hand of allHands) { // allHands is sorted newest to oldest
+    // --- Current Streak (reverse chronological) ---
+    let currentStreak = 0;
+    const reversedHands = [...chronologicalHands].reverse(); // Newest to oldest
+    for (const hand of reversedHands) {
         if (hand >= threshold) {
-            finalCurrentStreak++;
+            currentStreak++;
         } else {
             break; // Stop at the first hand that doesn't meet the threshold
         }
     }
 
-    return { total, bestStreak, currentStreak: finalCurrentStreak };
+    return { bestStreak, currentStreak };
 };
-
 
 function calculateSummaryStats(scores) {
     if (scores.length === 0) {
@@ -140,8 +147,13 @@ function calculateSummaryStats(scores) {
     const leagueTotalPins = leagueScores.reduce((acc, s) => acc + s.score, 0);
     const leagueAverage = leagueScores.length > 0 ? (leagueTotalPins / leagueScores.length).toFixed(2) : 'N/A';
 
-    // Scores are newest to oldest, so hands will be too.
+    // Create a single, chronological list of all hands
     const allHands = scores.flatMap(s => s.hands);
+
+    // Calculate exact totals
+    const sevensTotal = allHands.filter(h => h === 7).length;
+    const eightsTotal = allHands.filter(h => h === 8).length;
+    const ninesTotal = allHands.filter(h => h === 9).length;
 
     return {
         fixturesPlayed: scores.length,
@@ -150,9 +162,9 @@ function calculateSummaryStats(scores) {
         leagueAverageScore: leagueAverage,
         highScore,
         totalSpares,
-        sevens: getStreakMetrics(allHands, 7),
-        eights: getStreakMetrics(allHands, 8),
-        nines: getStreakMetrics(allHands, 9)
+        sevens: { total: sevensTotal, ...getStreakData(allHands, 7) },
+        eights: { total: eightsTotal, ...getStreakData(allHands, 8) },
+        nines: { total: ninesTotal, ...getStreakData(allHands, 9) }
     };
 }
 
@@ -160,8 +172,8 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     document.getElementById('stats-player-name').textContent = playerName;
     document.getElementById('stats-team-name').textContent = teamName;
     
-    const scores = await fetchPlayerStats(playerId, teamId);
-    const summary = calculateSummaryStats(scores);
+    const { chronologicalScores, reversedScores } = await fetchPlayerStats(playerId, teamId);
+    const summary = calculateSummaryStats(chronologicalScores);
 
     const mainStatsContainer = document.getElementById('main-stats-grid');
     const streakStatsContainer = document.getElementById('streak-stats-grid');
@@ -176,18 +188,60 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     `;
 
     streakStatsContainer.innerHTML = `
-        <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak:</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.nines.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak:</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.eights.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.sevens.currentStreak}</p></div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-content">
+                <div class="stat-main">
+                    <h4>9s</h4>
+                    <div class="stat-total">${summary.nines.total}</div>
+                </div>
+                <div class="stat-streaks">
+                    <h5>Streak</h5>
+                    <div class="streaks-data">
+                        <p><strong>Current:</strong> <span>${summary.nines.currentStreak}</span></p>
+                        <p><strong>Best:</strong> <span>${summary.nines.bestStreak}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-content">
+                <div class="stat-main">
+                    <h4>8s</h4>
+                    <div class="stat-total">${summary.eights.total}</div>
+                </div>
+                <div class="stat-streaks">
+                    <h5>Streak</h5>
+                    <div class="streaks-data">
+                        <p><strong>Current:</strong> <span>${summary.eights.currentStreak}</span></p>
+                        <p><strong>Best:</strong> <span>${summary.eights.bestStreak}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-content">
+                <div class="stat-main">
+                    <h4>7s</h4>
+                    <div class="stat-total">${summary.sevens.total}</div>
+                </div>
+                <div class="stat-streaks">
+                    <h5>Streak</h5>
+                    <div class="streaks-data">
+                        <p><strong>Current:</strong> <span>${summary.sevens.currentStreak}</span></p>
+                        <p><strong>Best:</strong> <span>${summary.sevens.bestStreak}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
 
 
     const tableContainer = document.querySelector('.stats-results-table');
-    if (scores.length > 0) {
+    if (reversedScores.length > 0) {
         const teamsMap = new Map();
         const competitionsMap = new Map();
-        const teamIds = [...new Set(scores.map(s => s.opponent))];
-        const competitionIds = [...new Set(scores.map(s => s.competitionId))];
+        const teamIds = [...new Set(reversedScores.map(s => s.opponent))];
+        const competitionIds = [...new Set(reversedScores.map(s => s.competitionId))];
 
         if (teamIds.length > 0) {
             const teamsQuery = query(collection(db, "teams"), where("__name__", "in", teamIds));
@@ -207,6 +261,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                         <tr>
                             <th></th>
                             <th>Date</th>
+                            <th>Time</th>
                             <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th>
                             <th>Total</th>
                             <th>Team Rank</th>
@@ -216,7 +271,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${scores.map(s => {
+                        ${reversedScores.map(s => { // Use reversed scores for display
                             let resultClass = 'draw';
                             if (s.teamScore > s.opponentScore) resultClass = 'win';
                             if (s.teamScore < s.opponentScore) resultClass = 'loss';
@@ -225,6 +280,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                                 <tr>
                                     <td><span class="result-indicator ${resultClass}"></span></td>
                                     <td>${formatDate(s.date)}</td>
+                                    <td>${formatTime(s.date)}</td>
                                     ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
                                     <td><strong>${s.score}</strong></td>
                                     <td>${s.teamRank === 1 ? `<span class="rank-one">1</span>` : s.teamRank}</td>
