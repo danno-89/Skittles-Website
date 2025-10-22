@@ -59,44 +59,39 @@ async function fetchPlayerStats(playerId, teamId) {
     processSnapshot(homeSnapshot, true);
     processSnapshot(awaySnapshot, false);
 
-    allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
+    // Sort matches by date, OLDEST first for chronological processing.
+    allScores.sort((a, b) => a.date.toDate() - b.date.toDate());
     return allScores;
 }
 
-const getStreakMetrics = (allHands, threshold) => {
-    let total = 0;
+const getStreakMetrics = (scores, threshold) => {
+    // Scores are now oldest to newest.
+    const allHandsChronological = scores.flatMap(s => s.hands);
+
     let bestStreak = 0;
     let currentStreakForBest = 0;
-
-    const chronologicalHands = [...allHands].reverse();
-
-    for (const hand of chronologicalHands) {
+    for (const hand of allHandsChronological) {
         if (hand >= threshold) {
             currentStreakForBest++;
         } else {
-            if (currentStreakForBest > bestStreak) {
-                bestStreak = currentStreakForBest;
-            }
+            bestStreak = Math.max(bestStreak, currentStreakForBest);
             currentStreakForBest = 0;
         }
-        if (hand === threshold) {
-            total++;
-        }
     }
-    if (currentStreakForBest > bestStreak) {
-        bestStreak = currentStreakForBest;
-    }
+    bestStreak = Math.max(bestStreak, currentStreakForBest);
 
-    let finalCurrentStreak = 0;
-    for (const hand of allHands) {
-        if (hand >= threshold) {
-            finalCurrentStreak++;
+    let currentStreak = 0;
+    for (let i = allHandsChronological.length - 1; i >= 0; i--) {
+        if (allHandsChronological[i] >= threshold) {
+            currentStreak++;
         } else {
             break;
         }
     }
+    
+    const total = allHandsChronological.filter(h => h === threshold).length;
 
-    return { total, bestStreak, currentStreak: finalCurrentStreak };
+    return { total, bestStreak, currentStreak };
 };
 
 function calculateSummaryStats(scores) {
@@ -118,8 +113,6 @@ function calculateSummaryStats(scores) {
     const leagueTotalPins = leagueScores.reduce((acc, s) => acc + s.score, 0);
     const leagueAverage = leagueScores.length > 0 ? (leagueTotalPins / leagueScores.length).toFixed(2) : 'N/A';
 
-    const allHands = scores.flatMap(s => s.hands);
-
     return {
         fixturesPlayed: scores.length,
         totalPins,
@@ -127,15 +120,16 @@ function calculateSummaryStats(scores) {
         leagueAverageScore: leagueAverage,
         highScore,
         totalSpares,
-        sevens: getStreakMetrics(allHands, 7),
-        eights: getStreakMetrics(allHands, 8),
-        nines: getStreakMetrics(allHands, 9)
+        sevens: getStreakMetrics(scores, 7),
+        eights: getStreakMetrics(scores, 8),
+        nines: getStreakMetrics(scores, 9)
     };
 }
 
 async function renderStatistics(playerId, playerName, teamId, teamName) {
     document.getElementById('stats-player-name').textContent = playerName;
     document.getElementById('stats-team-name').textContent = teamName;
+    document.getElementById('stats-player-name-header').textContent = playerName;
     
     const scores = await fetchPlayerStats(playerId, teamId);
     const summary = calculateSummaryStats(scores);
@@ -158,6 +152,8 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
         <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.sevens.currentStreak}</p></div>
     `;
 
+    // Re-sort scores to display newest first in the table
+    scores.sort((a, b) => b.date.toDate() - a.date.toDate());
 
     const tableContainer = document.querySelector('.stats-results-table');
     if (scores.length > 0) {
@@ -242,6 +238,4 @@ async function initializePage() {
     await renderStatistics(playerId, `${playerData.firstName} ${playerData.lastName}`, playerData.teamId, teamName);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializePage();
-});
+document.addEventListener('DOMContentLoaded', initializePage);
