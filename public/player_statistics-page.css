@@ -63,6 +63,7 @@
     border-bottom: 1px solid var(--light-grey);
     text-align: left;
     white-space: nowrap;
+    height: 40px; /* Uniform row height */
 }
 
 .stats-table th {
@@ -91,9 +92,8 @@
     font-style: italic;
 }
 
-.division-leader td:first-child::before {
-    content: '👑';
-    margin-right: 0.5em;
+.division-leader {
+    background-color: #fffbeb; /* Pale Yellow */
 }
 
 /* Movement indicators */
@@ -122,4 +122,9 @@
 .user-id-icon {
     width: 25px;
     height: 25px;
+    color: var(--club-green);
+}
+
+a:hover .user-id-icon {
+    color: var(--club-yellow);
 }

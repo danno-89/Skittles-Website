@@ -264,6 +264,15 @@ function renderCurrentTab() {
     if (activeTab === 'high-scores') renderHighScores();
 }
 
+const profileIconSvg = `<svg class="user-id-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="1.5"/>
+<path d="M13 15C13 16.1046 13 17 9 17C5 17 5 16.1046 5 15C5 13.8954 6.79086 13 9 13C11.2091 13 13 13.8954 13 15Z" stroke="currentColor" stroke-width="1.5"/>
+<path opacity="0.5" d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12C22 15.7712 22 17.6569 20.8284 18.8284C19.6569 20 17.7712 20 14 20H10C6.22876 20 4.34315 20 3.17157 18.8284C2 17.6569 2 15.7712 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+<path d="M19 12H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M19 9H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+<path opacity="0.9" d="M19 15H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>`;
+
 function renderAverages() {
     const container = document.getElementById('averages-content');
     if (!container) return;
@@ -292,7 +301,7 @@ function renderAverages() {
     });
 
     let tableHTML = `<table class="stats-table"><thead><tr>
-                    <th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th>
+                    <th>Rank</th><th></th><th class="player-col">Player</th><th class="team-col">Team</th>
                     <th colspan="2" class="divisions-header">Divisions</th>
                     <th>PLD</th><th class="total-pins-header">Total Pins</th><th class="main-stat">Average</th><th>Movement</th>
                     </tr></thead><tbody>`;
@@ -318,8 +327,8 @@ function renderAverages() {
 
         tableHTML += `<tr class="${rowClass.trim()}">
             <td>${rankDisplay}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}">${profileIconSvg}</a></td>
             <td class="player-col">${player.name}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
             <td class="team-col">${player.teamName}</td>
             <td class="division-col">${player.division}</td>
             <td class="league-col">${player.league}</td>
@@ -350,15 +359,15 @@ function renderSpares() {
     });
 
     const narrativeHTML = `<div class="stats-narrative"><p>A spare is defined as any score of 10 and above.</p></div>`;
-    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th><th class="main-stat">Spares</th><th>Extra Pins</th><th>Average</th></tr></thead><tbody>`;
+    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th></th><th class="player-col">Player</th><th class="team-col">Team</th><th class="main-stat">Spares</th><th>Extra Pins</th><th>Average</th></tr></thead><tbody>`;
     let lastPlayerStats = null;
     filteredSpares.forEach((player, index) => {
         let rank = index + 1;
         if (lastPlayerStats && player.spares === lastPlayerStats.spares && player.extraPins === lastPlayerStats.extraPins) rank = `=`;
         tableHTML += `<tr>
             <td>${rank}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}">${profileIconSvg}</a></td>
             <td class="player-col">${player.name}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
             <td class="team-col">${player.teamName}</td>
             <td class="main-stat">${player.spares}</td>
             <td>${player.extraPins}</td>
@@ -386,15 +395,15 @@ function renderHighScores() {
     });
     
     const narrativeHTML = `<div class="stats-narrative"><p>A High Score is an individual score achieved in any league or cup fixture.</p></div>`;
-    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th><th class="main-stat">High Score</th><th>Date</th><th class="opponent-col">Opponent</th></tr></thead><tbody>`;
+    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th></th><th class="player-col">Player</th><th class="team-col">Team</th><th class="main-stat">High Score</th><th>Date</th><th class="opponent-col">Opponent</th></tr></thead><tbody>`;
     let lastScore = null;
     filteredHighScores.forEach((player, index) => {
         let rank = index + 1;
         if (lastScore && player.score === lastScore) rank = `=`;
         tableHTML += `<tr>
             <td>${rank}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}">${profileIconSvg}</a></td>
             <td class="player-col">${player.name}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
             <td class="team-col">${player.teamName}</td>
             <td class="main-stat">${player.score}</td>
             <td>${formatDate(player.date)}</td>
