@@ -92,8 +92,8 @@
     font-style: italic;
 }
 
-.division-leader {
-    background-color: #fffbeb; /* Pale Yellow */
+.stats-table tr.division-leader {
+    background-color: #fffbeb !important; /* Pale Yellow, !important to ensure override */
 }
 
 /* Movement indicators */
@@ -126,5 +126,5 @@
 }
 
 a:hover .user-id-icon {
-    color: var(--club-yellow);
+    color: var(--darker-green);
 }
