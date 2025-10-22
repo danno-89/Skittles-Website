@@ -292,7 +292,7 @@ function renderAverages() {
     });
 
     let tableHTML = `<table class="stats-table"><thead><tr>
-                    <th>Rank</th><th class="player-col">Player</th><th class="team-col">Team</th>
+                    <th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th>
                     <th colspan="2" class="divisions-header">Divisions</th>
                     <th>PLD</th><th class="total-pins-header">Total Pins</th><th class="main-stat">Average</th><th>Movement</th>
                     </tr></thead><tbody>`;
@@ -317,11 +317,17 @@ function renderAverages() {
         }
 
         tableHTML += `<tr class="${rowClass.trim()}">
-            <td>${rankDisplay}</td><td class="player-col">${player.name}</td>
-            <td class="team-col">${player.teamName}</td><td class="division-col">${player.division}</td>
-            <td class="league-col">${player.league}</td><td>${player.gamesPlayed} <span class="team-games-played">[${player.totalTeamGames}]</span></td>
-            <td>${pinsCellContent}</td><td class="main-stat">${player.average}</td>
-            <td class="movement-cell ${movementClass}">${movementDisplay}</td></tr>`;
+            <td>${rankDisplay}</td>
+            <td class="player-col">${player.name}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
+            <td class="team-col">${player.teamName}</td>
+            <td class="division-col">${player.division}</td>
+            <td class="league-col">${player.league}</td>
+            <td>${player.gamesPlayed} <span class="team-games-played">[${player.totalTeamGames}]</span></td>
+            <td>${pinsCellContent}</td>
+            <td class="main-stat">${player.average}</td>
+            <td class="movement-cell ${movementClass}">${movementDisplay}</td>
+            </tr>`;
         lastAverage = player.average;
     });
     tableHTML += `</tbody></table>`;
@@ -344,12 +350,20 @@ function renderSpares() {
     });
 
     const narrativeHTML = `<div class="stats-narrative"><p>A spare is defined as any score of 10 and above.</p></div>`;
-    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th class="team-col">Team</th><th class="main-stat">Spares</th><th>Extra Pins</th><th>Average</th></tr></thead><tbody>`;
+    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th><th class="main-stat">Spares</th><th>Extra Pins</th><th>Average</th></tr></thead><tbody>`;
     let lastPlayerStats = null;
     filteredSpares.forEach((player, index) => {
         let rank = index + 1;
         if (lastPlayerStats && player.spares === lastPlayerStats.spares && player.extraPins === lastPlayerStats.extraPins) rank = `=`;
-        tableHTML += `<tr><td>${rank}</td><td class="player-col">${player.name}</td><td class="team-col">${player.teamName}</td><td class="main-stat">${player.spares}</td><td>${player.extraPins}</td><td>${player.average}</td></tr>`;
+        tableHTML += `<tr>
+            <td>${rank}</td>
+            <td class="player-col">${player.name}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
+            <td class="team-col">${player.teamName}</td>
+            <td class="main-stat">${player.spares}</td>
+            <td>${player.extraPins}</td>
+            <td>${player.average}</td>
+            </tr>`;
         lastPlayerStats = player;
     });
     tableHTML += `</tbody></table></div>`;
@@ -372,12 +386,20 @@ function renderHighScores() {
     });
     
     const narrativeHTML = `<div class="stats-narrative"><p>A High Score is an individual score achieved in any league or cup fixture.</p></div>`;
-    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th class="team-col">Team</th><th class="main-stat">High Score</th><th>Date</th><th class="opponent-col">Opponent</th></tr></thead><tbody>`;
+    let tableHTML = `<div class="stats-table-container"><table class="stats-table"><thead><tr><th>Rank</th><th class="player-col">Player</th><th></th><th class="team-col">Team</th><th class="main-stat">High Score</th><th>Date</th><th class="opponent-col">Opponent</th></tr></thead><tbody>`;
     let lastScore = null;
     filteredHighScores.forEach((player, index) => {
         let rank = index + 1;
         if (lastScore && player.score === lastScore) rank = `=`;
-        tableHTML += `<tr><td>${rank}</td><td class="player-col">${player.name}</td><td class="team-col">${player.teamName}</td><td class="main-stat">${player.score}</td><td>${formatDate(player.date)}</td><td class="opponent-col">vs ${player.opponent}</td></tr>`;
+        tableHTML += `<tr>
+            <td>${rank}</td>
+            <td class="player-col">${player.name}</td>
+            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><img src="assets/user-id.svg" alt="Profile" class="user-id-icon"></a></td>
+            <td class="team-col">${player.teamName}</td>
+            <td class="main-stat">${player.score}</td>
+            <td>${formatDate(player.date)}</td>
+            <td class="opponent-col">vs ${player.opponent}</td>
+            </tr>`;
         lastScore = player.score;
     });
     tableHTML += `</tbody></table></div>`;
