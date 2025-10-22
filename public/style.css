@@ -182,6 +182,16 @@ header h1 {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
+.register-now-btn {
+    background-color: var(--club-yellow);
+    color: var(--charcoal);
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
 /* --- Main Navigation --- */
 .main-nav {
     flex-shrink: 0;
@@ -281,7 +291,7 @@ footer a:hover {
     align-items: center;
     padding-block-end: 10px;
     border-block-end: 4px solid var(--club-yellow);
-    margin-block-end: 0;
+    margin-block-end: 20px;
 }
 
 .page-header h1 {
