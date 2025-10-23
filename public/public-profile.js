@@ -59,18 +59,21 @@ async function fetchPlayerStats(playerId, teamId) {
     processSnapshot(homeSnapshot, true);
     processSnapshot(awaySnapshot, false);
 
-    // Sort matches by date, OLDEST first for chronological processing.
-    allScores.sort((a, b) => a.date.toDate() - b.date.toDate());
+    // Sort matches by date, newest first. This is important for "current streak".
+    allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
     return allScores;
 }
 
 const getStreakMetrics = (scores, threshold) => {
-    // Scores are now oldest to newest.
-    const allHandsChronological = scores.flatMap(s => s.hands);
+    // Scores are newest to oldest.
+    const allHandsNewestFirst = scores.flatMap(s => s.hands);
+    // Create a truly chronological list of hands for 'best streak' calculation.
+    const allHandsOldestFirst = [...scores].reverse().flatMap(s => s.hands);
 
     let bestStreak = 0;
     let currentStreakForBest = 0;
-    for (const hand of allHandsChronological) {
+
+    for (const hand of allHandsOldestFirst) {
         if (hand >= threshold) {
             currentStreakForBest++;
         } else {
@@ -78,18 +81,18 @@ const getStreakMetrics = (scores, threshold) => {
             currentStreakForBest = 0;
         }
     }
-    bestStreak = Math.max(bestStreak, currentStreakForBest);
+    bestStreak = Math.max(bestStreak, currentStreakForBest); // Check streak at the end
 
     let currentStreak = 0;
-    for (let i = allHandsChronological.length - 1; i >= 0; i--) {
-        if (allHandsChronological[i] >= threshold) {
+    for (const hand of allHandsNewestFirst) {
+        if (hand >= threshold) {
             currentStreak++;
         } else {
-            break;
+            break; // Stop at the first hand that doesn't meet the threshold
         }
     }
     
-    const total = allHandsChronological.filter(h => h === threshold).length;
+    const total = allHandsNewestFirst.filter(h => h === threshold).length;
 
     return { total, bestStreak, currentStreak };
 };
@@ -127,9 +130,8 @@ function calculateSummaryStats(scores) {
 }
 
 async function renderStatistics(playerId, playerName, teamId, teamName) {
-    document.getElementById('stats-player-name').textContent = playerName;
-    document.getElementById('stats-team-name').textContent = teamName;
     document.getElementById('stats-player-name-header').textContent = playerName;
+    document.getElementById('stats-team-name-header').textContent = teamName;
     
     const scores = await fetchPlayerStats(playerId, teamId);
     const summary = calculateSummaryStats(scores);
@@ -147,13 +149,19 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
     `;
 
     streakStatsContainer.innerHTML = `
-        <div class="stat-box detailed-stat"><h4>9s</h4><p><strong>Total:</strong> ${summary.nines.total}</p><p><strong>Best Streak:</strong> ${summary.nines.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.nines.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>8s</h4><p><strong>Total:</strong> ${summary.eights.total}</p><p><strong>Best Streak:</strong> ${summary.eights.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.eights.currentStreak}</p></div>
-        <div class="stat-box detailed-stat"><h4>7s</h4><p><strong>Total:</strong> ${summary.sevens.total}</p><p><strong>Best Streak:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current Streak:</strong> ${summary.sevens.currentStreak}</p></div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-main"><h4>9s</h4><p class="stat-total">${summary.nines.total}</p></div>
+            <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.nines.bestStreak}</p><p><strong>Current:</strong> ${summary.nines.currentStreak}</p></div></div>
+        </div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-main"><h4>8s</h4><p class="stat-total">${summary.eights.total}</p></div>
+            <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.eights.bestStreak}</p><p><strong>Current:</strong> ${summary.eights.currentStreak}</p></div></div>
+        </div>
+        <div class="stat-box detailed-stat">
+            <div class="stat-main"><h4>7s</h4><p class="stat-total">${summary.sevens.total}</p></div>
+            <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current:</strong> ${summary.sevens.currentStreak}</p></div></div>
+        </div>
     `;
-
-    // Re-sort scores to display newest first in the table
-    scores.sort((a, b) => b.date.toDate() - a.date.toDate());
 
     const tableContainer = document.querySelector('.stats-results-table');
     if (scores.length > 0) {
