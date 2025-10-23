@@ -209,7 +209,7 @@ async function displayMatchResults() {
                     }
                 }
 
-                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="btn-details">Details</a>` : (isPostponed ? `<span>postponed</span>` : (isRescheduled ? `<span>Rescheduled</span>` : ''));
+                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>` : (isPostponed ? `<span>postponed</span>` : (isRescheduled ? `<span>Rescheduled</span>` : ''));
                 
                 weekTableHTML += `<tr class="${rowClass}">
                                     <td class="date-col">${dateCell}</td>
