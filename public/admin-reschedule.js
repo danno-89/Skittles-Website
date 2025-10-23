@@ -1,60 +1,25 @@
-import { db, collection, getDocs, query, where, Timestamp, httpsCallable, functions } from './firebase.config.js';
+import { db, collection, getDocs, query, where, Timestamp, doc, updateDoc } from './firebase.config.js';
 
 let postponedFixtures = [];
-let availableSlots = [];
 let teamsMapRef;
 
 const elements = {
     postponedSelect: null,
-    spareSelect: null,
+    dateInput: null,
+    timeInput: null,
     rescheduleBtn: null,
     feedbackDiv: null,
 };
 
 // --- Data Fetching ---
-
 async function fetchPostponedFixtures() {
-    // Fetches all fixtures that are currently postponed
     const q = query(collection(db, "match_results"), where("status", "==", "postponed"));
     const querySnapshot = await getDocs(q);
     postponedFixtures = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     postponedFixtures.sort((a, b) => a.scheduledDate.toMillis() - b.scheduledDate.toMillis());
 }
 
-async function fetchAvailableSlots() {
-    // Calculate the cutoff date: today - 7 days
-    const today = new Date();
-    const cutoffDate = new Date(today);
-    cutoffDate.setDate(today.getDate() - 7);
-    cutoffDate.setHours(0, 0, 0, 0); // Start of the day for a clean comparison
-
-    const cutoffTimestamp = Timestamp.fromDate(cutoffDate);
-
-    // An available slot is any 'spare' or 'postponed' fixture's slot from the cutoff date onwards.
-    const q = query(
-        collection(db, "match_results"), 
-        where("status", "in", ["spare", "postponed"]),
-        where("scheduledDate", ">=", cutoffTimestamp) // Filter out old dates
-    );
-    
-    const querySnapshot = await getDocs(q);
-    
-    const slots = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Sort by date to ensure chronological order in the dropdown
-    slots.sort((a, b) => a.scheduledDate.toMillis() - b.scheduledDate.toMillis());
-    
-    availableSlots = slots;
-}
-
-
 // --- UI Population ---
-
-function populateSelects() {
-    populatePostponedFixturesSelect();
-    populateAvailableSlotsSelect();
-}
-
 function populatePostponedFixturesSelect() {
     elements.postponedSelect.innerHTML = '<option value="">1. Select Fixture to Move</option>';
     postponedFixtures.forEach(fixture => {
@@ -68,67 +33,43 @@ function populatePostponedFixturesSelect() {
     });
 }
 
-function populateAvailableSlotsSelect(excludedId = null) {
-    const currentSelection = elements.spareSelect.value;
-    elements.spareSelect.innerHTML = '<option value="">2. Select Target Slot</option>';
-    
-    availableSlots.forEach(slot => {
-        if (slot.id === excludedId) return; // A fixture cannot be rescheduled into its own slot
-
-        const date = slot.scheduledDate.toDate().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-        const time = slot.scheduledDate.toDate().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        const option = document.createElement('option');
-        option.value = slot.id;
-
-        if (slot.status === 'spare') {
-            option.textContent = `Spare Slot on ${date} at ${time}`;
-        } else {
-            const homeTeam = teamsMapRef.get(slot.homeTeamId) || 'Unknown';
-            const awayTeam = teamsMapRef.get(slot.awayTeamId) || 'Unknown';
-            option.textContent = `Slot of ${homeTeam} vs ${awayTeam} on ${date}`;
-        }
-        elements.spareSelect.appendChild(option);
-    });
-
-    if (currentSelection && currentSelection !== excludedId) {
-        elements.spareSelect.value = currentSelection;
-    }
-}
-
 // --- Event Handlers & Logic ---
-
 function checkButtonState() {
-    elements.rescheduleBtn.disabled = !(elements.postponedSelect.value && elements.spareSelect.value);
+    elements.rescheduleBtn.disabled = !(elements.postponedSelect.value && elements.dateInput.value && elements.timeInput.value);
 }
 
 async function handleReschedule() {
-    const postponedFixtureId = elements.postponedSelect.value;
-    const targetSlotId = elements.spareSelect.value;
+    const fixtureId = elements.postponedSelect.value;
+    const newDate = elements.dateInput.value;
+    const newTime = elements.timeInput.value;
 
-    if (!postponedFixtureId || !targetSlotId) {
-        showFeedback('Please select both a fixture to move and a target slot.', 'error');
+    if (!fixtureId || !newDate || !newTime) {
+        showFeedback('Please select a fixture and enter a new date and time.', 'error');
         return;
     }
 
-    const confirmed = confirm('Are you sure you want to reschedule this fixture? This action cannot be undone.');
+    const [year, month, day] = newDate.split('-').map(Number);
+    const [hours, minutes] = newTime.split(':').map(Number);
+    const newScheduledDate = new Date(year, month - 1, day, hours, minutes);
+
+    const confirmed = confirm('Are you sure you want to reschedule this fixture to the new date and time?');
     if (!confirmed) return;
 
     elements.rescheduleBtn.disabled = true;
     showFeedback('Rescheduling fixture...', 'info');
 
     try {
-        const rescheduleFixture = httpsCallable(functions, 'rescheduleFixture');
-        const result = await rescheduleFixture({ postponedFixtureId, targetSlotId });
+        const fixtureRef = doc(db, "match_results", fixtureId);
+        await updateDoc(fixtureRef, {
+            scheduledDate: Timestamp.fromDate(newScheduledDate),
+            status: 'rescheduled'
+        });
 
-        if (result.data.success) {
-            showFeedback(result.data.message, 'success');
-            await initialize(); 
-        } else {
-            throw new Error(result.data.message || 'The cloud function reported an error.');
-        }
+        showFeedback('Fixture rescheduled successfully!', 'success');
+        await initialize();
 
     } catch (error) {
-        console.error('Error calling rescheduleFixture function:', error);
+        console.error('Error updating fixture:', error);
         showFeedback(`An error occurred: ${error.message}`, 'error');
     } finally {
         checkButtonState();
@@ -142,30 +83,30 @@ function showFeedback(message, type) {
 }
 
 // --- Initialization ---
-
 async function initialize() {
-    await Promise.all([fetchPostponedFixtures(), fetchAvailableSlots()]);
-    populateSelects();
+    await fetchPostponedFixtures();
+    populatePostponedFixturesSelect();
+    elements.dateInput.value = '';
+    elements.timeInput.value = '';
     checkButtonState();
 }
 
 export function initRescheduleFixture(teamsMap) {
     teamsMapRef = teamsMap;
     elements.postponedSelect = document.getElementById('postponed-fixture-select');
-    elements.spareSelect = document.getElementById('spare-fixture-select');
+    elements.dateInput = document.getElementById('new-date-input');
+    elements.timeInput = document.getElementById('new-time-input');
     elements.rescheduleBtn = document.getElementById('reschedule-submit-btn');
     elements.feedbackDiv = document.getElementById('reschedule-feedback');
 
-    if (!elements.postponedSelect || !elements.spareSelect || !elements.rescheduleBtn) {
+    if (!elements.postponedSelect || !elements.dateInput || !elements.timeInput || !elements.rescheduleBtn) {
         console.error('Reschedule fixture tab elements not found!');
         return;
     }
 
-    elements.postponedSelect.addEventListener('change', () => {
-        populateAvailableSlotsSelect(elements.postponedSelect.value);
-        checkButtonState();
-    });
-    elements.spareSelect.addEventListener('change', checkButtonState);
+    elements.postponedSelect.addEventListener('change', checkButtonState);
+    elements.dateInput.addEventListener('change', checkButtonState);
+    elements.timeInput.addEventListener('change', checkButtonState);
     elements.rescheduleBtn.addEventListener('click', handleReschedule);
 
     initialize();

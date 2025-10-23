@@ -162,22 +162,25 @@
                 <div id="reschedule-fixture-content" class="tab-pane">
                     <h2>Reschedule a Postponed Fixture</h2>
                     <div class="form-section">
-                        <p>Use this tool to move a postponed fixture into an available spare slot.</p>
-
+                        <p>Use this tool to move a postponed fixture to a new date and time.</p>
+                
                         <div class="form-group">
                             <label for="postponed-fixture-select"><strong>1. Select the Postponed Fixture to Move</strong></label>
                             <select id="postponed-fixture-select" class="form-select">
                                 <option value="">Loading postponed fixtures...</option>
                             </select>
                         </div>
-            
+                
                         <div class="form-group">
-                            <label for="spare-fixture-select"><strong>2. Select the Available Spare Slot</strong></label>
-                            <select id="spare-fixture-select" class="form-select">
-                                <option value="">Loading spare slots...</option>
-                            </select>
+                            <label for="new-date-input"><strong>2. Select the New Date</strong></label>
+                            <input type="date" id="new-date-input" class="form-select">
                         </div>
-            
+                
+                        <div class="form-group">
+                            <label for="new-time-input"><strong>3. Enter the New Time</strong></label>
+                            <input type="time" id="new-time-input" class="form-select">
+                        </div>
+                
                         <button id="reschedule-submit-btn" class="btn btn-primary" disabled>Reschedule Fixture</button>
                         <div id="reschedule-feedback" class="feedback-message" style="display: none;"></div>
                     </div>
