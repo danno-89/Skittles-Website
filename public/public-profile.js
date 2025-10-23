@@ -59,21 +59,18 @@ async function fetchPlayerStats(playerId, teamId) {
     processSnapshot(homeSnapshot, true);
     processSnapshot(awaySnapshot, false);
 
-    // Sort matches by date, newest first. This is important for "current streak".
-    allScores.sort((a, b) => b.date.toDate() - a.date.toDate());
+    // Sort matches by date, OLDEST first for chronological processing.
+    allScores.sort((a, b) => a.date.toDate() - b.date.toDate());
     return allScores;
 }
 
 const getStreakMetrics = (scores, threshold) => {
-    // Scores are newest to oldest.
-    const allHandsNewestFirst = scores.flatMap(s => s.hands);
-    // Create a truly chronological list of hands for 'best streak' calculation.
-    const allHandsOldestFirst = [...scores].reverse().flatMap(s => s.hands);
+    // Scores are now oldest to newest.
+    const allHandsChronological = scores.flatMap(s => s.hands);
 
     let bestStreak = 0;
     let currentStreakForBest = 0;
-
-    for (const hand of allHandsOldestFirst) {
+    for (const hand of allHandsChronological) {
         if (hand >= threshold) {
             currentStreakForBest++;
         } else {
@@ -81,18 +78,18 @@ const getStreakMetrics = (scores, threshold) => {
             currentStreakForBest = 0;
         }
     }
-    bestStreak = Math.max(bestStreak, currentStreakForBest); // Check streak at the end
+    bestStreak = Math.max(bestStreak, currentStreakForBest);
 
     let currentStreak = 0;
-    for (const hand of allHandsNewestFirst) {
-        if (hand >= threshold) {
+    for (let i = allHandsChronological.length - 1; i >= 0; i--) {
+        if (allHandsChronological[i] >= threshold) {
             currentStreak++;
         } else {
-            break; // Stop at the first hand that doesn't meet the threshold
+            break;
         }
     }
     
-    const total = allHandsNewestFirst.filter(h => h === threshold).length;
+    const total = allHandsChronological.filter(h => h === threshold).length;
 
     return { total, bestStreak, currentStreak };
 };
@@ -163,6 +160,9 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
         </div>
     `;
 
+    // Re-sort scores to display newest first in the table
+    scores.sort((a, b) => b.date.toDate() - a.date.toDate());
+
     const tableContainer = document.querySelector('.stats-results-table');
     if (scores.length > 0) {
         const teamsMap = new Map();
@@ -188,6 +188,7 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                         <tr>
                             <th></th>
                             <th>Date</th>
+                            <th>Time</th>
                             <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th>
                             <th>Total</th>
                             <th>Team Rank</th>
@@ -201,11 +202,13 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
                             let resultClass = 'draw';
                             if (s.teamScore > s.opponentScore) resultClass = 'win';
                             if (s.teamScore < s.opponentScore) resultClass = 'loss';
+                            const time = s.date.toDate().toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true });
 
                             return `
                                 <tr>
                                     <td><span class="result-indicator ${resultClass}"></span></td>
                                     <td>${formatDate(s.date)}</td>
+                                    <td>${time}</td>
                                     ${s.hands.map(h => `<td><span class="${h >= 10 ? 'highlight-score' : ''}">${h}</span></td>`).join('')}
                                     <td><strong>${s.score}</strong></td>
                                     <td>${s.teamRank === 1 ? `<span class="rank-one">1</span>` : s.teamRank}</td>
