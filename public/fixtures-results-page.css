@@ -1,54 +1,69 @@
 /* --- Fixtures/Results Page Specific Styles --- */
 
 .page-header {
-    position: relative; /* Needed for absolute positioning of the mobile controls */
-}
-
-.mobile-controls {
-    display: none; /* Hidden by default */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    justify-content: flex-start;
-    padding: 0 var(--spacing-md);
-    margin-bottom: 0;
-}
-
-.mobile-controls .icon-btn {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-sm);
-    background-color: transparent;
+    margin-bottom: 0; /* Connects to the tabs */
+    border-bottom: 3px solid var(--club-yellow);
+    padding-bottom: var(--spacing-md);
+}
+
+/* Add space between tabs and the content below */
+.tab-content-area {
+    margin-top: var(--spacing-xl);
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-sm);
+}
+
+.icon-btn icon-component {
+    width: 24px;
+    height: 24px;
+}
+
+/* --- Modal Styles --- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); 
+}
+
+.modal-content {
+    background-color: var(--pure-white);
+    margin: 15% auto; 
+    padding: var(--spacing-lg);
     border: 1px solid var(--light-grey);
-    border-bottom: none;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-top-left-radius: var(--border-radius);
-    border-top-right-radius: var(--border-radius);
-    margin-bottom: -1px; /* Overlaps the border */
+    width: 80%;
+    max-width: 500px;
+    border-radius: var(--border-radius);
+    position: relative;
 }
 
-.mobile-controls .icon-btn.active {
-    background-color: var(--off-white);
-    border-color: var(--light-grey);
-    border-bottom: 1px solid var(--off-white);
+.close-btn {
+    color: var(--medium-grey);
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
 }
-
 
 #filters-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: var(--spacing-lg);
-    padding: var(--spacing-md);
-    background-color: var(--off-white);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-lg);
-    align-items: flex-end;
-    border: 1px solid var(--light-grey);
-    border-top: none;
-    position: relative;
-    z-index: 0;
-    margin-top: 0;
 }
 
 .filter-group {
@@ -58,83 +73,69 @@
 }
 
 .filter-group-right {
-    margin-left: auto;
     display: flex;
-    align-items: flex-end;
+    justify-content: flex-end;
+    margin-top: var(--spacing-md);
 }
 
-.checkbox-group {
-    display: flex;
-    gap: var(--spacing-md);
-    padding-top: var(--spacing-xs);
-}
+/* --- Results Table & Week Details --- */
 
-.checkbox-group span {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.checkbox-group input[type="checkbox"] {
-    margin: 0;
-    width: 1rem;
-    height: 1rem;
-}
-
-#results-container {
-    flex-grow: 1;
+.table-container {
+    overflow-x: auto;
 }
 
 .results-table {
     border-collapse: collapse;
-    width: 100%;
     table-layout: fixed; 
+    width: auto; /* Allow table to determine its own width based on columns */
+}
+
+.results-table tr {
+    height: 40px;
 }
 
 .results-table th, .results-table td {
-    padding: var(--spacing-xs);
+    padding: 0 var(--spacing-md);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: left; /* General alignment */
+    text-align: left;
+    vertical-align: middle; 
 }
 
-.date-col { width: 13%; }
-.time-col { width: 9%; }
-.home-team-col { width: 20%; }
-.away-team-col { width: 20%; }
-.score-col { width: 8%; }
-.status-col { width: 10%; }
-.competition-col { width: 15%; }
-.round-col { width: 12%; }
+.date-col { width: 110px; }
+.time-col { width: 90px; }
+.home-team-col { width: 150px; }
+.away-team-col { width: 150px; }
+.score { width: 80px; }
+.status-cell { width: 90px; }
+.competition-col { width: 150px; }
+.round-col { width: 100px; }
 
-
-.results-table .score-col,
-.results-table .status-col,
-.results-table th.score-col,
-.results-table th.status-col {
-    text-align: center !important; /* Force center alignment */
+.score, .status-cell {
+    text-align: center;
 }
 
-
-/* --- Fix for rounded corners on tables inside a bordered container --- */
-.results-table tr:last-child td:first-child {
-    border-bottom-left-radius: calc(var(--border-radius) - 1px);
-}
-
-.results-table tr:last-child td:last-child {
-    border-bottom-right-radius: calc(var(--border-radius) - 1px);
-}
-
+/* --- Week Details Styling --- */
 
 .week-details {
     border: 1px solid var(--light-grey);
     border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-md);
     background-color: var(--pure-white);
+    margin: 0 var(--spacing-md) var(--spacing-md) 0; /* Consistent spacing */
+    display: inline-block; /* Default for collapsed state */
+    vertical-align: top;   /* Align all week blocks to the top */
 }
 
+/* Set a fixed width for collapsed (not open) headers for uniform stacking */
+.week-details:not([open]) {
+    width: 325px;
+}
+
+/* Force open details to be a block element and shrink-to-fit its content */
 .week-details[open] {
+    display: block;          /* Force it onto its own line */
+    width: fit-content;      /* THE FIX: Shrink-wrap the container to the table */
     border-color: var(--club-green);
 }
 
@@ -143,38 +144,22 @@
     background-color: var(--club-green);
     color: var(--club-yellow);
     font-weight: bold;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius);
-    transition: background-color var(--transition-speed);
-    list-style-type: none; /* Remove default marker */
+    list-style: none; 
 }
+
 .week-details[open] .week-header {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
 
-
-.week-header.is-cup-week {
-    background-color: var(--club-yellow);
-    color: var(--club-green);
-}
-
-.week-header:hover {
-    background-color: var(--darker-green);
-}
-
-.week-header.is-cup-week:hover {
-    background-color: var(--darker-yellow);
-}
-
-.week-header::-webkit-details-marker {
-    display: none;
-}
+.week-header::-webkit-details-marker { display: none; }
 
 .week-header::before {
     content: '►';
     display: inline-block;
-    width: 1.5em;
+    margin-right: var(--spacing-sm);
     transition: transform 0.2s;
 }
 
@@ -182,70 +167,35 @@
     transform: rotate(90deg);
 }
 
-.score, .status-cell {
-    text-align: center;
-}
-
-.status-postponed {
-    background-color: hsla(39, 100%, 90%, 1); /* Light Orange */
-}
-
-.status-rescheduled {
-    background-color: hsla(200, 100%, 90%, 1); /* Light Blue */
-}
-
-.status-postponed-text {
-    color: var(--danger);
-    font-size: 0.8rem;
-}
-
-.status-rescheduled-text {
-    color: var(--info);
-    font-size: 0.8rem;
-}
-
-.postponed-by-team {
-    font-weight: bold;
-    color: var(--danger);
+/* --- Status & Winner Styles --- */
+.winner {
+    color: var(--club-green);
+    font-weight: 700;
 }
 
 .status-spare {
-    background-color: hsla(120, 60%, 90%, 1); /* Light Green */
-    font-style: italic;
-    text-align: center;
+    background-color: hsla(200, 60%, 95%, 1); 
+    font-style: italic; 
+    text-align: center; 
+}
+
+.status-cell .details-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.status-cell .details-link icon-component {
+    width: 24px;
+    height: 24px;
 }
 
 /* --- Responsive Styles --- */
 @media (max-width: 768px) {
-    .mobile-controls {
-        display: flex;
-    }
-    
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .results-table {
-        width: 800px; /* Force table to be wide, activating scroll */
-    }
-
-    #filters-container {
-        display: none; /* Hidden by default on mobile */
-        flex-direction: column;
-        align-items: stretch;
-        border-top-left-radius: 0;
-    }
-
-    #filters-container.visible {
-        display: flex; /* Shown when toggled */
-    }
-
-    .filter-group-right {
-        margin-left: 0;
-        justify-content: center;
-    }
-
-    .page-header {
-      padding-bottom: 3rem; /* Add padding to make space for the hanging button */
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
     }
 }

@@ -3,29 +3,32 @@ import { db, collection, getDocs, query, orderBy, where, limit } from './firebas
 const competitionCache = new Map();
 const teamCache = new Map();
 let allFixtures = [];
+let activeTab = 'fixtures';
 
 // --- Helper Functions ---
 
-function formatTeamName(teamName) {
-    if (typeof teamName === 'string' && teamName.startsWith('Display[')) {
-        const startIndex = teamName.indexOf('[') + 1;
-        const endIndex = teamName.indexOf(']');
-        if (startIndex > 0 && endIndex > startIndex) {
-            const displayText = teamName.substring(startIndex, endIndex);
-            return `<strong>${displayText}</strong>`;
-        }
-    }
-    return teamName;
+function formatDate(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = new Date(date);
+    const day = d.getDate();
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
 }
 
 function getTeamName(teamIdentifier) {
     if (typeof teamIdentifier === 'string' && teamIdentifier.startsWith('Display[')) {
-        return teamIdentifier;
+        const startIndex = teamIdentifier.indexOf('[') + 1;
+        const endIndex = teamIdentifier.indexOf(']');
+        return `<strong>${teamIdentifier.substring(startIndex, endIndex)}</strong>`;
     }
     return teamCache.get(teamIdentifier)?.name || "Unknown Team";
 }
 
 function getWeekStartDate(date) {
+    if (!date || !(date instanceof Date)) {
+        return new Date();
+    }
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -39,9 +42,7 @@ function getWeekStartDate(date) {
 async function populateCompetitionCache() {
     try {
         const snapshot = await getDocs(collection(db, "competitions"));
-        snapshot.forEach(doc => {
-            competitionCache.set(doc.id, doc.data());
-        });
+        snapshot.forEach(doc => competitionCache.set(doc.id, doc.data()));
     } catch (error) {
         console.error("Error populating competition cache:", error);
     }
@@ -50,73 +51,85 @@ async function populateCompetitionCache() {
 async function populateTeamCache() {
     try {
         const snapshot = await getDocs(collection(db, "teams"));
-        snapshot.forEach(doc => {
-            teamCache.set(doc.id, doc.data());
-        });
+        snapshot.forEach(doc => teamCache.set(doc.id, doc.data()));
     } catch (error) {
         console.error("Error populating team cache:", error);
     }
 }
 
-async function fetchAllFixtures() {
+async function fetchAllFixtures(season) {
     try {
-        const q = query(collection(db, "match_results"), orderBy("scheduledDate", "asc"));
+        const q = query(collection(db, "match_results"), where("season", "==", season), orderBy("scheduledDate", "asc"));
         const snapshot = await getDocs(q);
         allFixtures = snapshot.docs.map(doc => {
             const data = doc.data();
-            if (data.scheduledDate && typeof data.scheduledDate.toDate === 'function') {
-                data.scheduledDate = data.scheduledDate.toDate();
-            } else if (typeof data.scheduledDate === 'string') {
-                data.scheduledDate = new Date(data.scheduledDate);
-            }
+            data.scheduledDate = data.scheduledDate?.toDate();
             return { id: doc.id, ...data };
         });
     } catch (error) {
-        console.error("Error fetching all fixtures:", error);
+        console.error("Error fetching fixtures for season:", error);
         allFixtures = [];
     }
 }
 
-// --- Main Display Logic ---
+// --- Spare Slot Generation ---
 
-async function displayMatchResults() {
-    const resultsContainer = document.getElementById('results-container');
-    const teamFilter = document.getElementById('team-filter').value;
-    const competitionFilter = document.getElementById('competition-filter').value;
-    const seasonFilter = document.getElementById('season-filter').value;
-    const excludePostponed = document.getElementById('exclude-postponed-filter').checked;
-    const onlyPostponed = document.getElementById('only-postponed-filter').checked;
-    const onlySpare = document.getElementById('only-spare-filter').checked;
+function generateSpareSlots(fixtures) {
+    const spareSlots = [];
+    const fixturesByDate = new Map();
 
-    if (!resultsContainer) return;
-    resultsContainer.innerHTML = '<p>Loading fixtures...</p>';
-
-    const filteredFixtures = allFixtures.filter(match => {
-        const awayTeamId = match.awayTeamId || match.awayTeamis;
-        const teamMatch = !teamFilter || match.homeTeamId === teamFilter || awayTeamId === teamFilter;
-        const competitionMatch = !competitionFilter || match.division === competitionFilter;
-        const seasonMatch = !seasonFilter || match.season === seasonFilter;
-        
-        let statusMatch = true;
-        if (onlySpare) {
-            statusMatch = match.status === 'spare';
-        } else {
-            statusMatch = (!excludePostponed || match.status !== 'postponed') && (!onlyPostponed || match.status === 'postponed');
+    fixtures.forEach(fixture => {
+        if (fixture.status !== 'spare' && fixture.scheduledDate) {
+            const dateStr = fixture.scheduledDate.toISOString().split('T')[0];
+            if (!fixturesByDate.has(dateStr)) {
+                fixturesByDate.set(dateStr, []);
+            }
+            fixturesByDate.get(dateStr).push(fixture);
         }
-
-        return teamMatch && competitionMatch && seasonMatch && statusMatch;
     });
 
-    if (filteredFixtures.length === 0) {
-        resultsContainer.innerHTML = '<p>No fixtures found matching your criteria.</p>';
+    const standardTimes = ['19:00', '20:00', '21:00'];
+
+    fixturesByDate.forEach((dayFixtures, dateStr) => {
+        const scheduledTimes = new Set(dayFixtures.map(f => {
+            return f.scheduledDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }).substring(0, 5);
+        }));
+    
+        standardTimes.forEach(time => {
+            if (!scheduledTimes.has(time)) {
+                const [hour, minute] = time.split(':');
+                const [year, month, day] = dateStr.split('-').map(Number);
+                const spareDate = new Date(Date.UTC(year, month - 1, day, parseInt(hour, 10), parseInt(minute, 10)));
+    
+                if (spareDate > new Date()) { 
+                    spareSlots.push({
+                        id: `spare-${dateStr}-${time}`,
+                        scheduledDate: spareDate,
+                        status: 'spare'
+                    });
+                }
+            }
+        });
+    });
+    
+    return spareSlots;
+}
+
+// --- Main Display Logic ---
+
+function renderFixturesTable(fixtures, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (fixtures.length === 0) {
+        container.innerHTML = '<p>No matches found for this category.</p>';
         return;
     }
-    
-    const groupedFixtures = filteredFixtures.reduce((groups, match) => {
-        const matchDate = match.scheduledDate;
-        const weekStartDate = getWeekStartDate(matchDate);
-        const weekKey = weekStartDate.toISOString().split('T')[0];
 
+    const groupedFixtures = fixtures.reduce((groups, match) => {
+        if (!match.scheduledDate) return groups;
+        const weekStartDate = getWeekStartDate(match.scheduledDate);
+        const weekKey = weekStartDate.toISOString().split('T')[0];
         if (!groups[weekKey]) {
             groups[weekKey] = { startDate: weekStartDate, matches: [] };
         }
@@ -130,154 +143,137 @@ async function displayMatchResults() {
     for (const weekKey of sortedWeekKeys) {
         const group = groupedFixtures[weekKey];
         group.matches.sort((a, b) => a.scheduledDate - b.scheduledDate);
+        const weekStartDateFormatted = formatDate(group.startDate);
 
-        const weekStartDate = group.startDate;
-        const weekSaturday = new Date(weekStartDate);
-        weekSaturday.setDate(weekSaturday.getDate() + 5);
-        weekSaturday.setHours(23, 59, 59, 999);
-        const isPastWeek = new Date() > weekSaturday;
-        const isOpen = isPastWeek ? '' : 'open';
-
-        const weekStartDateFormatted = group.startDate.toLocaleDateString('en-GB', {
-            day: 'numeric', month: 'short', year: 'numeric'
-        });
-        
-        const cupFixturesCount = group.matches.filter(match => match.round).length;
-        const isCupWeek = cupFixturesCount > group.matches.length / 2;
-        const summaryClass = isCupWeek ? 'week-header is-cup-week' : 'week-header';
-
-        html += `<details class="week-details" ${isOpen}>`;
-        html += `<summary class="${summaryClass}">Week Commencing: ${weekStartDateFormatted}</summary>`;
-        
-        let weekTableHTML = `<div class="table-container"><table class="results-table">
+        html += `<details class="week-details" open><summary class="week-header">Week Commencing: ${weekStartDateFormatted}</summary>`;
+        html += `<div class="table-container"><table class="results-table">
             <thead class="sticky-header">
                 <tr>
                     <th class="date-col">Date</th>
                     <th class="time-col">Time</th>
                     <th class="home-team-col">Home Team</th>
                     <th class="away-team-col">Away Team</th>
-                    <th class="centered-header">Score</th>
-                    <th class="centered-header">Status</th>
-                    <th>Competition</th>
-                    <th>Round</th>
+                    <th class="score">Score</th>
+                    <th class="status-cell">Status</th>
+                    <th class="competition-col">Competition</th>
+                    <th class="round-col">Round</th>
                 </tr>
-            </thead>
-            <tbody>`;
+            </thead><tbody>`;
 
         let lastRenderedDate = null;
         for (const match of group.matches) {
             const dateObj = match.scheduledDate;
-        
-            if (match.status === 'spare' && dateObj < new Date()) {
-                continue;
-            }
-        
-            const date = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
+            const date = formatDate(dateObj);
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
             const dateCell = (date === lastRenderedDate) ? '' : date;
             if (date !== lastRenderedDate) lastRenderedDate = date;
 
             if (match.status === 'spare') {
-                weekTableHTML += `<tr class="status-spare">
-                                    <td class="date-col">${dateCell}</td>
-                                    <td class="time-col">${time}</td>
-                                    <td colspan="6">Spare slot for Postponed Fixtures</td>
-                                  </tr>`;
+                html += `<tr class="status-spare">
+                            <td class="date-col">${dateCell}</td>
+                            <td class="time-col">${time}</td>
+                            <td colspan="6">Spare slot for Postponed Fixtures</td>
+                          </tr>`;
             } else {
-                const awayTeamIdentifier = match.awayTeamId || match.awayTeamis;
-                let homeTeamName = formatTeamName(getTeamName(match.homeTeamId));
-                let awayTeamName = formatTeamName(getTeamName(awayTeamIdentifier));
+                const awayTeamId = match.awayTeamId || match.awayTeamis;
+                const homeTeamName = getTeamName(match.homeTeamId);
+                const awayTeamName = getTeamName(awayTeamId);
                 const hasResult = match.homeScore != null && match.awayScore != null;
                 const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
                 const divisionName = competitionCache.get(match.division)?.name || 'N/A';
                 const round = match.round || '';
+
+                let homeTeamHtml = homeTeamName;
+                let awayTeamHtml = awayTeamName;
                 
-                const isPostponed = match.status === 'postponed' && !hasResult;
-                const isRescheduled = match.status === 'rescheduled';
-                let rowClass = '';
-                if (isPostponed) {
-                    rowClass = 'status-postponed';
-                } else if (isRescheduled) {
-                    rowClass = 'status-rescheduled';
+                let status = match.status;
+                if (!status && hasResult) {
+                    status = 'completed';
+                } else if (!status) {
+                    status = 'scheduled';
                 }
                 
-                if (isPostponed && match.postponedBy) {
-                    if (match.postponedBy === match.homeTeamId) {
-                        homeTeamName = `<span class="postponed-by-team">${homeTeamName}</span>`;
-                    } else if (match.postponedBy === awayTeamIdentifier) {
-                        awayTeamName = `<span class="postponed-by-team">${awayTeamName}</span>`;
+                let statusCell = `<span>${status}</span>`;
+                if (status === 'completed') {
+                    statusCell = `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>`;
+
+                    const homeScore = parseInt(match.homeScore, 10);
+                    const awayScore = parseInt(match.awayScore, 10);
+
+                    if (homeScore > awayScore) {
+                        homeTeamHtml = `<span class="winner">${homeTeamName}</span>`;
+                    } else if (awayScore > homeScore) {
+                        awayTeamHtml = `<span class="winner">${awayTeamName}</span>`;
                     }
                 }
 
-                let statusCell = hasResult ? `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>` : (isPostponed ? `<span>postponed</span>` : (isRescheduled ? `<span>Rescheduled</span>` : ''));
-                
-                weekTableHTML += `<tr class="${rowClass}">
-                                    <td class="date-col">${dateCell}</td>
-                                    <td class="time-col">${time}</td>
-                                    <td class="home-team-col">${homeTeamName}</td>
-                                    <td class="away-team-col">${awayTeamName}</td>
-                                    <td class="score">${score}</td>
-                                    <td class="status-cell">${statusCell}</td>
-                                    <td>${divisionName}</td>
-                                    <td>${round}</td>
-                                </tr>`;
+                html += `<tr class="status-${status}">
+                            <td class="date-col">${dateCell}</td>
+                            <td class="time-col">${time}</td>
+                            <td class="home-team-col">${homeTeamHtml}</td>
+                            <td class="away-team-col">${awayTeamHtml}</td>
+                            <td class="score">${score}</td>
+                            <td class="status-cell">${statusCell}</td>
+                            <td class="competition-col">${divisionName}</td>
+                            <td class="round-col">${round}</td>
+                        </tr>`;
             }
         }
-        weekTableHTML += `</tbody></table></div>`;
-        html += weekTableHTML;
-        html += `</details>`;
+        html += `</tbody></table></div></details>`;
     }
+    container.innerHTML = html;
+}
 
-    resultsContainer.innerHTML = html;
+
+async function updateView() {
+    const teamFilter = document.getElementById('team-filter').value;
+    const competitionFilter = document.getElementById('competition-filter').value;
+
+    let filteredFixtures = allFixtures.filter(match => {
+        const awayTeamId = match.awayTeamId || match.awayTeamis;
+        const teamMatch = !teamFilter || match.homeTeamId === teamFilter || awayTeamId === teamFilter;
+        const competitionMatch = !competitionFilter || match.division === competitionFilter;
+        return teamMatch && competitionMatch;
+    });
+
+    if (activeTab === 'fixtures') {
+        let scheduledFixtures = filteredFixtures.filter(m => (!m.status || m.status === 'scheduled') && (m.homeScore == null));
+        const spareSlots = generateSpareSlots(allFixtures);
+        let displayFixtures = [...scheduledFixtures, ...spareSlots];
+        renderFixturesTable(displayFixtures, 'fixtures-container');
+    } else if (activeTab === 'results') {
+        let results = filteredFixtures.filter(m => m.status === 'completed' || (m.homeScore != null && m.awayScore != null && m.status !== 'postponed'));
+        renderFixturesTable(results, 'results-container');
+    } else if (activeTab === 'postponements') {
+        let postponements = filteredFixtures.filter(m => m.status === 'postponed');
+        renderFixturesTable(postponements, 'postponements-container');
+    }
 }
 
 // --- Filter Logic ---
 
-function handleFilterChange() {
-    const seasonFilter = document.getElementById('season-filter').value;
+function populateFilterDropdowns() {
     const teamFilter = document.getElementById('team-filter').value;
     const competitionFilter = document.getElementById('competition-filter').value;
 
-    const fixturesInSeason = allFixtures.filter(match => match.season === seasonFilter);
-
-    // Update competitions based on selected team
-    let relevantFixturesForComp = fixturesInSeason;
-    if (teamFilter) {
-        relevantFixturesForComp = fixturesInSeason.filter(match => match.homeTeamId === teamFilter || (match.awayTeamId || match.awayTeamis) === teamFilter);
-    }
-    const availableCompetitions = [...new Set(relevantFixturesForComp.map(match => match.division))];
+    const availableCompetitions = [...new Set(allFixtures.map(m => m.division))];
     populateCompetitionDropdown(availableCompetitions);
 
-    // Update teams based on selected competition
-    let relevantFixturesForTeam = fixturesInSeason;
-    if (competitionFilter) {
-        relevantFixturesForTeam = fixturesInSeason.filter(match => match.division === competitionFilter);
-    }
     const availableTeams = new Set();
-    relevantFixturesForTeam.forEach(match => {
+    allFixtures.forEach(match => {
         if (teamCache.has(match.homeTeamId)) availableTeams.add(match.homeTeamId);
         const awayTeamId = match.awayTeamId || match.awayTeamis;
         if (teamCache.has(awayTeamId)) availableTeams.add(awayTeamId);
     });
     populateTeamDropdown([...availableTeams]);
     
-    // Re-apply original selections if they are still valid
-    if ([...document.getElementById('competition-filter').options].some(opt => opt.value === competitionFilter)) {
-        document.getElementById('competition-filter').value = competitionFilter;
-    }
-    if ([...document.getElementById('team-filter').options].some(opt => opt.value === teamFilter)) {
-        document.getElementById('team-filter').value = teamFilter;
-    }
-    
-    displayMatchResults();
+    document.getElementById('competition-filter').value = competitionFilter;
+    document.getElementById('team-filter').value = teamFilter;
 }
-
 
 function populateCompetitionDropdown(competitionIds) {
     const competitionFilterSelect = document.getElementById('competition-filter');
-    const currentValue = competitionFilterSelect.value;
     competitionFilterSelect.innerHTML = '<option value="">All Competitions</option>';
-    
     competitionIds.forEach(id => {
         const competition = competitionCache.get(id);
         if (competition && competition.fixtures === true) {
@@ -287,29 +283,24 @@ function populateCompetitionDropdown(competitionIds) {
             competitionFilterSelect.appendChild(option);
         }
     });
-    competitionFilterSelect.value = currentValue;
 }
 
 function populateTeamDropdown(teamIds) {
     const teamFilterSelect = document.getElementById('team-filter');
-    const currentValue = teamFilterSelect.value;
     teamFilterSelect.innerHTML = '<option value="">All Teams</option>';
-
     const sortedTeams = teamIds
         .map(id => ({ id, name: teamCache.get(id)?.name }))
+        .filter(team => team.name)
         .sort((a, b) => a.name.localeCompare(b.name));
-
     sortedTeams.forEach(team => {
         const option = document.createElement('option');
         option.value = team.id;
         option.textContent = team.name;
         teamFilterSelect.appendChild(option);
     });
-    teamFilterSelect.value = currentValue;
 }
 
-
-async function populateSeasonFilter() {
+async function populateSeasonFilterAndInitialLoad() {
     const seasonFilterSelect = document.getElementById('season-filter');
     let currentSeason = null;
     try {
@@ -322,76 +313,73 @@ async function populateSeasonFilter() {
         console.error("Error fetching current season:", error);
     }
 
-    const uniqueSeasons = [...new Set(allFixtures.map(fixture => fixture.season).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+    const allSeasonsQuery = await getDocs(collection(db, "match_results"));
+    const uniqueSeasons = [...new Set(allSeasonsQuery.docs.map(doc => doc.data().season).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+    
     seasonFilterSelect.innerHTML = '';
     if (!currentSeason && uniqueSeasons.length > 0) {
-        currentSeason = uniqueSeasons[0]; 
+        currentSeason = uniqueSeasons[0];
     }
 
     uniqueSeasons.forEach(season => {
         const option = document.createElement('option');
         option.value = season;
         option.textContent = season;
-        if (season === currentSeason) {
-            option.selected = true;
-        }
+        if (season === currentSeason) option.selected = true;
         seasonFilterSelect.appendChild(option);
     });
+    
+    await handleSeasonChange();
 }
 
+async function handleSeasonChange() {
+    const selectedSeason = document.getElementById('season-filter').value;
+    if (!selectedSeason) return;
+    
+    document.getElementById('fixtures-container').innerHTML = '<p>Loading fixtures...</p>';
+    document.getElementById('results-container').innerHTML = '';
+    document.getElementById('postponements-container').innerHTML = '';
+
+    await fetchAllFixtures(selectedSeason);
+    populateFilterDropdowns();
+    updateView();
+}
 
 // --- Event Listeners & Initialization ---
 
 function setupEventListeners() {
-    document.getElementById('season-filter')?.addEventListener('change', handleFilterChange);
-    document.getElementById('team-filter')?.addEventListener('change', handleFilterChange);
-    document.getElementById('competition-filter')?.addEventListener('change', handleFilterChange);
-    
-    const excludePostponed = document.getElementById('exclude-postponed-filter');
-    const onlyPostponed = document.getElementById('only-postponed-filter');
-    const onlySpare = document.getElementById('only-spare-filter');
+    const modal = document.getElementById('filter-modal');
+    const filterBtn = document.getElementById('filter-modal-btn');
+    const closeBtn = document.querySelector('.modal .close-btn');
+    const applyBtn = document.getElementById('apply-filters-btn');
 
-    excludePostponed?.addEventListener('change', () => {
-        if (excludePostponed.checked) {
-            onlyPostponed.checked = false;
-            onlySpare.checked = false;
-        }
-        displayMatchResults();
-    });
-
-    onlyPostponed?.addEventListener('change', () => {
-        if (onlyPostponed.checked) {
-            excludePostponed.checked = false;
-            onlySpare.checked = false;
-        }
-        displayMatchResults();
-    });
-
-    onlySpare?.addEventListener('change', () => {
-        if (onlySpare.checked) {
-            excludePostponed.checked = false;
-            onlyPostponed.checked = false;
-        }
-        displayMatchResults();
-    });
-    
-    const toggleBtn = document.getElementById('toggle-all-btn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const isCollapsed = toggleBtn.textContent === 'Expand All';
-            document.querySelectorAll('.week-details').forEach(details => {
-                details.open = isCollapsed;
-            });
-            toggleBtn.textContent = isCollapsed ? 'Collapse All' : 'Expand All';
-        });
+    filterBtn.onclick = () => modal.style.display = 'block';
+    closeBtn.onclick = () => modal.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal) modal.style.display = 'none';
     }
+    applyBtn.onclick = () => {
+        updateView();
+        modal.style.display = 'none';
+    };
+
+    document.querySelector('.tab-bar').addEventListener('click', (e) => {
+        if (e.target.matches('.tab-link')) {
+            activeTab = e.target.dataset.tab;
+            document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(activeTab).classList.add('active');
+            updateView();
+        }
+    });
+
+    document.getElementById('season-filter').addEventListener('change', handleSeasonChange);
 }
 
 async function initializePage() {
     await Promise.all([populateCompetitionCache(), populateTeamCache()]);
-    await fetchAllFixtures();
-    await populateSeasonFilter();
-    handleFilterChange();
+    await populateSeasonFilterAndInitialLoad();
     setupEventListeners();
 }
 

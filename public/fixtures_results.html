@@ -6,6 +6,7 @@
     <title>Sarnia Skittles Club - Fixtures / Results</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fixtures-results-page.css">
+    <link rel="stylesheet" href="tabs.css">
 </head>
 <body>
 
@@ -18,52 +19,68 @@
     <div class="page-header">
         <h1>Fixtures / Results</h1>
         <div class="filter-group">
-            <label for="season-filter">Select Season:</label>
-            <select id="season-filter" class="form-select"></select>
+            <button id="filter-modal-btn" class="btn icon-btn">
+                <icon-component icon="select.svg" alt="Filters"></icon-component>
+            </button>
         </div>
     </div>
 
-    <div id="filters-container">
-        <div class="filter-group">
-            <label for="team-filter">Filter by Team:</label>
-            <select id="team-filter" class="form-select">
-                <option value="">All Teams</option>
-            </select>
+    <!-- Tab Controls -->
+    <div class="tab-bar hanging-tabs">
+        <div class="tabs-main">
+            <button class="tab-link active" data-tab="fixtures">Fixtures</button>
+            <button class="tab-link" data-tab="results">Results</button>
+            <button class="tab-link" data-tab="postponements">Postponements</button>
         </div>
+    </div>
 
-        <div class="filter-group">
-            <label for="competition-filter">Filter by Competition:</label>
-            <select id="competition-filter" class="form-select">
-                <option value="">All Competitions</option>
-            </select>
+    <!-- Tab Content Panels -->
+    <div class="tab-content-area">
+      <div id="fixtures" class="tab-pane active">
+        <div id="fixtures-container">
+          <!-- Fixtures will be dynamically loaded here -->
         </div>
+      </div>
+      <div id="results" class="tab-pane">
+        <div id="results-container">
+          <!-- Results will be dynamically loaded here -->
+        </div>
+      </div>
+      <div id="postponements" class="tab-pane">
+        <div id="postponements-container">
+          <!-- Postponements will be dynamically loaded here -->
+        </div>
+      </div>
+    </div>
 
-        <div class="filter-group">
-            <label>Filter by Status:</label>
-            <div class="checkbox-group">
-                <span>
-                    <input type="checkbox" id="exclude-postponed-filter">
-                    <label for="exclude-postponed-filter">Hide Postponed</label>
-                </span>
-                <span>
-                    <input type="checkbox" id="only-postponed-filter">
-                    <label for="only-postponed-filter">Show Only Postponed</label>
-                </span>
-                <span>
-                    <input type="checkbox" id="only-spare-filter">
-                    <label for="only-spare-filter">Show Only Spare</label>
-                </span>
+    <div id="filter-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Filters</h2>
+            <div id="filters-container">
+                <div class="filter-group">
+                    <label for="season-filter">Select Season:</label>
+                    <select id="season-filter" class="form-select"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="team-filter">Filter by Team:</label>
+                    <select id="team-filter" class="form-select">
+                        <option value="">All Teams</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="competition-filter">Filter by Competition:</label>
+                    <select id="competition-filter" class="form-select">
+                        <option value="">All Competitions</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group-right">
+                <button id="apply-filters-btn" class="btn">Apply Filters</button>
             </div>
         </div>
-
-        <div class="filter-group-right">
-            <button id="toggle-all-btn" class="btn">Collapse All</button>
-        </div>
     </div>
 
-    <div id="results-container">
-        <!-- Match results will be dynamically loaded here -->
-    </div>
   </main>
 </div>
 
