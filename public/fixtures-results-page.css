@@ -108,9 +108,10 @@
 .home-team-col { width: 150px; }
 .away-team-col { width: 150px; }
 .score { width: 80px; }
-.status-cell { width: 90px; }
-.competition-col { width: 150px; }
-.round-col { width: 100px; }
+.status-cell { width: 150px; }       
+.competition-col { width: 200px; } 
+.round-col { width: 150px; } 
+.postponed-by-col { width: 150px; }      
 
 .score, .status-cell {
     text-align: center;
@@ -154,6 +155,11 @@
     border-bottom-right-radius: 0;
 }
 
+.week-header.cup-week-header {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+}
+
 .week-header::-webkit-details-marker { display: none; }
 
 .week-header::before {
@@ -177,6 +183,10 @@
     background-color: hsla(200, 60%, 95%, 1); 
     font-style: italic; 
     text-align: center; 
+}
+
+.status-rescheduled {
+    background-color: hsla(55, 100%, 90%, 1); /* Light yellow for rescheduled matches */
 }
 
 .status-cell .details-link {

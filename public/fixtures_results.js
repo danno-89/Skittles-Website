@@ -126,6 +126,10 @@ function renderFixturesTable(fixtures, containerId) {
         return;
     }
 
+    const isFixturesTab = activeTab === 'fixtures';
+    const isResultsTab = activeTab === 'results';
+    const isPostponedTab = activeTab === 'postponed';
+
     const groupedFixtures = fixtures.reduce((groups, match) => {
         if (!match.scheduledDate) return groups;
         const weekStartDate = getWeekStartDate(match.scheduledDate);
@@ -145,22 +149,47 @@ function renderFixturesTable(fixtures, containerId) {
         group.matches.sort((a, b) => a.scheduledDate - b.scheduledDate);
         const weekStartDateFormatted = formatDate(group.startDate);
 
-        html += `<details class="week-details" open><summary class="week-header">Week Commencing: ${weekStartDateFormatted}</summary>`;
-        html += `<div class="table-container"><table class="results-table">
-            <thead class="sticky-header">
-                <tr>
-                    <th class="date-col">Date</th>
-                    <th class="time-col">Time</th>
-                    <th class="home-team-col">Home Team</th>
-                    <th class="away-team-col">Away Team</th>
-                    <th class="score">Score</th>
-                    <th class="status-cell">Status</th>
-                    <th class="competition-col">Competition</th>
-                    <th class="round-col">Round</th>
-                </tr>
-            </thead><tbody>`;
+        const relevantMatches = group.matches.filter(m => m.status !== 'rescheduled' && m.status !== 'spare');
+        const isCupWeek = relevantMatches.length > 0 && relevantMatches.every(match => {
+            const competitionName = competitionCache.get(match.division)?.name || '';
+            return competitionName !== 'Premier Division' && competitionName !== 'First Division';
+        });
+        const headerClass = isCupWeek ? 'week-header cup-week-header' : 'week-header';
 
+        let tableHeader;
+        if (isFixturesTab) {
+            tableHeader = `
+                <thead class="sticky-header">
+                    <tr>
+                        <th class="date-col">Date</th>
+                        <th class="time-col">Time</th>
+                        <th class="home-team-col">Home Team</th>
+                        <th class="away-team-col">Away Team</th>
+                        <th class="competition-col">Competition</th>
+                        <th class="round-col">Round</th>
+                        <th class="status-cell">Status</th>
+                    </tr>
+                </thead>`;
+        } else {
+            tableHeader = `
+                <thead class="sticky-header">
+                    <tr>
+                        <th class="date-col">Date</th>
+                        <th class="time-col">Time</th>
+                        <th class="home-team-col">Home Team</th>
+                        <th class="away-team-col">Away Team</th>
+                        ${!isPostponedTab ? '<th class="score">Score</th>' : ''}
+                        ${!isPostponedTab ? `<th class="status-cell">${isResultsTab ? '' : 'Status'}</th>` : ''}
+                        <th class="competition-col">Competition</th>
+                        <th class="round-col">Round</th>
+                        ${isPostponedTab ? '<th class="postponed-by-col">Postponed by</th>' : ''}
+                    </tr>
+                </thead>`;
+        }
+
+        let tableBody = '<tbody>';
         let lastRenderedDate = null;
+
         for (const match of group.matches) {
             const dateObj = match.scheduledDate;
             const date = formatDate(dateObj);
@@ -169,45 +198,65 @@ function renderFixturesTable(fixtures, containerId) {
             if (date !== lastRenderedDate) lastRenderedDate = date;
 
             if (match.status === 'spare') {
-                html += `<tr class="status-spare">
-                            <td class="date-col">${dateCell}</td>
-                            <td class="time-col">${time}</td>
-                            <td colspan="6">Spare slot for Postponed Fixtures</td>
-                          </tr>`;
+                const spareColspan = 5;
+                tableBody += `
+                    <tr class="status-spare">
+                        <td class="date-col">${dateCell}</td>
+                        <td class="time-col">${time}</td>
+                        <td colspan="${spareColspan}">Spare slot for Postponed Fixtures</td>
+                    </tr>`;
             } else {
                 const awayTeamId = match.awayTeamId || match.awayTeamis;
                 const homeTeamName = getTeamName(match.homeTeamId);
                 const awayTeamName = getTeamName(awayTeamId);
-                const hasResult = match.homeScore != null && match.awayScore != null;
-                const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
                 const divisionName = competitionCache.get(match.division)?.name || 'N/A';
                 const round = match.round || '';
 
-                let homeTeamHtml = homeTeamName;
-                let awayTeamHtml = awayTeamName;
-                
-                let status = match.status;
-                if (!status && hasResult) {
-                    status = 'completed';
-                } else if (!status) {
-                    status = 'scheduled';
-                }
-                
-                let statusCell = `<span>${status}</span>`;
-                if (status === 'completed') {
-                    statusCell = `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>`;
+                if (isPostponedTab) {
+                    const postponedByTeamName = getTeamName(match.postponedBy);
+                    tableBody += `
+                        <tr class="status-postponed">
+                            <td class="date-col">${dateCell}</td>
+                            <td class="time-col">${time}</td>
+                            <td class="home-team-col">${homeTeamName}</td>
+                            <td class="away-team-col">${awayTeamName}</td>
+                            <td class="competition-col">${divisionName}</td>
+                            <td class="round-col">${round}</td>
+                            <td class="postponed-by-col">${postponedByTeamName}</td>
+                        </tr>`;
+                } else if (isFixturesTab) {
+                    let status = match.status || 'scheduled';
+                    let statusCell = (status === 'scheduled') ? '<span></span>' : `<span>${status}</span>`;
+                    tableBody += `
+                        <tr class="status-${status}">
+                            <td class="date-col">${dateCell}</td>
+                            <td class="time-col">${time}</td>
+                            <td class="home-team-col">${homeTeamName}</td>
+                            <td class="away-team-col">${awayTeamName}</td>
+                            <td class="competition-col">${divisionName}</td>
+                            <td class="round-col">${round}</td>
+                            <td class="status-cell">${statusCell}</td>
+                        </tr>`;
+                } else { // Results Tab
+                    const hasResult = match.homeScore != null && match.awayScore != null;
+                    const score = hasResult ? `${match.homeScore} - ${match.awayScore}` : '-';
+                    let homeTeamHtml = homeTeamName;
+                    let awayTeamHtml = awayTeamName;
+                    let status = match.status || (hasResult ? 'completed' : 'scheduled');
+                    let statusCell = `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>`;
 
-                    const homeScore = parseInt(match.homeScore, 10);
-                    const awayScore = parseInt(match.awayScore, 10);
-
-                    if (homeScore > awayScore) {
-                        homeTeamHtml = `<span class="winner">${homeTeamName}</span>`;
-                    } else if (awayScore > homeScore) {
-                        awayTeamHtml = `<span class="winner">${awayTeamName}</span>`;
+                    if (hasResult) {
+                        const homeScore = parseInt(match.homeScore, 10);
+                        const awayScore = parseInt(match.awayScore, 10);
+                        if (homeScore > awayScore) {
+                            homeTeamHtml = `<span class="winner">${homeTeamName}</span>`;
+                        } else if (awayScore > homeScore) {
+                            awayTeamHtml = `<span class="winner">${awayTeamName}</span>`;
+                        }
                     }
-                }
 
-                html += `<tr class="status-${status}">
+                    tableBody += `
+                        <tr class="status-${status}">
                             <td class="date-col">${dateCell}</td>
                             <td class="time-col">${time}</td>
                             <td class="home-team-col">${homeTeamHtml}</td>
@@ -217,9 +266,21 @@ function renderFixturesTable(fixtures, containerId) {
                             <td class="competition-col">${divisionName}</td>
                             <td class="round-col">${round}</td>
                         </tr>`;
+                }
             }
         }
-        html += `</tbody></table></div></details>`;
+        tableBody += '</tbody>';
+
+        html += `
+            <details class="week-details" open>
+                <summary class="${headerClass}">Week Commencing: ${weekStartDateFormatted}</summary>
+                <div class="table-container">
+                    <table class="results-table">
+                        ${tableHeader}
+                        ${tableBody}
+                    </table>
+                </div>
+            </details>`;
     }
     container.innerHTML = html;
 }
@@ -228,6 +289,7 @@ function renderFixturesTable(fixtures, containerId) {
 async function updateView() {
     const teamFilter = document.getElementById('team-filter').value;
     const competitionFilter = document.getElementById('competition-filter').value;
+    const isFilterActive = teamFilter || competitionFilter;
 
     let filteredFixtures = allFixtures.filter(match => {
         const awayTeamId = match.awayTeamId || match.awayTeamis;
@@ -237,14 +299,21 @@ async function updateView() {
     });
 
     if (activeTab === 'fixtures') {
-        let scheduledFixtures = filteredFixtures.filter(m => (!m.status || m.status === 'scheduled') && (m.homeScore == null));
-        const spareSlots = generateSpareSlots(allFixtures);
-        let displayFixtures = [...scheduledFixtures, ...spareSlots];
+        let scheduledFixtures = filteredFixtures.filter(m => 
+            (!m.status || m.status === 'scheduled' || m.status === 'rescheduled') && (m.homeScore == null)
+        );
+        
+        let displayFixtures = [...scheduledFixtures];
+        if (!isFilterActive) {
+            const spareSlots = generateSpareSlots(allFixtures);
+            displayFixtures.push(...spareSlots);
+        }
+
         renderFixturesTable(displayFixtures, 'fixtures-container');
     } else if (activeTab === 'results') {
         let results = filteredFixtures.filter(m => m.status === 'completed' || (m.homeScore != null && m.awayScore != null && m.status !== 'postponed'));
         renderFixturesTable(results, 'results-container');
-    } else if (activeTab === 'postponements') {
+    } else if (activeTab === 'postponed') {
         let postponements = filteredFixtures.filter(m => m.status === 'postponed');
         renderFixturesTable(postponements, 'postponements-container');
     }
