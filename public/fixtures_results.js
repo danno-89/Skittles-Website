@@ -144,6 +144,10 @@ function renderFixturesTable(fixtures, containerId) {
     let html = '';
     const sortedWeekKeys = Object.keys(groupedFixtures).sort();
 
+    if (isResultsTab) {
+        sortedWeekKeys.reverse();
+    }
+
     for (const weekKey of sortedWeekKeys) {
         const group = groupedFixtures[weekKey];
         group.matches.sort((a, b) => a.scheduledDate - b.scheduledDate);
