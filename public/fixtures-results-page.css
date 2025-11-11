@@ -1,4 +1,3 @@
-/* --- Fixtures/Results Page Specific Styles --- */
 
 .page-header {
     display: flex;
@@ -103,13 +102,13 @@
     vertical-align: middle; 
 }
 
-.date-col { width: 110px; }
-.time-col { width: 90px; }
-.home-team-col { width: 150px; }
-.away-team-col { width: 150px; }
+.date-col { width: 80px; }
+.time-col { width: 80px; }
+.home-team-col { width: 180px; }
+.away-team-col { width: 180px; }
 .score { width: 80px; }
 .status-cell { width: 150px; }       
-.competition-col { width: 200px; } 
+.competition-col { width: 180px; } 
 .round-col { width: 150px; } 
 .postponed-by-col { width: 150px; }      
 

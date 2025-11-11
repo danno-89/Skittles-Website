@@ -34,8 +34,8 @@ The layout of the weekly fixture list has been carefully refined to provide a cl
     *   On the **Fixtures tab**, the "Status" column is intentionally left blank for normally `scheduled` matches to reduce clutter but shows the status for `rescheduled` matches.
 *   **Highlighting Rescheduled Fixtures:** To further differentiate them, `rescheduled` fixtures are highlighted with a light yellow background color on the "Fixtures" tab.
 *   **Cup Week Identification:** Weeks that consist exclusively of cup matches (i.e., not "Premier Division" or "First Division" games) are marked as "cup weeks." This calculation explicitly ignores any `rescheduled` or `spare` matches to ensure accuracy. The header for these weeks is styled with a distinct yellow background.
-*   **Column Sizing:** The results table uses fixed-width columns to ensure a stable, readable, and well-aligned layout. All status-related columns (`.status-cell` and `.postponed-by-col`) have a uniform width of `150px`.
-    *   Date: `110px`, Time: `90px`, Home Team: `150px`, Away Team: `150px`, Score: `80px`, Competition: `200px`, Round: `150px`, Status/Postponed by: `150px`.
+*   **Column Sizing:** The results table uses fixed-width columns to ensure a stable, readable, and well-aligned layout. The `.home-team-col` and `.away-team-col` have been widened to prevent inconsistent container sizes caused by long team names. All status-related columns (`.status-cell` and `.postponed-by-col`) have a uniform width of `150px`.
+    *   Date: `110px`, Time: `90px`, Home Team: `180px`, Away Team: `180px`, Score: `80px`, Competition: `200px`, Round: `150px`, Status/Postponed by: `150px`.
 *   **Spare Row Formatting:** The "Spare slot for Postponed Fixtures" rows now correctly span all columns in the table, including the final "Status" column, for a visually consistent appearance.
 
 ## File Structure
