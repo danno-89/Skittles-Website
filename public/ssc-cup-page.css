@@ -1,8 +1,6 @@
 /* ssc-cup-page.css */
 
-/* Reusing styles for consistency */
 @import url("tables.css");
-@import url("fixtures-results-page.css");
 
 /* Add any additional styles specific to the SSC Cup page here */
 .fixtures-container {
@@ -26,7 +24,12 @@
 
 .results-table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto; /* Changed from fixed to auto */
+}
+
+.results-table th, .results-table td {
+    padding: var(--spacing-sm);
+    text-align: left;
 }
 
 /* Override the table header style for this page */
@@ -63,10 +66,17 @@
 
 .score-balance-col {
     text-align: center;
-    width: 180px;
+    width: 15%; /* Adjusted width */
     font-style: italic;
     color: #555;
 }
+
+.date-col { width: 15%; }
+.time-col { width: 10%; }
+.home-team-col { width: 25%; }
+.away-team-col { width: 25%; }
+.score-col { width: 10%; }
+
 
 /* Remove the green line under the tabs on this page */
 .tab-bar {
