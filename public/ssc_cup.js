@@ -22,7 +22,7 @@ const getTeamData = async () => {
 const getFixturesForGroup = async (seasonId, groupName) => {
     const fixtures = [];
     try {
-        const q = query(collection(db, "match_results"), 
+        const q = query(collection(db, "match_results"),
             where("season", "==", seasonId),
             where("division", "==", "ssc-cup"),
             where("round", "==", groupName)
@@ -53,7 +53,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
         try {
             const seasonsSnapshot = await getDocs(collection(db, 'ssc_cup'));
             const seasons = seasonsSnapshot.docs.map(doc => doc.id).sort((a, b) => b.localeCompare(a));
-            
+
             seasonFilter.innerHTML = '<option value="">Select a Season</option>';
             seasons.forEach(seasonId => {
                 const option = document.createElement('option');
@@ -73,12 +73,12 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
     const renderTable = (groupData) => {
         const container = document.createElement('div');
-        container.className = 'table-container'; 
+        container.className = 'table-container';
 
         if (!groupData || !Array.isArray(groupData.standings)) {
-            return container; 
+            return container;
         }
-        
+
         const teams = groupData.standings.map(team => ({
             teamName: teamData[team.teamName] || team.teamName,
             played: team.played ?? 0,
@@ -90,7 +90,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
         const table = document.createElement('table');
         table.className = 'league-standings-table styled-table';
-        
+
         table.innerHTML = `
             <thead>
                 <tr>
@@ -108,7 +108,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
         const tbody = table.querySelector('tbody');
 
         teams.sort((a, b) => b.points - a.points || b.played - a.played || a.teamName.localeCompare(b.teamName));
-        
+
         teams.forEach((team, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -129,17 +129,17 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
     const renderFixtures = (fixtures) => {
         const container = document.createElement('div');
         container.className = 'fixtures-container';
-    
+
         if (!fixtures || fixtures.length === 0) {
             container.innerHTML = '<p>No fixtures available for this group.</p>';
             return container;
         }
-    
+
         const fixturesByWeek = fixtures.reduce((acc, fixture) => {
             if (!fixture.scheduledDate) return acc;
             const fixtureDate = fixture.scheduledDate.toDate ? fixture.scheduledDate.toDate() : new Date(fixture.scheduledDate);
             if (isNaN(fixtureDate.getTime())) return acc;
-    
+
             const startOfWeek = getStartOfWeek(fixtureDate).toISOString().split('T')[0];
             if (!acc[startOfWeek]) {
                 acc[startOfWeek] = [];
@@ -147,9 +147,9 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
             acc[startOfWeek].push(fixture);
             return acc;
         }, {});
-    
+
         const sortedWeeks = Object.keys(fixturesByWeek).sort((a, b) => new Date(a) - new Date(b));
-    
+
         let html = '';
         sortedWeeks.forEach(week => {
             const fixturesInWeek = fixturesByWeek[week].sort((a,b) => {
@@ -160,10 +160,9 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
             const weekStartDate = new Date(week);
             const weekCommencing = weekStartDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    
+
             html += `<details class="week-details" open>`;
             html += `<summary class="week-summary">Week Commencing: ${weekCommencing}</summary>`;
-            html += `<div class="table-container">`;
             html += `<table class="results-table league-standings-table styled-table">
                         <thead>
                             <tr>
@@ -177,13 +176,13 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                             </tr>
                         </thead>
                         <tbody>`;
-    
+
             fixturesInWeek.forEach(fixture => {
                 const homeTeamId = fixture.homeTeamId;
                 const awayTeamId = fixture.awayTeamId;
                 const homeTeamName = teamData[homeTeamId] || 'Unknown Team';
                 const awayTeamName = teamData[awayTeamId] || 'Unknown Team';
-                
+
                 const fixtureDate = fixture.scheduledDate.toDate ? fixture.scheduledDate.toDate() : new Date(fixture.scheduledDate);
                 const formattedDate = fixtureDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
                 const formattedTime = fixtureDate.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true });
@@ -212,23 +211,23 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                     rowClass = 'status-postponed';
                     statusText = 'Postponed';
                 }
-    
+
                 html += `
                     <tr class="${rowClass}">
-                        <td>${formattedDate}</td>
-                        <td>${formattedTime}</td>
-                        <td class="team-name home-team">${homeTeamName}</td>
-                        <td class="team-name away-team">${awayTeamName}</td>
+                        <td class="date-col">${formattedDate}</td>
+                        <td class="time-col">${formattedTime}</td>
+                        <td class="home-team-col">${homeTeamName}</td>
+                        <td class="away-team-col">${awayTeamName}</td>
                         <td class="score-col">${score}</td>
                         <td class="score-balance-col">${handicapText}</td>
                         <td class="status-col">${statusText}</td>
                     </tr>
                 `;
             });
-    
-            html += `</tbody></table></div></details>`;
+
+            html += `</tbody></table></details>`;
         });
-        
+
         container.innerHTML = html;
         return container;
     };
@@ -239,7 +238,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
         const activeTab = groupTabsContainer.querySelector(`[data-group="${groupKey}"]`);
         const activeContent = groupContainer.querySelector(`[data-group-content="${groupKey}"]`);
-        
+
         if (activeTab) activeTab.classList.add('active');
         if (activeContent) activeContent.style.display = 'block';
     }
@@ -254,13 +253,13 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
 
         try {
             const docSnap = await getDoc(doc(db, 'ssc_cup', seasonId));
-            
+
             if (docSnap.exists()) {
                 const cupData = docSnap.data();
-                teamAverages = cupData.teamAverages || {}; 
+                teamAverages = cupData.teamAverages || {};
                 const sortedGroupKeys = Object.keys(cupData).sort();
-                
-                groupContainer.innerHTML = ''; 
+
+                groupContainer.innerHTML = '';
 
                 let firstTab = true;
                 for (const groupKey of sortedGroupKeys) {
@@ -279,7 +278,7 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                         subheader.textContent = 'Group Fixtures';
                         subheader.className = 'group-fixtures-subheader';
                         contentContainer.appendChild(subheader);
-                        
+
                         const narrativeDiv = document.createElement('div');
                         narrativeDiv.className = 'handicap-narrative';
                         narrativeDiv.innerHTML = `
@@ -292,9 +291,9 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                         const fixtures = await getFixturesForGroup(seasonId, `Group Stage - ${groupLetter}`);
                         const fixturesContainer = renderFixtures(fixtures);
                         contentContainer.appendChild(fixturesContainer);
-                        
+
                         groupContainer.appendChild(contentContainer);
-                        
+
                         const tab = document.createElement('a');
                         tab.className = 'tab-link';
                         tab.dataset.group = groupKey;
