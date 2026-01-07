@@ -2,46 +2,46 @@
 
 :root {
   /* Primary Colours */
-  --club-green: #006400;
-  --club-yellow: #F9DD16;
-  --pure-white: #FFFFFF;
-  --club-alternate: #1f00d1;
+    --club-green: #006400;
+      --club-yellow: #F9DD16;
+        --pure-white: #FFFFFF;
+          --club-alternate: #1f00d1;
 
-  /* Neutral Colours */
-  --off-white: #F8F9FA;
-  --light-grey: #E9ECEF;
-  --medium-grey: #6C757D;
-  --charcoal: #212529;
+            /* Neutral Colours */
+              --off-white: #F8F9FA;
+                --light-grey: #E9ECEF;
+                  --medium-grey: #6C757D;
+                    --charcoal: #212529;
 
-  /* Tints & Shades */
-  --light-green: #1e8a49;
-  --darker-green: #004d00;
-  --darker-yellow: #D7B804;
-  --light-yellow: #fff1a2;
+                      /* Tints & Shades */
+                        --light-green: #1e8a49;
+                          --darker-green: #004d00;
+                            --darker-yellow: #D7B804;
+                              --light-yellow: #fff1a2;
 
-  /* System (Semantic) Colours */
-  --success: #198754;
-  --danger: #DC3545;
-  --warning-bg: #F9DD16;
-  --warning-text: #212529;
-  --info: #0D6EFD;
-  
-  /* Modern Styling Variables */
-  --border-radius: 8px;
-  --shadow-color: 220 23% 90%;
-  --shadow-elevation-low:
-    0.3px 0.5px 0.7px hsl(var(--shadow-color) / 0.34),
-    0.4px 0.8px 1px -1.2px hsl(var(--shadow-color) / 0.34),
-    1px 2px 2.5px -2.5px hsl(var(--shadow-color) / 0.34);
-  --transition-speed: 0.2s ease-in-out;
+                                /* System (Semantic) Colours */
+                                  --success: #198754;
+                                    --danger: #DC3545;
+                                      --warning-bg: #F9DD16;
+                                        --warning-text: #212529;
+                                          --info: #0D6EFD;
+                                            
+                                              /* Modern Styling Variables */
+                                                --border-radius: 8px;
+                                                  --shadow-color: 220 23% 90%;
+                                                    --shadow-elevation-low:
+                                                        0.3px 0.5px 0.7px hsl(var(--shadow-color) / 0.34),
+                                                            0.4px 0.8px 1px -1.2px hsl(var(--shadow-color) / 0.34),
+                                                                1px 2px 2.5px -2.5px hsl(var(--shadow-color) / 0.34);
+                                                                  --transition-speed: 0.2s ease-in-out;
 
-  /* Utility Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-}
+                                                                    /* Utility Spacing */
+                                                                      --spacing-xs: 0.25rem;
+                                                                        --spacing-sm: 0.5rem;
+                                                                          --spacing-md: 1rem;
+                                                                            --spacing-lg: 1.5rem;
+                                                                              --spacing-xl: 2rem;
+                                                                              }
 
 html {
     font-size: 100%;

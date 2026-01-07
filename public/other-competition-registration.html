@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Competition Registration</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="other-competition-registration.css">
+    <link rel="icon" type="image/png" href="SSC%20Logo.png">
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main>
+    <div class="page-header">
+        <h1>Register for a Competition</h1>
+    </div>
+    <div class="registration-container">
+        <form id="registration-form">
+            <div class="form-group">
+                <label for="competition">Select Competition:</label>
+                <select id="competition" name="competition" class="form-select">
+                    <option value="" disabled selected>Select a competition...</option>
+                    <option value="ladies-pairs">Ladies Pairs</option>
+                    <option value="mens-pairs">Men's Pairs</option>
+                    <option value="ladies-singles">Ladies' Singles</option>
+                    <option value="mens-singles">Men's Singles</option>
+                    <option value="mixed-pairs">Mixed Pairs</option>
+                </select>
+            </div>
+
+            <div id="competition-date-display" class="competition-date-highlight hidden"></div>
+
+            <h2 id="player1-label">Player 1</h2>
+            <div class="player-input-row">
+                <div class="form-group">
+                    <label for="player1-team">Team:</label>
+                    <select id="player1-team" name="player1-team" class="form-select">
+                        <option value="" disabled selected>Select a team...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="player1-name-wrapper">Full Name:</label>
+                    <div id="player1-name-wrapper" class="name-input-wrapper">
+                         <input type="text" id="player1-name" name="player1-name" class="form-input" placeholder="Select a team first" disabled required>
+                    </div>
+                </div>
+            </div>
+
+            <h2 id="player2-label">Player 2</h2>
+            <div class="player-input-row">
+                <div class="form-group">
+                    <label for="player2-team">Team:</label>
+                    <select id="player2-team" name="player2-team" class="form-select">
+                        <option value="" disabled selected>Select a team...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="player2-name-wrapper">Full Name:</label>
+                    <div id="player2-name-wrapper" class="name-input-wrapper">
+                         <input type="text" id="player2-name" name="player2-name" class="form-input" placeholder="Select a team first" disabled required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="contact-info-section" class="hidden">
+                <h2>Contact Information</h2>
+                <div class="form-group">
+                    <label for="contact-number">Contact Number:</label>
+                    <input type="tel" id="contact-number" name="contact-number" class="form-input">
+                    <p class="info-text">A contact number is required as neither player is registered to a team.</p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Registration</button>
+        </form>
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+<script src="main.js" type="module"></script>
+<script src="other-competition-registration.js" type="module"></script>
+
+</body>
+</html>

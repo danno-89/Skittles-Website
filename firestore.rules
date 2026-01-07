@@ -10,6 +10,12 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // --- Competition Registrations ---
+    // Allow public read and write access for competition registrations.
+    match /competition-registrations/{competitionId} {
+      allow read, write: if true;
+    }
+
     // --- Publicly Readable Data ---
     match /{collection}/{docId=**} {
       allow read: if collection in ['competitions', 'teams', 'seasons', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners', 'ssc_cup'];

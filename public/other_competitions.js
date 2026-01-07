@@ -1,3 +1,4 @@
+
 import { db, collection, getDocs, doc, getDoc, query, where, orderBy, limit } from './firebase.config.js';
 
 const competitionTabsContainer = document.getElementById('competition-tabs-container');
@@ -7,7 +8,7 @@ const competitionDatesContainer = document.getElementById('competition-dates-con
 
 const parseDate = (dateInput) => {
     if (!dateInput) return null;
-    if (dateInput.toDate) return dateInput.toDate();
+    if (dateInput.toDate) return dateInput.toDate(); // Handle Firestore Timestamps
     if (dateInput instanceof Date) return dateInput;
     try {
         const d = new Date(dateInput);
@@ -65,7 +66,23 @@ const fetchAndRenderTabs = async () => {
     competitionTabsContainer.innerHTML = '';
     competitionTabsContainer.appendChild(tabList);
 
-    switchTab('overview', 'Overview');
+    // Check for a tab in the URL and switch to it
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabId = urlParams.get('tab');
+
+    if (tabId) {
+        const tabButton = tabList.querySelector(`[data-competition-id='${tabId}']`);
+        if (tabButton) {
+            const competitionName = tabButton.textContent;
+            switchTab(tabId, competitionName);
+        } else {
+            // Fallback to overview if tabId is invalid
+            switchTab('overview', 'Overview');
+        }
+    } else {
+        // Default to overview
+        switchTab('overview', 'Overview');
+    }
 };
 
 const fetchCompetitionDates = async () => {
@@ -154,54 +171,115 @@ const renderWinners = (history, competitionName) => {
     competitionDatesContainer.appendChild(winnersList);
 };
 
-const fetchCompetitionDetails = async (competitionName) => {
+const fetchCompetitionDetails = async (competitionName, competitionId) => {
     if(!competitionContentContainer) return;
     competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Loading details...</p>`;
     try {
+        // Fetch event details
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
-        if (seasonQuery.empty) {
-            competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Could not determine the current season.</p>`;
-            return;
-        }
-        const seasonName = seasonQuery.docs[0].data().name;
-
-        const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("name", "==", competitionName), limit(1)));
-
-        if (eventsQuery.empty) {
-            competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Details for this competition have not been scheduled for the current season yet.</p>`;
-            return;
+        let eventData = null;
+        if (!seasonQuery.empty) {
+            const seasonName = seasonQuery.docs[0].data().name;
+            const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("name", "==", competitionName), limit(1)));
+            if (!eventsQuery.empty) {
+                eventData = eventsQuery.docs[0].data();
+            }
         }
         
-        const eventData = eventsQuery.docs[0].data();
-        renderCompetitionDetails(eventData, competitionName);
+        // Fetch registrations
+        const registrationDocRef = doc(db, 'competition-registrations', competitionId);
+        const registrationDocSnap = await getDoc(registrationDocRef);
+        let registrations = [];
+        if (registrationDocSnap.exists() && registrationDocSnap.data().entries) {
+            registrations = registrationDocSnap.data().entries;
+        }
+
+        renderCompetitionDetails(eventData, competitionName, registrations);
     } catch (error) {
         console.error(`Error fetching details for ${competitionName}:`, error);
         competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Could not load competition details.</p>`;
     }
 };
 
-const renderCompetitionDetails = (eventData, competitionName) => {
-    const competitionDate = eventData.date ? parseDate(eventData.date) : null;
-    const registrationClosedDate = eventData.registrationClosed ? parseDate(eventData.registrationClosed) : null;
+const renderCompetitionDetails = (eventData, competitionName, registrations) => {
+    let contentHTML = `<h2>${competitionName}</h2>`;
 
-    const formattedCompetitionDate = competitionDate
-        ? competitionDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-        : 'To be confirmed';
+    if (eventData) {
+        const competitionDate = eventData.date ? parseDate(eventData.date) : null;
+        
+        // Calculate registration close date as 7 days before the competition date
+        let registrationClosedDate = null;
+        if (competitionDate) {
+            registrationClosedDate = new Date(competitionDate);
+            registrationClosedDate.setDate(registrationClosedDate.getDate() - 7);
+        }
 
-    const formattedRegistrationDate = registrationClosedDate
-        ? registrationClosedDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-        : 'To be confirmed';
+        const formattedCompetitionDate = competitionDate ? competitionDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'To be confirmed';
+        const formattedRegistrationDate = registrationClosedDate ? registrationClosedDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'To be confirmed';
 
-    const contentHTML = `
-        <h2>${competitionName}</h2>
-        <div class="competition-details">
-            <p><strong>Competition Date:</strong> ${formattedCompetitionDate}</p>
-            <p><strong>Registration Closes:</strong> ${formattedRegistrationDate}</p>
-            <p><strong>Tournament Draw:</strong> Not yet available</p>
-        </div>
-    `;
+        contentHTML += `
+            <div class="competition-details">
+                <p><strong>Competition Date:</strong> ${formattedCompetitionDate}</p>
+                <p><strong>Registration Closes:</strong> ${formattedRegistrationDate}</p>
+                <p><strong>Tournament Draw:</strong> Not yet available</p>
+            </div>
+        `;
+    } else {
+        contentHTML += `<p>Details for this competition have not been scheduled for the current season yet.</p>`;
+    }
+
     competitionContentContainer.innerHTML = contentHTML;
+
+    // Render registrations section
+    const registrationSection = document.createElement('div');
+    registrationSection.className = 'registrations-section';
+    registrationSection.innerHTML = '<h3>Current Entrants</h3>';
+    
+    if (registrations && registrations.length > 0) {
+        const registrationList = document.createElement('ul');
+        registrationList.className = 'registration-list';
+
+        const sortedRegistrations = [...registrations].sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+
+        sortedRegistrations.forEach(entry => {
+            const listItem = document.createElement('li');
+
+            // Player 1
+            let player1HTML;
+            const player1Team = entry.player1Team ? ` (${entry.player1Team})` : '';
+            if (entry.player1PublicId) {
+                player1HTML = `<a href="/player.html?id=${entry.player1PublicId}">${entry.player1Name}</a>${player1Team}`;
+            } else {
+                player1HTML = `${entry.player1Name}${player1Team}`;
+            }
+
+            // Player 2 (check if it exists for pairs competitions)
+            if (entry.player2Name) {
+                let player2HTML;
+                const player2Team = entry.player2Team ? ` (${entry.player2Team})` : '';
+                if (entry.player2PublicId) {
+                    player2HTML = `<a href="/player.html?id=${entry.player2PublicId}">${entry.player2Name}</a>${player2Team}`;
+                } else {
+                    player2HTML = `${entry.player2Name}${player2Team}`;
+                }
+                listItem.innerHTML = `<span>${player1HTML} & ${player2HTML}</span>`;
+            } else {
+                // Only display Player 1 for singles competitions
+                listItem.innerHTML = `<span>${player1HTML}</span>`;
+            }
+
+            registrationList.appendChild(listItem);
+        });
+
+        registrationSection.appendChild(registrationList);
+    } else {
+        const noRegistrations = document.createElement('p');
+        noRegistrations.textContent = 'No-one has registered for this competition yet.';
+        registrationSection.appendChild(noRegistrations);
+    }
+    competitionContentContainer.appendChild(registrationSection);
 };
+
 
 const switchTab = (competitionId, competitionName) => {
     const allTabs = competitionTabsContainer.querySelectorAll('.tab-link');
@@ -216,7 +294,7 @@ const switchTab = (competitionId, competitionName) => {
     } else {
         if (overviewContent) overviewContent.style.display = 'none';
         if (competitionContentContainer) competitionContentContainer.style.display = 'block';
-        fetchCompetitionDetails(competitionName);
+        fetchCompetitionDetails(competitionName, competitionId);
         fetchWinners(competitionId, competitionName);
     }
 };
