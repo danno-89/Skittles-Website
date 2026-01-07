@@ -20,6 +20,42 @@ const parseDate = (dateInput) => {
     }
 };
 
+const populateCompetitionDropdown = async () => {
+    const competitionDropdown = document.getElementById('competition');
+    competitionDropdown.innerHTML = '<option value="" disabled selected>Loading competitions...</option>';
+
+    try {
+        const now = new Date();
+        const eventsQuery = query(
+            collection(db, 'events'),
+            where('season', '==', '2025-26'),
+            where('registrationClosed', '>', now),
+            where('registration', '==', true)
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
+
+        const options = [];
+        eventsSnapshot.forEach(doc => {
+            const event = doc.data();
+            options.push({ id: doc.id, name: event.name });
+        });
+
+        options.sort((a, b) => a.name.localeCompare(b.name));
+
+        competitionDropdown.innerHTML = '<option value="" disabled selected>Select a competition...</option>';
+        options.forEach(comp => {
+            const option = document.createElement('option');
+            option.value = comp.id;
+            option.textContent = comp.name;
+            competitionDropdown.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Error populating competitions:', error);
+        competitionDropdown.innerHTML = '<option value="" disabled selected>Failed to load competitions</option>';
+    }
+};
+
 // Function to fetch and display the competition date
 const displayCompetitionDate = async (competitionId) => {
     const dateDisplay = document.getElementById('competition-date-display');
@@ -31,13 +67,6 @@ const displayCompetitionDate = async (competitionId) => {
     }
 
     let competitionName = competitionDropdown.options[competitionDropdown.selectedIndex].text;
-
-    // Normalize competition name to handle inconsistencies
-    if (competitionName === "Ladies Pairs") {
-        competitionName = "Ladies' Pairs";
-    } else if (competitionName === "Men's Pairs") {
-        competitionName = "Open Pairs";
-    }
 
     try {
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
@@ -131,6 +160,8 @@ const updateAvailableTeams = async (competitionId) => {
                 isEligible = eligibility.hasFemale;
             } else if (competitionId.includes('men')) {
                 isEligible = eligibility.hasMale;
+            } else { // For other competitions, all active teams are eligible
+                isEligible = true;
             }
 
             if (isEligible) {
@@ -219,6 +250,7 @@ const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, f
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    populateCompetitionDropdown();
     const registrationForm = document.getElementById('registration-form');
     const competitionDropdown = document.getElementById('competition');
     const player1Label = document.getElementById('player1-label');
