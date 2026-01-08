@@ -2,22 +2,23 @@
 .registration-container {
     max-width: 800px;
     margin: 2rem 0;
-    padding: 0; /* Remove padding */
-    background-color: transparent; /* Remove background */
+    padding: 0;
+    background-color: transparent;
     border-radius: 0;
-    box-shadow: none; /* Remove shadow */
+    box-shadow: none;
 }
 
 .form-group {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 1.5rem;
 }
 
-.player-input-row {
+.player-input-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    align-items: end; /* Align items to the bottom */
-    margin-bottom: 2rem;
+    align-items: end;
 }
 
 .name-input-wrapper {
@@ -41,6 +42,7 @@ label {
     font-size: 1rem;
     background-color: #f9f9f9;
     transition: border-color 0.2s;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
 }
 
 .form-input:focus,
@@ -80,11 +82,10 @@ label {
     margin-top: 0.5rem;
 }
 
-/* New style for the competition date display */
 .competition-date-highlight {
-    background-color: #e7f3ff; /* Light blue background */
-    border: 1px solid #b3d7ff; /* Softer blue border */
-    color: #004085; /* Darker blue text */
+    background-color: #e7f3ff;
+    border: 1px solid #b3d7ff;
+    color: #004085;
     padding: 1rem;
     margin-top: 1rem;
     margin-bottom: 2rem;
@@ -96,7 +97,7 @@ label {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .player-input-row {
+    .player-input-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }

@@ -1,4 +1,9 @@
 /* --- Other Competitions Page Specific Styles --- */
+
+main .page-header {
+    margin-block-end: 0;
+}
+
 .hall-of-fame-layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -69,7 +74,7 @@
     padding-right: var(--spacing-md);
 }
 
-.competition-dates-list span {
+.competition-dates-.list span {
     font-weight: bold;
     color: var(--club-green);
     text-align: right;
@@ -123,6 +128,12 @@
 .competition-details strong {
     color: var(--darker-green);
 }
+
+.player-name {
+  color: var(--club-green);
+  font-weight: bold;
+}
+
 
 /* --- Responsive Styles --- */
 @media (max-width: 992px) {

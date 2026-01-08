@@ -230,6 +230,14 @@ async function renderStatistics(playerId, playerName, teamId, teamName) {
 async function initializePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const playerId = urlParams.get('playerId');
+    const returnUrl = urlParams.get('returnUrl');
+
+    if (returnUrl) {
+        const backButton = document.getElementById('back-btn');
+        if (backButton) {
+            backButton.href = returnUrl;
+        }
+    }
 
     if (!playerId) {
         document.getElementById('statistics-content').innerHTML = '<p>Player ID not provided.</p>';

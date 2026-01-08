@@ -172,36 +172,47 @@ const renderWinners = (history, competitionName) => {
 };
 
 const fetchCompetitionDetails = async (competitionName, competitionId) => {
-    if(!competitionContentContainer) return;
+    if (!competitionContentContainer) return;
+
     competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Loading details...</p>`;
+
     try {
-        // Fetch event details
+        // Determine the current season
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
+        if (seasonQuery.empty) {
+            competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Current season not configured.</p>`;
+            return;
+        }
+        const seasonName = seasonQuery.docs[0].data().name;
+
+        // Fetch event details to find the correct registration document ID
+        const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("name", "==", competitionName), limit(1)));
+
         let eventData = null;
-        if (!seasonQuery.empty) {
-            const seasonName = seasonQuery.docs[0].data().name;
-            const eventsQuery = await getDocs(query(collection(db, "events"), where("season", "==", seasonName), where("name", "==", competitionName), limit(1)));
-            if (!eventsQuery.empty) {
-                eventData = eventsQuery.docs[0].data();
+        let registrations = [];
+
+        if (!eventsQuery.empty) {
+            const eventDoc = eventsQuery.docs[0];
+            eventData = eventDoc.data();
+            const registrationId = eventDoc.id;
+
+            // Fetch registrations using the event document ID
+            const registrationDocRef = doc(db, 'competition-registrations', registrationId);
+            const registrationDocSnap = await getDoc(registrationDocRef);
+
+            if (registrationDocSnap.exists() && registrationDocSnap.data().entries) {
+                registrations = registrationDocSnap.data().entries;
             }
         }
-        
-        // Fetch registrations
-        const registrationDocRef = doc(db, 'competition-registrations', competitionId);
-        const registrationDocSnap = await getDoc(registrationDocRef);
-        let registrations = [];
-        if (registrationDocSnap.exists() && registrationDocSnap.data().entries) {
-            registrations = registrationDocSnap.data().entries;
-        }
 
-        renderCompetitionDetails(eventData, competitionName, registrations);
+        renderCompetitionDetails(eventData, competitionName, registrations, competitionId);
     } catch (error) {
         console.error(`Error fetching details for ${competitionName}:`, error);
         competitionContentContainer.innerHTML = `<h2>${competitionName}</h2><p>Could not load competition details.</p>`;
     }
 };
 
-const renderCompetitionDetails = (eventData, competitionName, registrations) => {
+const renderCompetitionDetails = (eventData, competitionName, registrations, competitionId) => {
     let contentHTML = `<h2>${competitionName}</h2>`;
 
     if (eventData) {
@@ -248,7 +259,7 @@ const renderCompetitionDetails = (eventData, competitionName, registrations) => 
             let player1HTML;
             const player1Team = entry.player1Team ? ` (${entry.player1Team})` : '';
             if (entry.player1PublicId) {
-                player1HTML = `<a href="/player.html?id=${entry.player1PublicId}">${entry.player1Name}</a>${player1Team}`;
+                player1HTML = `<span class="player-name">${entry.player1Name}</span>${player1Team}`;
             } else {
                 player1HTML = `${entry.player1Name}${player1Team}`;
             }
@@ -258,7 +269,7 @@ const renderCompetitionDetails = (eventData, competitionName, registrations) => 
                 let player2HTML;
                 const player2Team = entry.player2Team ? ` (${entry.player2Team})` : '';
                 if (entry.player2PublicId) {
-                    player2HTML = `<a href="/player.html?id=${entry.player2PublicId}">${entry.player2Name}</a>${player2Team}`;
+                    player2HTML = `<span class="player-name">${entry.player2Name}</span>${player2Team}`;
                 } else {
                     player2HTML = `${entry.player2Name}${player2Team}`;
                 }

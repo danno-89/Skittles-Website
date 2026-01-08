@@ -109,6 +109,9 @@ const displayCompetitionDate = async (competitionId) => {
 const updateAvailableTeams = async (competitionId) => {
     const player1TeamDropdown = document.getElementById('player1-team');
     const player2TeamDropdown = document.getElementById('player2-team');
+    const competitionDropdown = document.getElementById('competition');
+    const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+    const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
 
     player1TeamDropdown.innerHTML = '';
     player2TeamDropdown.innerHTML = '';
@@ -137,7 +140,7 @@ const updateAvailableTeams = async (competitionId) => {
             if (!teamsWithEligiblePlayers[playerData.teamId]) {
                 teamsWithEligiblePlayers[playerData.teamId] = { hasMale: false, hasFemale: false };
             }
-            if (playerData.division === 'Men') {
+            if (playerData.division === "Men's") {
                 teamsWithEligiblePlayers[playerData.teamId].hasMale = true;
             }
             if (playerData.division === "Ladies'") {
@@ -154,11 +157,11 @@ const updateAvailableTeams = async (competitionId) => {
             const eligibility = teamsWithEligiblePlayers[teamId] || { hasMale: false, hasFemale: false };
             
             let isEligible = false;
-            if (competitionId.includes('mixed')) {
+            if (competitionName.includes('mixed')) {
                 isEligible = eligibility.hasMale && eligibility.hasFemale;
-            } else if (competitionId.includes('ladies')) {
+            } else if (competitionName.includes('ladies')) {
                 isEligible = eligibility.hasFemale;
-            } else if (competitionId.includes('men')) {
+            } else if (competitionName.includes("men's")) {
                 isEligible = eligibility.hasMale;
             } else { // For other competitions, all active teams are eligible
                 isEligible = true;
@@ -173,24 +176,32 @@ const updateAvailableTeams = async (competitionId) => {
             }
         });
 
+        // Set the dropdowns to the placeholder
+        player1TeamDropdown.value = '';
+        player2TeamDropdown.value = '';
+
     } catch (error) {
         console.error('Error updating available teams:', error);
     }
 };
 
 // Function to create a player name dropdown with a forced division parameter
-const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, forcedDivision = null) => {
+const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, forcedDivision = null, isRequired = true) => {
     const wrapper = document.getElementById(wrapperElementId);
     wrapper.innerHTML = ''; // Clear previous input
+
+    const inputId = wrapperElementId.replace('-wrapper', '');
 
     if (teamName === 'no-team' || !teamName) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.id = wrapperElementId.replace('-wrapper', '');
-        input.name = input.id;
+        input.id = inputId;
+        input.name = inputId;
         input.className = 'form-input';
         input.placeholder = 'Enter player name';
-        input.required = true;
+        if (isRequired) {
+            input.required = true;
+        }
         wrapper.appendChild(input);
         return;
     }
@@ -223,10 +234,12 @@ const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, f
         eligiblePlayers.sort((a, b) => a.name.localeCompare(b.name));
 
         const select = document.createElement('select');
-        select.id = wrapperElementId.replace('-wrapper', '');
-        select.name = select.id;
+        select.id = inputId;
+        select.name = inputId;
         select.className = 'form-select';
-        select.required = true;
+        if (isRequired) {
+            select.required = true;
+        }
 
         const placeholder = document.createElement('option');
         placeholder.value = '';
@@ -262,21 +275,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleCompetitionChange = () => {
         const competitionId = competitionDropdown.value;
+        const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+        const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
+        const isIndividual = competitionName.includes('singles') || competitionName.includes('individual');
+
         displayCompetitionDate(competitionId); // Fetch and display the date
         updateAvailableTeams(competitionId);
 
-        createPlayerDropdown(null, 'player1-name-wrapper', competitionId);
-        createPlayerDropdown(null, 'player2-name-wrapper', competitionId);
+        // Player 1 is always required
+        createPlayerDropdown(null, 'player1-name-wrapper', competitionId, null, true);
 
-        if (competitionId.includes('singles')) {
+        // Player 2 is only required for non-individual competitions
+        createPlayerDropdown(null, 'player2-name-wrapper', competitionId, null, !isIndividual);
+
+
+        if (isIndividual) {
             player2Section.classList.add('hidden');
             player2Label.classList.add('hidden');
+            player2TeamDropdown.required = false;
         } else {
             player2Section.classList.remove('hidden');
             player2Label.classList.remove('hidden');
+            player2TeamDropdown.required = true;
         }
 
-        if (competitionId === 'mixed-pairs') {
+        if (competitionName.includes('mixed')) {
             player1Label.textContent = 'Male Player';
             player2Label.textContent = 'Female Player';
         } else {
@@ -289,28 +312,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     player1TeamDropdown.addEventListener('change', () => {
         const competitionId = competitionDropdown.value;
+        const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+        const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
         let forcedDivision = null;
-        if (competitionId === 'mixed-pairs') {
-            forcedDivision = 'Men';
-        } else if (competitionId.includes('ladies')) {
+        if (competitionName.includes('mixed')) {
+            forcedDivision = "Men's";
+        } else if (competitionName.includes('ladies')) {
             forcedDivision = "Ladies'";
-        } else if (competitionId.includes('men')) {
-            forcedDivision = 'Men';
+        } else if (competitionName.includes("men's")) {
+            forcedDivision = "Men's";
         }
-        createPlayerDropdown(player1TeamDropdown.value, 'player1-name-wrapper', competitionId, forcedDivision);
+        createPlayerDropdown(player1TeamDropdown.value, 'player1-name-wrapper', competitionId, forcedDivision, true);
     });
 
     player2TeamDropdown.addEventListener('change', () => {
         const competitionId = competitionDropdown.value;
+        const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+        const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
+        const isIndividual = competitionName.includes('singles') || competitionName.includes('individual');
+
         let forcedDivision = null;
-        if (competitionId === 'mixed-pairs') {
+        if (competitionName.includes('mixed')) {
             forcedDivision = "Ladies'";
-        } else if (competitionId.includes('ladies')) {
+        } else if (competitionName.includes('ladies')) {
             forcedDivision = "Ladies'";
-        } else if (competitionId.includes('men')) {
-            forcedDivision = 'Men';
+        } else if (competitionName.includes("men's")) {
+            forcedDivision = "Men's";
         }
-        createPlayerDropdown(player2TeamDropdown.value, 'player2-name-wrapper', competitionId, forcedDivision);
+        createPlayerDropdown(player2TeamDropdown.value, 'player2-name-wrapper', competitionId, forcedDivision, !isIndividual);
     });
     
     const toggleContactInfo = () => {
@@ -329,6 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const competition = competitionDropdown.value;
+            const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+            const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
+            const isIndividual = competitionName.includes('singles') || competitionName.includes('individual');
+
             const player1Team = player1TeamDropdown.value;
             const player2Team = player2TeamDropdown.value;
             const contactNumber = document.getElementById('contact-number').value;
@@ -344,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 player1Name = player1Select.options[player1Select.selectedIndex].text;
             }
 
-            if (!competition.includes('singles')) {
+            if (!isIndividual) {
                 if (player2Team === 'no-team') {
                     player2Name = document.getElementById('player2-name').value;
                     player2PublicId = null;
@@ -355,12 +388,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (!player1Name || (!player2Name && !competition.includes('singles')) || !player1Team || (!player2Team && !competition.includes('singles'))) {
+            if (!player1Name || (!player2Name && !isIndividual) || !player1Team || (!player2Team && !isIndividual)) {
                 alert('All player and team fields are required.');
                 return;
             }
 
-            if (player1Team === 'no-team' && (player2Team === 'no-team' || competition.includes('singles')) && !contactNumber) {
+            if (player1Team === 'no-team' && (player2Team === 'no-team' || isIndividual) && !contactNumber) {
                 alert('A contact number is required as neither player is registered to a team.');
                 return;
             }
@@ -372,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date()
             };
 
-            if (!competition.includes('singles')) {
+            if (!isIndividual) {
                 registrationData.player2Name = player2Name;
                 registrationData.player2Team = player2Team === 'no-team' ? '' : player2Team;
                 registrationData.player2PublicId = player2PublicId;
