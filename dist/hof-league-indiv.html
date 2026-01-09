@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - League Individual Awards</title>
+  <script type="module" crossorigin src="/assets/hof-league-indiv-DrXQwct2.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/hall-of-fame-page-CYxmthKG.css">
+  <link rel="stylesheet" crossorigin href="/assets/player-statistics-page-BqMisxr1.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main>
+    <div class="page-header">
+      <h1>League Winners - Individual</h1>
+    </div>
+
+    <div class="tabs-container">
+        <div class="tabs-header" id="competition-tabs-container">
+            <!-- Competition tabs will be dynamically inserted here -->
+        </div>
+    </div>
+    
+    <div id="division-filter-container" class="division-filter-container" style="display: none;">
+        <label for="division-filter">Filter by Division:</label>
+        <select id="division-filter" class="form-select"></select>
+    </div>
+
+    <div class="hall-of-fame-layout">
+      <div id="hall-of-fame-container">
+          <!-- Hall of Fame content will be loaded here -->
+      </div>
+      <div class="sidebar">
+        <aside id="stats-container">
+            <h2>Statistics</h2>
+            <div id="stats-content">
+                <p>Select a competition to see statistics.</p>
+            </div>
+        </aside>
+        <aside id="detailed-winners-container">
+            <!-- Detailed winners list will be loaded here -->
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+<link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+    
+</body>
+</html>

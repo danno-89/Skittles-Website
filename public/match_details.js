@@ -55,7 +55,7 @@ const fetchPlayerNamesInBatch = async (playerIds) => {
     } catch (error) {
         console.error('Error fetching player names in batch:', error);
     }
-    
+
     return namesMap;
 };
 
@@ -108,7 +108,7 @@ const renderPlayerScores = (scores, teamName, namesMap) => {
     }
 
     const scoreHeaders = scores[0].hands.map((_, index) => `<th>${index + 1}</th>`).join('');
-    
+
     const playerRows = scores.map(player => {
         const playerName = player.playerId === 'sixthPlayer' ? '6th Player' : (namesMap.get(player.playerId) || 'Unknown Player');
         const scoreCells = player.hands.map(score => `<td><span class="${score >= 10 ? 'highlight-score' : ''}">${score}</span></td>`).join('');
@@ -218,7 +218,7 @@ const renderScoreProgressionChart = (view) => {
     } else { // 'progression' view
         const firstTeamScores = bowledFirst === 'home' ? homeScores : awayScores;
         const secondTeamScores = bowledFirst === 'home' ? awayScores : homeScores;
-        
+
         const processHand = (teamScores, handIndex, isFirstTeam) => {
             for (let i = 0; i < 6; i++) {
                 const score = teamScores[i]?.hands[handIndex] || 0;
@@ -234,7 +234,7 @@ const renderScoreProgressionChart = (view) => {
                 labels.push('');
             }
         };
-        
+
         processHand(firstTeamScores, 0, true);
         processHand(secondTeamScores, 0, false);
         processHand(secondTeamScores, 1, false);
@@ -246,7 +246,7 @@ const renderScoreProgressionChart = (view) => {
         processHand(firstTeamScores, 4, true);
         processHand(secondTeamScores, 4, false);
     }
-    
+
     const datasets = view === 'battle' ? [
         {
             label: 'Lead',
@@ -286,7 +286,7 @@ const renderScoreProgressionChart = (view) => {
             plugins: {
                 legend: {
                     labels: {
-                        generateLabels: function(chart) {
+                        generateLabels: function (chart) {
                             if (view === 'battle') {
                                 return [
                                     {
@@ -359,7 +359,7 @@ const setupBackButton = () => {
     const backButton = document.getElementById('back-btn');
     if (!backButton) return;
     const from = getFromPage();
-    backButton.href = from === 'team-management' ? 'team-management.html' : 'fixtures_results.html';
+    backButton.href = from === 'team-management' ? 'team-management.html' : 'fixtures-results.html';
     backButton.textContent = from === 'team-management' ? '← Back to Team' : '← Back to Fixtures';
 };
 
@@ -368,13 +368,13 @@ async function displayMatchDetails() {
     const matchId = getMatchId();
     const matchDetailsContainer = document.getElementById('match-details-container');
     const scoreboardContent = document.getElementById('scoreboard-content');
-    const statisticsContent = document.getElementById('statistics-content'); 
+    const statisticsContent = document.getElementById('statistics-content');
     const graphViewSelect = document.getElementById('graph-view-select');
 
     if (!matchId || !matchDetailsContainer || !scoreboardContent || !statisticsContent) return;
 
     scoreboardContent.innerHTML = '<p>Loading scoreboard...</p>';
-    statisticsContent.innerHTML = '<p>Loading statistics...</p>'; 
+    statisticsContent.innerHTML = '<p>Loading statistics...</p>';
 
     try {
         const matchDocSnap = await getDoc(doc(db, 'match_results', matchId));
@@ -384,7 +384,7 @@ async function displayMatchDetails() {
         }
 
         currentMatchData = matchDocSnap.data();
-        
+
         [homeTeamName, awayTeamName] = await Promise.all([
             fetchTeamName(currentMatchData.homeTeamId),
             fetchTeamName(currentMatchData.awayTeamId)
@@ -407,17 +407,17 @@ async function displayMatchDetails() {
                     <div class="match-competition-info"><strong>Competition:</strong><span>${competitionName}</span></div>
                 </div>
             </div>`;
-        
+
         if (currentMatchData.homeScores && currentMatchData.awayScores) {
             const allPlayerIds = [...currentMatchData.homeScores, ...currentMatchData.awayScores].map(p => p.playerId);
             const playerNamesMap = await fetchPlayerNamesInBatch(allPlayerIds);
-            
+
             scoreboardContent.innerHTML = `
                 <div class="player-scores-grid">
                     ${renderPlayerScores(currentMatchData.homeScores, homeTeamName, playerNamesMap)}
                     ${renderPlayerScores(currentMatchData.awayScores, awayTeamName, playerNamesMap)}
                 </div>`;
-            
+
             const homeStats = calculateTeamStatistics(currentMatchData.homeScores, playerNamesMap);
             const awayStats = calculateTeamStatistics(currentMatchData.awayScores, playerNamesMap);
             statisticsContent.innerHTML = renderStatistics(homeStats, awayStats, homeTeamName, awayTeamName);
@@ -428,8 +428,8 @@ async function displayMatchDetails() {
             });
 
         } else {
-             scoreboardContent.innerHTML = '<p>Scoreboard data is not available for this match.</p>';
-             statisticsContent.innerHTML = '<p>Statistics are not available for this match.</p>';
+            scoreboardContent.innerHTML = '<p>Scoreboard data is not available for this match.</p>';
+            statisticsContent.innerHTML = '<p>Statistics are not available for this match.</p>';
         }
 
         setupTabNavigation();

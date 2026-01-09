@@ -1,0 +1,7 @@
+@import url('tables.css');
+
+/* --- League Tables Page Specific Styles --- */
+
+.division-filter-container {
+    justify-content: center; /* Center the division filter on mobile */
+}

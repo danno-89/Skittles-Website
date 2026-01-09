@@ -16,9 +16,16 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // --- Specific rule for the 'seasons' collection ---
+    // This allows list queries with 'where' clauses, which the broader recursive rule below does not.
+    match /seasons/{seasonId} {
+      allow read: if true;
+    }
+
     // --- Publicly Readable Data ---
+    // This uses a recursive wildcard to allow reads in subcollections.
     match /{collection}/{docId=**} {
-      allow read: if collection in ['competitions', 'teams', 'seasons', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners', 'ssc_cup'];
+      allow read: if collection in ['competitions', 'teams', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners', 'ssc_cup'];
     }
 
     // --- User-Specific Documents ---

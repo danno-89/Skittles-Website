@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Player Profile</title>
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/public-profile-ZOBt0yfB.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/profile-page-BLjIPajj.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main id="profile-form">
+            <div class="page-header">
+                <div class="header-title-container">
+                    <h1 id="stats-player-name-header">Player Profile</h1>
+                    <span id="stats-team-name-header" class="header-team-name"></span>
+                </div>
+                <a href="player_statistics.html" id="back-btn" class="btn btn-primary">← Back to Player Statistics</a>
+            </div>
+
+            <div id="statistics-content" class="tab-pane active">
+                <div id="main-stats-grid" class="stats-summary-grid">
+                    <!-- Main stat boxes will be inserted here by JavaScript -->
+                </div>
+                <div id="streak-stats-grid" class="stats-summary-grid">
+                    <!-- Streak stat boxes will be inserted here by JavaScript -->
+                </div>
+                <div class="stats-results-table">
+                    <!-- Detailed results table will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+
+</body>
+</html>

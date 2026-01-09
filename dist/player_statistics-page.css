@@ -1,0 +1,130 @@
+/* Container for the filter controls */
+.stats-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    align-items: center;
+}
+
+.stats-filters .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-filters label {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    color: var(--dark-grey);
+}
+
+.stats-filters .form-select {
+    min-width: 180px;
+}
+
+.stats-filters .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto; /* Align with bottom of other controls */
+}
+
+/* Header for averages tab */
+#stats-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--off-white);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stats-narrative {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
+    border-radius: var(--border-radius);
+}
+
+/* General table styling */
+.stats-table-container {
+    overflow-x: auto;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--light-grey);
+    text-align: left;
+    white-space: nowrap;
+    height: 40px; /* Uniform row height */
+}
+
+.stats-table th {
+    background-color: var(--darker-green);
+    color: var(--pure-white);
+    position: sticky;
+    top: 0;
+}
+
+/* Column specific alignment and widths */
+.stats-table th:first-child, .stats-table td:first-child, /* Rank */
+.stats-table th:nth-child(6), .stats-table td:nth-child(6), /* PLD */
+.stats-table th:nth-child(7), .stats-table td:nth-child(7), /* Total Pins */
+.stats-table th:nth-child(8), .stats-table td:nth-child(8), /* Average */
+.stats-table th:nth-child(9), .stats-table td:nth-child(9) { /* Movement */
+    text-align: center;
+}
+
+.stats-table .player-col { width: 200px; }
+.stats-table .team-col { width: 150px; }
+.stats-table .main-stat { font-weight: bold; font-size: 1.1em; color: var(--club-green); }
+
+/* Row Highlighting */
+.ineligible-player td {
+    color: var(--medium-grey);
+    font-style: italic;
+}
+
+.stats-table tr.division-leader {
+    background-color: #fffbeb !important; /* Pale Yellow, !important to ensure override */
+}
+
+/* Movement indicators */
+.movement-cell { text-align: center; }
+.movement-positive { color: var(--club-green); }
+.movement-negative { color: #b91c1c; }
+
+/* Weekly score display in Total Pins */
+.total-pins-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.weekly-score-value {
+    font-size: 0.8rem;
+    color: var(--medium-grey);
+}
+
+/* User ID icon style */
+.profile-icon-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-id-icon {
+    width: 25px;
+    height: 25px;
+    color: var(--club-green);
+}
+
+a:hover .user-id-icon {
+    color: var(--darker-green);
+}

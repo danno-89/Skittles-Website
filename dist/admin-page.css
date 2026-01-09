@@ -1,0 +1,221 @@
+/* --- Admin Page Specific Styles --- */
+
+#admin-tabs-container {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* --- Scorecard and Results Input --- */
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.competition-header {
+    text-align: center;
+    color: var(--club-green);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.scorecard-container {
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    background-color: var(--off-white);
+}
+
+.scorecard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--club-green);
+}
+
+.scorecard-header h3 {
+    margin: 0;
+    color: var(--club-green);
+}
+
+.bowled-first-section {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.team-total-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--club-green);
+}
+
+.scorecard {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.scorecard th, .scorecard td {
+    padding: var(--spacing-xs);
+    text-align: center;
+    border: 1px solid var(--light-grey);
+}
+
+.scorecard th {
+    background-color: var(--light-grey);
+}
+
+.player-name-col {
+    width: 40%;
+    text-align: left !important;
+}
+
+.total-score-col {
+    font-weight: bold;
+    width: 10%;
+}
+
+.hand-score-col {
+    width: 10%;
+}
+
+.hand-score {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    box-sizing: border-box;
+    border: 1px solid var(--medium-grey);
+    border-radius: var(--border-radius);
+    text-align: center;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.hand-score:focus {
+    border-color: var(--club-green);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem hsla(120, 100%, 20%, 0.25);
+}
+
+/* Hide the number input spinners */
+.hand-score::-webkit-outer-spin-button,
+.hand-score::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.hand-score[type=number] {
+    -moz-appearance: textfield;
+}
+
+.player-select {
+    width: 100%;
+}
+
+.tbc-player-name {
+    width: calc(100% - 10px);
+    margin-top: 5px;
+}
+
+/* --- Amend Player Tab --- */
+.data-display-section {
+    margin-top: var(--spacing-lg);
+}
+
+.data-edit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+}
+
+.data-edit-table th, .data-edit-table td {
+    border: 1px solid var(--light-grey);
+    padding: var(--spacing-sm);
+    text-align: left;
+}
+
+.data-edit-table th {
+    background-color: var(--off-white);
+}
+
+.table-section-header {
+    background-color: var(--club-green);
+    color: var(--pure-white);
+    font-weight: bold;
+    text-align: center !important;
+}
+
+.edit-input {
+    width: 100%;
+}
+
+.status-message {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+}
+
+/* --- Responsive Styles for Admin Page --- */
+
+.mobile-header-icons {
+    display: none; /* Hidden by default on desktop */
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .mobile-header-icons {
+        display: flex;
+        align-items: center;
+    }
+    
+    .icon-btn {
+        padding: var(--spacing-sm);
+        border-radius: var(--border-radius);
+        background-color: var(--off-white);
+        border: 1px solid var(--light-grey);
+    }
+
+    .icon-btn .material-symbols-outlined {
+        font-size: 1.5rem;
+        color: var(--club-green);
+    }
+    
+    /* Make tabs container collapsible */
+    #admin-tabs-container {
+        display: none;
+    }
+
+    #admin-tabs-container.visible {
+        display: block;
+        background-color: var(--off-white);
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    /* Stack tabs vertically */
+    .tabs-main {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+        border-bottom: none;
+    }
+    .tab-link {
+        text-align: center;
+        border-bottom: 1px solid var(--light-grey);
+    }
+    .tab-link.active {
+        border-bottom-color: var(--club-yellow);
+    }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Scoreboard - Standard Game</title>
+  <script type="module" crossorigin src="/assets/scoreboard\standard-game-BPUOnMqq.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/standard-game-CJR9_CyZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/scoreboard-BBHDMKZj.css">
+</head>
+<body class="scoreboard-page no-header">
+
+    <div class="game-wrapper">
+        <header class="game-header">
+            <h1 id="home-team-header" class="team-name-header">Home Team</h1>
+            <div class="game-total-scores">
+                <div class="score-box">
+                    <span id="home-total-score">0</span>
+                    <div id="home-sub-score-wrapper" class="sub-score-wrapper">
+                        <span id="home-sub-score">0</span>
+                    </div>
+                </div>
+                <div class="score-box">
+                    <span id="away-total-score">0</span>
+                    <div id="away-sub-score-wrapper" class="sub-score-wrapper">
+                        <span id="away-sub-score">0</span>
+                    </div>
+                </div>
+            </div>
+            <h1 id="away-team-header" class="team-name-header">Away Team</h1>
+        </header>
+
+        <main id="scoreboard-grid" class="scoreboard-grid">
+            <!-- Player scores will be dynamically inserted here -->
+        </main>
+
+        <footer id="scoreboard-footer" class="scoreboard-footer">
+            <!-- Match total will be inserted here -->
+        </footer>
+    </div>
+
+</body>
+</html>

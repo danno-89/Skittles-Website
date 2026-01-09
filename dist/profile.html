@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - My Profile</title>
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/profile-CGMYXzNF.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/profile-page-BLjIPajj.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main id="profile-form">
+            <div class="page-header">
+                <h1>My Profile</h1>
+                <button id="sign-out-btn" class="btn btn-danger">Sign Out</button>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-link active" data-tab="personal-details">Personal Details</button>
+                    <button class="tab-link" data-tab="statistics">Statistics</button>
+                </div>
+            </div>
+
+            <div id="tab-content-container">
+                <div id="personal-details-content" class="tab-pane active">
+                    <div class="profile-grid">
+                        
+                        <!-- Public Information Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Public Information</h2>
+                            <div class="profile-details">
+                                <p><strong>First Name:</strong> <span id="first-name"></span></p>
+                                <p><strong>Last Name:</strong> <span id="last-name"></span></p>
+                                <p><strong>Team:</strong> <span id="team-name"></span></p>
+                                <p><strong>Division:</strong> <span id="division"></span></p>
+                                <p><strong>Role:</strong> <span id="role"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Personal Information</h2>
+                            <div class="profile-details">
+                                <p><strong>Email:</strong> <span id="email"></span></p>
+                                <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
+                                <p><strong>Mobile Number:</strong> <span id="mobile-no"></span></p>
+                                <p><strong>Home/Work Number:</strong> <span id="home-no"></span></p>
+                                <div class="address-block">
+                                    <strong>Address:</strong>
+                                    <div class="address-details">
+                                        <span id="address-line-1"></span>
+                                        <span id="address-line-2"></span>
+                                        <span id="address-line-3"></span>
+                                        <span id="parish"></span>
+                                        <span id="postcode"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registration Details Card -->
+                        <div class="card-no-hover">
+                            <h2 class="heading-border">Registration Details</h2>
+                             <div class="profile-details">
+                                <p><strong>Registration Date:</strong> <span id="registration-date"></span></p>
+                                <p><strong>Recent Fixture:</strong> <span id="recent-fixture"></span></p>
+                                <p><strong>Registration Expiry:</strong> <span id="register-expiry"></span></p>
+                                <p><strong>Days to Expiry:</strong> <span id="days-to-expiry"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="statistics-content" class="tab-pane">
+                    <div class="stats-header">
+                        <h2 id="stats-player-name"></h2>
+                        <p id="stats-team-name"></p>
+                    </div>
+                    <div id="main-stats-grid" class="stats-summary-grid">
+                        <!-- Main stat boxes will be inserted here by JavaScript -->
+                    </div>
+                    <div id="streak-stats-grid" class="stats-summary-grid">
+                        <!-- Streak stat boxes will be inserted here by JavaScript -->
+                    </div>
+                    <div class="stats-results-table">
+                        <!-- Detailed results table will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div id="message" style="display:none;"></div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+
+</body>
+</html>

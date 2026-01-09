@@ -49,7 +49,7 @@ const fetchPlayerNamesInBatch = async (playerIds) => {
     } catch (error) {
         console.error('Error fetching player names in batch:', error);
     }
-    
+
     return namesMap;
 };
 
@@ -102,7 +102,7 @@ const renderPlayerScores = (scores, teamType, namesMap) => {
     }
 
     const scoreHeaders = scores[0].hands.map((_, index) => `<th>${index + 1}</th>`).join('');
-    
+
     const playerRows = scores.map(player => {
         const playerName = player.playerId === 'sixthPlayer' ? '6th Player' : (namesMap.get(player.playerId) || 'Unknown Player');
         const scoreCells = player.hands.map(score => `<td>${score}</td>`).join('');
@@ -209,7 +209,7 @@ const setupBackButton = () => {
     } else {
         // Default to fixtures
         backButton.textContent = '← Back to Fixtures';
-        backButton.href = 'fixtures_results.html';
+        backButton.href = 'fixtures-results.html';
     }
 };
 
@@ -219,7 +219,7 @@ async function displayMatchDetails() {
     const matchId = getMatchId();
     const matchDetailsContainer = document.getElementById('match-details-container');
     const scoreboardContent = document.getElementById('scoreboard-content');
-    const statisticsContent = document.getElementById('statistics-content'); 
+    const statisticsContent = document.getElementById('statistics-content');
 
     if (!matchId || !matchDetailsContainer || !scoreboardContent || !statisticsContent) {
         console.error("Required HTML elements for match details are missing.");
@@ -227,7 +227,7 @@ async function displayMatchDetails() {
     }
 
     scoreboardContent.innerHTML = '<p>Loading scoreboard...</p>';
-    statisticsContent.innerHTML = '<p>Loading statistics...</p>'; 
+    statisticsContent.innerHTML = '<p>Loading statistics...</p>';
 
     try {
         const matchDocSnap = await getDoc(doc(db, 'match_results', matchId));
@@ -259,24 +259,24 @@ async function displayMatchDetails() {
                     <div class="match-competition-info"><strong>Competition:</strong><span>${competitionName}</span></div>
                 </div>
             </div>`;
-        
+
         if (matchData.homeScores && matchData.awayScores) {
             const allPlayerIds = [...matchData.homeScores, ...matchData.awayScores].map(p => p.playerId);
             const playerNamesMap = await fetchPlayerNamesInBatch(allPlayerIds);
-            
+
             scoreboardContent.innerHTML = `
                 <div class="player-scores-grid">
                     ${renderPlayerScores(matchData.homeScores, 'home', playerNamesMap)}
                     ${renderPlayerScores(matchData.awayScores, 'away', playerNamesMap)}
                 </div>`;
-            
+
             const homeStats = calculateTeamStatistics(matchData.homeScores, playerNamesMap);
             const awayStats = calculateTeamStatistics(matchData.awayScores, playerNamesMap);
             statisticsContent.innerHTML = renderStatistics(homeStats, awayStats, homeTeamName, awayTeamName);
 
         } else {
-             scoreboardContent.innerHTML = '<p>Scoreboard data is not available for this match.</p>';
-             statisticsContent.innerHTML = '<p>Statistics are not available for this match.</p>';
+            scoreboardContent.innerHTML = '<p>Scoreboard data is not available for this match.</p>';
+            statisticsContent.innerHTML = '<p>Statistics are not available for this match.</p>';
         }
 
         setupTabNavigation();

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sarnia Skittles Club - SSC Cup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/ssc_cup-yZ2y9ALA.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/ssc_cup-CSkuS9aQ.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main id="ssc-cup-page">
+    <page-header>
+        <span slot="title">SSC Cup</span>
+        <popup-menu slot="icon" icon="select" label="Season">
+            <select id="season-filter" class="form-select"></select>
+        </popup-menu>
+    </page-header>
+    
+    <div class="tab-bar">
+        <div class="tabs-main">
+            <div id="group-tabs-container" class="tabs-main">
+                <!-- Group tabs will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="group-container">
+        <!-- The group table and fixtures for the selected group will be shown here -->
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+    
+</body>
+</html>

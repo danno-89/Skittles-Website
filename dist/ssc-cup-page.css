@@ -1,0 +1,97 @@
+/* ssc-cup-page.css */
+
+@import url("tables.css");
+
+/* Add any additional styles specific to the SSC Cup page here */
+.fixtures-container {
+    margin-top: 1.5rem; /* Give a bit of space after the narrative */
+}
+
+.week-details {
+    border: 1px solid var(--club-green); /* Thinner border */
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.week-summary {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+    padding: var(--spacing-sm);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.week-details > .results-table {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.results-table {
+    width: 100%;
+    table-layout: fixed; /* Use fixed layout for predictable column widths */
+}
+
+.results-table th,
+.results-table td {
+    padding: var(--spacing-sm);
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Override the table header style for this page */
+.results-table thead th {
+    background-color: var(--pure-white);
+    color: var(--charcoal);
+    font-weight: bold;
+}
+
+#group-container {
+    margin-top: 1.5rem;
+}
+
+.group-fixtures-subheader {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--club-green);
+    border-bottom: 2px solid var(--club-yellow);
+    padding-bottom: 0.5rem;
+}
+
+.handicap-narrative {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+.handicap-narrative p {
+    margin-bottom: 0.5rem; /* Space between paragraphs */
+}
+
+.date-col { width: 15%; }
+.time-col { width: 10%; }
+.home-team-col { width: 20%; }
+.away-team-col { width: 20%; }
+.score-col { width: 10%; }
+.score-balance-col {
+    width: 15%;
+    font-style: italic;
+    color: #555;
+}
+.status-col { width: 10%; }
+
+
+/* Remove the green line under the tabs on this page */
+.tab-bar {
+    border-bottom: none;
+}
+
+#group-tabs-container .tab-link {
+    min-width: 100px;
+}

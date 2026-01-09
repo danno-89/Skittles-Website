@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Match Details</title>
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/match_details-Cagi6Vy_.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/match_details-C9HQCanU.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main>
+            <div class="page-header">
+                <h1>Match Details</h1>
+                <a href="fixtures-results.html" id="back-btn" class="btn btn-primary">← Back to Fixtures</a>
+            </div>
+            <div id="match-details-container">
+                <!-- Match header card will be loaded here -->
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs-header" id="match-tabs-container">
+                    <button class="tab-link active" data-tab="scoreboard">Scoreboard</button>
+                    <button class="tab-link" data-tab="statistics">Statistics</button>
+                    <button class="tab-link" data-tab="graph">Graph</button>
+                    <button class="tab-link" data-tab="previous-results">Previous Results</button>
+                </div>
+            </div>
+
+            <div class="graph-controls-container">
+                <div class="graph-controls">
+                    <select id="graph-view-select" class="form-select">
+                        <option value="simultaneous">Simultaneous</option>
+                        <option value="progression">Game Progression</option>
+                        <option value="battle">Battle</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="tab-content-container">
+                <div id="scoreboard-content" class="tab-pane active">
+                    <div id="player-scores-container">
+                        <!-- Player scores will be loaded here -->
+                    </div>
+                </div>
+                <div id="statistics-content" class="tab-pane">
+                    <p>Statistics for this match will be available soon.</p>
+                </div>
+                <div id="graph-content" class="tab-pane">
+                    <div class="chart-container">
+                        <canvas id="score-progression-chart"></canvas>
+                    </div>
+                </div>
+                <div id="previous-results-content" class="tab-pane">
+                    <p>A list of previous results between these two teams will be shown here.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+
+</html>

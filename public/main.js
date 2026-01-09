@@ -2,27 +2,48 @@
 import './components/page-header.js';
 import './components/popup-menu.js';
 import { auth, db, collection, getDocs, query, orderBy, limit } from './firebase.config.js';
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signOut } from "firebase/auth";
 import { authReady } from './auth-manager.js';
 import { getStatistics } from './statistics.js';
 
+import headerHtml from './header.html?raw';
+import footerHtml from './footer.html?raw';
+import navigationHtml from './navigation.html?raw';
+
+const htmlTemplates = {
+    'header.html': headerHtml,
+    'footer.html': footerHtml,
+    'navigation.html': navigationHtml
+};
+
 async function includeHTML() {
     const includeElements = Array.from(document.querySelectorAll('[w3-include-html]'));
-    const promises = includeElements.map(el => {
+
+    includeElements.forEach(el => {
         const file = el.getAttribute('w3-include-html');
-        return fetch(file)
-            .then(response => response.ok ? response.text() : Promise.reject(`Failed to load ${file}`))
-            .then(data => {
-                el.innerHTML = data;
-                el.removeAttribute('w3-include-html');
-            })
-            .catch(error => {
-                el.innerHTML = "Page not found.";
-                console.error(error);
+        if (htmlTemplates[file]) {
+            el.innerHTML = htmlTemplates[file];
+            el.removeAttribute('w3-include-html');
+
+            // Execute any scripts found in the injected HTML (specifically for header/favicon)
+            const scripts = el.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
             });
+        } else {
+            console.warn(`Template ${file} not found in bundle.`);
+            // Fallback for others if needed, though we expect only these 3
+            // Not implementing fetch fallback to force bundling usage
+            el.innerHTML = "Page not found.";
+        }
     });
 
-    await Promise.all(promises);
+    // Dispatch event immediately since we are sync now (or close to it)
+    // We keep it async function signature to match previous contract if called elsewhere, 
+    // but execution is sync.
     document.dispatchEvent(new CustomEvent('htmlIncludesLoaded'));
 }
 
@@ -150,12 +171,8 @@ authReady.then(({ user, publicData }) => {
     const skittlesHubTitle = document.getElementById('skittles-hub-title');
 
     // Default states
-    if (loginLink) loginLink.style.display = 'block';
-    if (logoutLink) logoutLink.style.display = 'none';
-    if (profileLink) profileLink.style.display = 'none';
-    if (teamManagementLink) teamManagementLink.style.display = 'none';
-    if (adminLink) adminLink.style.display = 'none';
-    if (skittlesHubTitle) skittlesHubTitle.style.display = 'none';
+    // Default states are now all hidden in HTML.
+    // We strictly enable what is needed based on auth state.
 
     if (user && publicData) {
         // Logged-in user
@@ -166,7 +183,7 @@ authReady.then(({ user, publicData }) => {
             skittlesHubTitle.style.display = 'block';
             skittlesHubTitle.textContent = `${publicData.firstName}'s Skittles Hub`;
         }
-        
+
         // Role-specific links
         if (publicData.role === 'Captain' || publicData.role === 'Vice Captain') {
             if (teamManagementLink) teamManagementLink.style.display = 'block';
@@ -174,5 +191,13 @@ authReady.then(({ user, publicData }) => {
         if (publicData.committee) {
             if (adminLink) adminLink.style.display = 'block';
         }
+    } else {
+        // Not logged in
+        if (loginLink) loginLink.style.display = 'block';
+        if (logoutLink) logoutLink.style.display = 'none';
+        if (profileLink) profileLink.style.display = 'none';
+        if (teamManagementLink) teamManagementLink.style.display = 'none';
+        if (adminLink) adminLink.style.display = 'none';
+        if (skittlesHubTitle) skittlesHubTitle.style.display = 'none';
     }
 });

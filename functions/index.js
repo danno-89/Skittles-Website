@@ -1,101 +1,32 @@
-const { onCall } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * const {onCall} = require("firebase-functions/v2/https");
+ * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
 
-admin.initializeApp();
+const {setGlobalOptions} = require("firebase-functions");
+const {onRequest} = require("firebase-functions/https");
+const logger = require("firebase-functions/logger");
 
-exports.rescheduleFixture = onCall({ region: "europe-west1" }, async (request) => {
-    // 1. Authentication Check
-    if (!request.auth) {
-        throw new functions.https.HttpsError(
-            "unauthenticated",
-            "This function must be called while authenticated."
-        );
-    }
+// For cost control, you can set the maximum number of containers that can be
+// running at the same time. This helps mitigate the impact of unexpected
+// traffic spikes by instead downgrading performance. This limit is a
+// per-function limit. You can override the limit for each function using the
+// `maxInstances` option in the function's options, e.g.
+// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
+// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// In the v1 API, each function can only serve one request per container, so
+// this will be the maximum concurrent request count.
+setGlobalOptions({ maxInstances: 10 });
 
-    // 2. Argument Validation
-    const { postponedFixtureId, targetSlotId } = request.data;
-    if (!postponedFixtureId || !targetSlotId) {
-        throw new functions.https.HttpsError(
-            "invalid-argument",
-            "Required arguments 'postponedFixtureId' and 'targetSlotId' are missing."
-        );
-    }
-    
-    // Self-rescheduling is not allowed
-    if (postponedFixtureId === targetSlotId) {
-        throw new functions.https.HttpsError(
-            "invalid-argument",
-            "A fixture cannot be rescheduled into its own slot."
-        );
-    }
+// Create and deploy your first functions
+// https://firebase.google.com/docs/functions/get-started
 
-    const db = admin.firestore();
-    const batch = db.batch();
-
-    try {
-        // 3. Get Document References
-        const fixtureToMoveRef = db.collection("match_results").doc(postponedFixtureId);
-        const targetSlotRef = db.collection("match_results").doc(targetSlotId);
-
-        const [fixtureToMoveSnap, targetSlotSnap] = await Promise.all([
-            fixtureToMoveRef.get(),
-            targetSlotRef.get(),
-        ]);
-
-        // 4. Data Existence and Status Validation
-        if (!fixtureToMoveSnap.exists) throw new functions.https.HttpsError("not-found", "The fixture to be moved does not exist.");
-        if (!targetSlotSnap.exists) throw new functions.https.HttpsError("not-found", "The target slot does not exist.");
-
-        const fixtureToMoveData = fixtureToMoveSnap.data();
-        const targetSlotData = targetSlotSnap.data();
-
-        if (fixtureToMoveData.status !== 'postponed') {
-            throw new functions.https.HttpsError("failed-precondition", "The fixture to be moved is not in a 'postponed' state.");
-        }
-        if (targetSlotData.status !== 'spare' && targetSlotData.status !== 'postponed') {
-            throw new functions.https.HttpsError("failed-precondition", "The target slot is not a 'spare' or 'postponed' fixture.");
-        }
-
-        const originalFixtureDate = fixtureToMoveData.scheduledDate;
-        const targetSlotDate = targetSlotData.scheduledDate;
-        
-        // 5. Core Rescheduling Logic
-        if (targetSlotData.status === 'spare') {
-            batch.update(fixtureToMoveRef, {
-                originalDate: originalFixtureDate,
-                scheduledDate: targetSlotDate,
-                status: 'rescheduled',
-                postponedBy: admin.firestore.FieldValue.delete(),
-                postponedDate: admin.firestore.FieldValue.delete()
-            });
-            batch.delete(targetSlotRef);
-
-        } else if (targetSlotData.status === 'postponed') {
-            batch.update(fixtureToMoveRef, {
-                originalDate: originalFixtureDate,
-                scheduledDate: targetSlotDate,
-                status: 'rescheduled',
-                postponedBy: admin.firestore.FieldValue.delete(),
-                postponedDate: admin.firestore.FieldValue.delete()
-            });
-            batch.update(targetSlotRef, {
-                originalDate: targetSlotDate,
-                scheduledDate: originalFixtureDate,
-                status: 'rescheduled',
-                postponedBy: admin.firestore.FieldValue.delete(),
-                postponedDate: admin.firestore.FieldValue.delete()
-            });
-        }
-        
-        await batch.commit();
-
-        return { success: true, message: "Fixture has been successfully rescheduled." };
-
-    } catch (error) {
-        console.error("Critical error in rescheduleFixture function:", error);
-        if (error instanceof functions.https.HttpsError) {
-            throw error;
-        }
-        throw new functions.https.HttpsError("internal", "An unexpected error occurred during the reschedule process.");
-    }
-});
+// exports.helloWorld = onRequest((request, response) => {
+//   logger.info("Hello logs!", {structuredData: true});
+//   response.send("Hello from Firebase!");
+// });

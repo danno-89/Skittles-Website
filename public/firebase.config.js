@@ -1,21 +1,21 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signOut, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    addDoc, 
-    doc, 
-    getDoc, 
-    query, 
-    where, 
-    orderBy, 
+import { initializeApp } from "firebase/app";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+} from "firebase/auth";
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    addDoc,
+    doc,
+    getDoc,
+    query,
+    where,
+    orderBy,
     limit,
     updateDoc,
     setDoc,
@@ -26,17 +26,17 @@ import {
     writeBatch,
     serverTimestamp,
     runTransaction
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { 
-    getFunctions, 
-    connectFunctionsEmulator, 
-    httpsCallable 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-import { 
-    getDatabase, 
-    ref, 
-    onValue 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+} from "firebase/firestore";
+import {
+    getFunctions,
+    connectFunctionsEmulator,
+    httpsCallable
+} from "firebase/functions";
+import {
+    getDatabase,
+    ref,
+    onValue
+} from "firebase/database";
 
 // Your web app's Firebase configuration
 // keys are replaced with environment variables for security
@@ -48,7 +48,7 @@ export const firebaseConfig = {
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID
-  };
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

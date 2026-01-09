@@ -1,0 +1,29 @@
+import"../modulepreload-polyfill-B5Qt9EMX.js";import{d as T,b as g,g as M,t as D,q as A,w as G,c as H,e as F}from"../firebase.config-IpTQKhZm.js";/* empty css                    */document.addEventListener("DOMContentLoaded",async()=>{const s=[document.getElementById("step1"),document.getElementById("step2"),document.getElementById("step3"),document.getElementById("step4")],d=["Step 1: Team Names","Step 2: Configure Players","Step 3: Player Names","Step 4: Who Bowls First?"];let m=0;const c=document.getElementById("action-button"),w=document.getElementById("back-button"),B=document.getElementById("step-title"),i=document.getElementById("home-team-name"),y=document.getElementById("away-team-name"),N=document.getElementById("player-config-container"),b=document.getElementById("home-player-names"),f=document.getElementById("away-player-names"),E=document.getElementById("bowling-first-container");let r,t={};try{const a=T(g,"scoreboard","standardGame"),l=await M(a);l.exists()?(r=l.data(),i.placeholder=r.homeTeam.name,y.placeholder=r.awayTeam.name):(i.placeholder="Home Team",y.placeholder="Away Team")}catch(a){console.error("Error fetching game data:",a)}c.addEventListener("click",async()=>{m===0?(t.homeTeamName=i.value||i.placeholder,t.awayTeamName=y.value||y.placeholder,C(),u(1)):m===1?(t.homePlayers=document.getElementById("home-players").value,t.awayPlayers=document.getElementById("away-players").value,$(),u(2)):m===2&&(L(),u(3),c.style.display="none",w.style.display="none")}),w.addEventListener("click",()=>{if(m>0){const a=m-1;u(a),c.textContent="Next",c.disabled=!1}else window.location.href="index.html"});async function p(){const a=E.querySelectorAll("button");a.forEach(n=>n.disabled=!0);const l=t.bowlingTeam==="home"?"prompt-home-team":"prompt-away-team",o=document.getElementById(l);o?(o.textContent="Creating...",o.classList.add("selected")):document.getElementById("prompt-random").textContent="Creating...";try{const n=await S(),e=P();await D(T(g,"scoreboard",n),e),window.location.href=`standard-game.html?gameId=${n}`}catch(n){console.error("Error submitting game setup:",n),alert("Could not create the game. Please try again."),a.forEach(e=>e.disabled=!1),o?o.textContent=t.bowlingTeam==="home"?t.homeTeamName:t.awayTeamName:document.getElementById("prompt-random").textContent="Choose for me"}}function P(){const a=b.querySelectorAll("input"),l=f.querySelectorAll("input"),o={homeTeam:{name:t.homeTeamName,players:{}},awayTeam:{name:t.awayTeamName,players:{}},bowlingTeam:t.bowlingTeam,currentTurnIndex:0,createdAt:new Date};return a.forEach((n,e)=>{o.homeTeam.players[`player${e+1}`]={name:n.value||`Player ${e+1}`,hands:[],totalScore:0}}),l.forEach((n,e)=>{o.awayTeam.players[`player${e+1}`]={name:n.value||`Player ${e+1}`,hands:[],totalScore:0}}),o}async function S(){const a=new Date,l=a.getFullYear().toString().slice(-2),o=(a.getMonth()+1).toString().padStart(2,"0"),n=a.getDate().toString().padStart(2,"0"),e=`standardGame-${l}${o}${n}`,k=A(H(g,"scoreboard"),G("__name__",">=",e)),x=await F(k);let h=0;x.forEach(I=>{if(I.id.startsWith(e)){const v=parseInt(I.id.slice(-3));v>h&&(h=v)}});const q=(h+1).toString().padStart(3,"0");return`${e}-${q}`}function u(a){s[m].classList.remove("active"),s[m].style.display="none",m=a,s[m].classList.add("active"),s[m].style.display="block",B.textContent=d[m]}function C(){N.innerHTML=`
+            <div class="team-card">
+                <h3>${t.homeTeamName}</h3>
+                <p>Number of Players:</p>
+                <div class="player-config">
+                    <button id="home-minus">-</button>
+                    <input type="number" id="home-players" value="${(r==null?void 0:r.homeTeam.playerNos)||"5"}" min="1" readonly>
+                    <button id="home-plus">+</button>
+                </div>
+            </div>
+            <div class="team-card">
+                <h3>${t.awayTeamName}</h3>
+                <p>Number of Players:</p>
+                <div class="player-config">
+                    <button id="away-minus">-</button>
+                    <input type="number" id="away-players" value="${(r==null?void 0:r.awayTeam.playerNos)||"5"}" min="1" readonly>
+                    <button id="away-plus">+</button>
+                </div>
+            </div>
+        `,_()}function $(){const a=document.getElementById("home-players").value,l=document.getElementById("away-players").value;let o=`<h3>${t.homeTeamName}</h3>`;for(let e=1;e<=a;e++)o+=`<input type="text" placeholder="Player ${e} Name">`;b.innerHTML=o;let n=`<h3>${t.awayTeamName}</h3>`;for(let e=1;e<=l;e++)n+=`<input type="text" placeholder="Player ${e} Name">`;f.innerHTML=n}function L(){E.innerHTML=`
+            <div class="bowling-prompt-container">
+                <h2>Who is bowling first?</h2>
+                <div class="prompt-buttons">
+                    <button id="prompt-home-team" class="btn home-btn">${t.homeTeamName}</button>
+                    <button id="prompt-away-team" class="btn away-btn">${t.awayTeamName}</button>
+                </div>
+                <button id="prompt-random" class="btn random-btn">Choose for me</button>
+            </div>
+        `,document.getElementById("prompt-home-team").addEventListener("click",()=>{t.bowlingTeam="home",p()}),document.getElementById("prompt-away-team").addEventListener("click",()=>{t.bowlingTeam="away",p()}),document.getElementById("prompt-random").addEventListener("click",()=>{t.bowlingTeam=["home","away"][Math.floor(Math.random()*2)],p()})}});function _(){const s=document.getElementById("home-players"),d=document.getElementById("away-players");document.getElementById("home-minus").addEventListener("click",()=>{s.value>1&&s.value--}),document.getElementById("home-plus").addEventListener("click",()=>{s.value++}),document.getElementById("away-minus").addEventListener("click",()=>{d.value>1&&d.value--}),document.getElementById("away-plus").addEventListener("click",()=>{d.value++})}

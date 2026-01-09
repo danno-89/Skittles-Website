@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Other Competitions</title>
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/other_competitions-yannnNbB.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/other_competitions-C7PDqrSX.css">
+  <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main>
+    <div class="page-header">
+        <h1>Other Competitions</h1>
+        <a href="other-competition-registration.html" class="btn btn-primary">Register for a Competition</a>
+    </div>
+
+    <div id="competition-tabs-container" class="tab-bar">
+        <!-- Competition tabs will be dynamically inserted here -->
+    </div>
+
+    <div class="hall-of-fame-layout">
+        <div id="competitions-main-content">
+            
+            <div id="overview-content" class="page-intro">
+                <p>During the season, on a number of Fridays, Individual and Pairs competitions are held as well as the 4-A-Side Knockout tournament held at Easter time.</p>
+                <p>Previously, registration for these competitions only required a player to turn up on the night, however, a more structured approach is being adopted going forward to help the committee organise these competitions better.</p>
+                <p>As such, players can now register for these tournaments from the start of the season. Each tournament will have a registration closure date (usually 2 weeks beforehand) where the initial draw will be completed.</p>
+                <p>Players will still be able to register by showing up on the night, but they will be drawn into the preliminary round (or earliest equivalent) on a first come, first-drawn basis.</p>
+                <p>Details of the competition date, registration deadlines and tournament draw (when available) will be shown here.</p>
+                <p>As always, if there are any issues, please do not hesitate to contact the committee by email (sarniaskittles@gmail.com), by phone, or in person.</p>
+            </div>
+
+            <div id="competition-content-container" style="display: none;">
+                 <!-- Competition-specific content will be loaded here -->
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <aside id="competition-dates-container">
+                <h2>Competition Dates</h2>
+                <div id="current-season-display">
+                    <!-- Season will be loaded here by the JS -->
+                </div>
+            </aside>
+        </div>
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Players Register</title>
+    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/players_register-DXfImM49.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
+  <link rel="stylesheet" crossorigin href="/assets/players_register-Cf5mGilR.css">
+</head>
+<body>
+
+<div w3-include-html="header.html"></div>
+
+<div class="container">
+  <div w3-include-html="navigation.html"></div>
+
+  <main>
+    <div class="page-header">
+      <h1>Players Register</h1>
+        <div class="filter-group">
+            <label for="team-filter">Filter by Team:</label>
+            <select id="team-filter" class="form-select">
+                <option value="">All Teams</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="filter-explanations">
+        <div class="checkbox-group">
+            <input type="checkbox" id="show-expired-filter">
+            <label for="show-expired-filter">Show expired registrations</label>
+            <p class="explanation">Check this box to show players whose registrations have lapsed.</p>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="expiring-soon-filter">
+            <label for="expiring-soon-filter">Expiring in the next 30 days</label>
+            <p class="explanation">Check this box to only show players whose registration will expire in the next 30 days.</p>
+        </div>
+    </div>
+
+    <div id="players-table-container" class="table-container">
+        <!-- Player data will be loaded here by players_register.js -->
+    </div>
+  </main>
+</div>
+
+<div w3-include-html="footer.html"></div>
+
+    
+</body>
+</html>

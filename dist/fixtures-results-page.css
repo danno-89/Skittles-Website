@@ -1,0 +1,210 @@
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0; /* Connects to the tabs */
+    border-bottom: 3px solid var(--club-yellow);
+    padding-bottom: var(--spacing-md);
+}
+
+/* Add space between tabs and the content below */
+.tab-content-area {
+    margin-top: var(--spacing-xl);
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-sm);
+}
+
+.icon-btn icon-component {
+    width: 24px;
+    height: 24px;
+}
+
+/* --- Modal Styles --- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); 
+}
+
+.modal-content {
+    background-color: var(--pure-white);
+    margin: 15% auto; 
+    padding: var(--spacing-lg);
+    border: 1px solid var(--light-grey);
+    width: 80%;
+    max-width: 500px;
+    border-radius: var(--border-radius);
+    position: relative;
+}
+
+.close-btn {
+    color: var(--medium-grey);
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.filter-group-right {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spacing-md);
+}
+
+/* --- Results Table & Week Details --- */
+
+.table-container {
+    overflow-x: auto;
+}
+
+.results-table {
+    border-collapse: collapse;
+    table-layout: fixed; 
+    width: auto; /* Allow table to determine its own width based on columns */
+}
+
+.results-table tr {
+    height: 40px;
+}
+
+.results-table th, .results-table td {
+    padding: 0 var(--spacing-md);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    vertical-align: middle; 
+}
+
+.date-col { width: 80px; }
+.time-col { width: 80px; }
+.home-team-col { width: 180px; }
+.away-team-col { width: 180px; }
+.score { width: 80px; }
+.status-cell { width: 150px; }       
+.competition-col { width: 180px; } 
+.round-col { width: 150px; } 
+.postponed-by-col { width: 150px; }      
+
+.score, .status-cell {
+    text-align: center;
+}
+
+/* --- Week Details Styling --- */
+
+.week-details {
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    background-color: var(--pure-white);
+    margin: 0 var(--spacing-md) var(--spacing-md) 0; /* Consistent spacing */
+    display: inline-block; /* Default for collapsed state */
+    vertical-align: top;   /* Align all week blocks to the top */
+}
+
+/* Set a fixed width for collapsed (not open) headers for uniform stacking */
+.week-details:not([open]) {
+    width: 325px;
+}
+
+/* Force open details to be a block element and shrink-to-fit its content */
+.week-details[open] {
+    display: block;          /* Force it onto its own line */
+    width: fit-content;      /* THE FIX: Shrink-wrap the container to the table */
+    border-color: var(--club-green);
+}
+
+.week-header {
+    cursor: pointer;
+    background-color: var(--club-green);
+    color: var(--club-yellow);
+    font-weight: bold;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    list-style: none; 
+}
+
+.week-details[open] .week-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.week-header.cup-week-header {
+    background-color: var(--club-yellow);
+    color: var(--club-green);
+}
+
+.week-header::-webkit-details-marker { display: none; }
+
+.week-header::before {
+    content: '►';
+    display: inline-block;
+    margin-right: var(--spacing-sm);
+    transition: transform 0.2s;
+}
+
+.week-details[open] > .week-header::before {
+    transform: rotate(90deg);
+}
+
+/* --- Status & Winner Styles --- */
+.winner {
+    color: var(--club-green);
+    font-weight: 700;
+}
+
+.status-spare {
+    background-color: hsla(200, 60%, 95%, 1); 
+    font-style: italic; 
+    text-align: center; 
+}
+
+.status-rescheduled {
+    background-color: hsla(55, 100%, 90%, 1); /* Light yellow for rescheduled matches */
+}
+
+.status-cell .details-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.status-cell .details-link icon-component {
+    width: 24px;
+    height: 24px;
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
+    }
+}
