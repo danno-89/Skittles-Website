@@ -16,17 +16,38 @@ popupMenuTemplate.innerHTML = `
       align-items: center;
     }
 
+    .icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+
     .icon-container svg {
       width: 1em;
       height: 1em;
     }
 
     /* Style the duotone SVG paths */
-    .icon-container svg path:nth-of-type(1) {
-      fill: var(--club-green);
+    /* Target only direct children for top-level paths to avoid matching nested group paths */
+    .icon-container svg > path:nth-of-type(1) {
+      fill: var(--club-green) !important;
+      transition: fill 0.3s ease;
     }
-    .icon-container svg path:nth-of-type(2) {
-      fill: var(--club-yellow);
+    .icon-container svg > path:nth-of-type(2) {
+      fill: var(--club-yellow) !important;
+    }
+    /* Target paths within the opacity group */
+    .icon-container svg g[opacity="0.5"] path {
+        fill: var(--club-yellow) !important;
+    }
+    
+    :host(:hover) .icon-container svg path {
+       /* For fill-based icons, we might want to change fill on hover? 
+          Original didn't specify hover for popup-menu, but icon-component did.
+          Let's try simply changing fill. */
+       fill: var(--club-alternate);
     }
     
     #label {
@@ -76,17 +97,17 @@ class PopupMenu extends HTMLElement {
     const label = this.getAttribute('label');
 
     if (icon) {
-        try {
-            const response = await fetch(`assets/${icon}.svg`);
-            if (!response.ok) {
-                throw new Error(`Failed to load icon: ${response.statusText}`);
-            }
-            const svgText = await response.text();
-            iconContainer.innerHTML = svgText;
-        } catch (error) {
-            console.error('Error loading SVG:', error);
-            iconContainer.innerHTML = '⚠️'; // Show an error icon
+      try {
+        const response = await fetch(`assets/${icon}.svg`);
+        if (!response.ok) {
+          throw new Error(`Failed to load icon: ${response.statusText}`);
         }
+        const svgText = await response.text();
+        iconContainer.innerHTML = svgText;
+      } catch (error) {
+        console.error('Error loading SVG:', error);
+        iconContainer.innerHTML = '⚠️'; // Show an error icon
+      }
     }
     labelEl.textContent = label;
 

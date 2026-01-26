@@ -1,62 +1,7 @@
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0; /* Connects to the tabs */
-    border-bottom: 3px solid var(--club-yellow);
-    padding-bottom: var(--spacing-md);
-}
-
 /* Add space between tabs and the content below */
 .tab-content-area {
     margin-top: var(--spacing-xl);
-}
-
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--spacing-sm);
-}
-
-.icon-btn icon-component {
-    width: 24px;
-    height: 24px;
-}
-
-/* --- Modal Styles --- */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.5); 
-}
-
-.modal-content {
-    background-color: var(--pure-white);
-    margin: 15% auto; 
-    padding: var(--spacing-lg);
-    border: 1px solid var(--light-grey);
-    width: 80%;
-    max-width: 500px;
-    border-radius: var(--border-radius);
-    position: relative;
-}
-
-.close-btn {
-    color: var(--medium-grey);
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
 }
 
 #filters-container {

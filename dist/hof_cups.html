@@ -1,57 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarnia Skittles Club - Cup Competitions</title>
-    <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
-  <script type="module" crossorigin src="/assets/hof_cups-D85e19XH.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarnia Skittles Club - Cup Competitions</title>
+  <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
+  <script type="module" crossorigin src="/assets/hof_cups-BcaLnfZD.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DLzLBIiP.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
   <link rel="stylesheet" crossorigin href="/assets/hall-of-fame-page-CYxmthKG.css">
   <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
 </head>
+
 <body>
 
-<div w3-include-html="header.html"></div>
+  <div w3-include-html="header.html"></div>
 
-<div class="container">
-  <div w3-include-html="navigation.html"></div>
+  <div class="container">
+    <div w3-include-html="navigation.html"></div>
 
-  <main>
-    <div class="page-header">
-      <h1>Cup Competitions</h1>
-    </div>
+    <main>
+      <page-header>
+        <span slot="title">Cup Competitions</span>
+      </page-header>
 
-    <div class="tabs-container">
-        <div class="tabs-header" id="competition-tabs-container">
+      <div class="tab-bar">
+        <div class="tabs-main">
+          <div id="competition-tabs-container" class="tabs-main">
             <!-- Competition tabs will be dynamically inserted here -->
+          </div>
         </div>
-    </div>
-    
-    <div class="hall-of-fame-layout">
-      <div id="hall-of-fame-container">
-          <!-- Hall of Fame content will be loaded here -->
       </div>
-      <div class="sidebar">
-        <aside id="stats-container">
+
+      <div class="hall-of-fame-layout">
+        <div id="hall-of-fame-container">
+          <!-- Hall of Fame content will be loaded here -->
+        </div>
+        <div class="sidebar">
+          <aside id="stats-container">
             <h2>Statistics</h2>
             <div id="stats-content">
-                <p>Select a competition to see statistics.</p>
+              <p>Select a competition to see statistics.</p>
             </div>
-        </aside>
-        <aside id="detailed-winners-container">
+          </aside>
+          <aside id="detailed-winners-container">
             <!-- Detailed winners list will be loaded here -->
-        </aside>
+          </aside>
+        </div>
       </div>
-    </div>
-  </main>
-</div>
+    </main>
+  </div>
 
-<div w3-include-html="footer.html"></div>
+  <div w3-include-html="footer.html"></div>
 
-    
+
 </body>
+
 </html>

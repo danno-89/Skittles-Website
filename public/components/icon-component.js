@@ -19,18 +19,24 @@ iconTemplate.innerHTML = `
       width: 100%;
       height: 100%;
     }
-    svg path {
-      /* Default stroke for primary parts of the icon */
-      stroke: var(--club-green);
-      transition: stroke 0.3s ease;
+    svg > path:nth-of-type(1) {
+      /* Default fill for primary parts of the icon, matching popup-menu */
+      fill: var(--club-green) !important;
+      transition: fill 0.3s ease;
+      stroke: none; /* Ensure no stroke interferes */
     }
-    svg path[opacity="0.5"] {
+    svg > path:nth-of-type(2) {
+      fill: var(--club-yellow) !important;
+      stroke: none;
+    }
+    svg path[opacity="0.5"], svg g[opacity="0.5"] path {
       /* Secondary color for duotone effect */
-      stroke: var(--club-yellow);
+      fill: var(--club-yellow) !important;
+      stroke: none;
     }
     :host(:hover) svg path {
       /* Hover color for all parts of the icon */
-      stroke: var(--club-alternate);
+      fill: var(--club-alternate) !important;
     }
   </style>
   <div class="icon-container"></div>

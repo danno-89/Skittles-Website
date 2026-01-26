@@ -61,7 +61,7 @@ async function initializeAdminPage() {
         initializeResultsInput();
         initializePostponeFixture();
         initializeAmendPlayerTab();
-        
+
         // Initialise modules for specific tabs
         initAdminEditFixture();
         initRescheduleFixture(teamsMap);
@@ -171,7 +171,7 @@ function initializeTabs() {
 
     const tabs = tabsContainer.querySelectorAll('.tab-link');
     const tabPanes = tabContentContainer.querySelectorAll('.tab-pane');
-    
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
@@ -222,7 +222,7 @@ function initializePostponeFixture() {
             statusDiv.className = 'status-error';
             return;
         }
-        
+
         try {
             await updateDoc(doc(db, "match_results", fixtureId), {
                 status: 'postponed',
@@ -233,21 +233,21 @@ function initializePostponeFixture() {
             statusDiv.className = 'status-success';
             form.reset();
             teamSelect.disabled = true;
-            await fetchScheduledFixtures(); 
-            populateFixturePostponeSelect(); 
+            await fetchScheduledFixtures();
+            populateFixturePostponeSelect();
         } catch (error) {
             console.error("Error postponing fixture:", error);
             statusDiv.textContent = 'An error occurred. Please try again.';
             statusDiv.className = 'status-error';
         }
     });
-    
+
     populateFixturePostponeSelect();
 }
 
 function populateFixturePostponeSelect() {
     const fixtureSelect = document.getElementById('fixture-to-postpone-select');
-    if(!fixtureSelect) return;
+    if (!fixtureSelect) return;
 
     fixtureSelect.innerHTML = '<option value="">Select a fixture to postpone</option>';
     allFixtures.forEach(fixture => {
@@ -269,8 +269,13 @@ function initializeResultsInput() {
     const matchSelect = document.getElementById('match-select');
     const resultsFormContainer = document.getElementById('results-form-container');
     const submitBtn = document.getElementById('submit-results-btn');
+    const walkoverSelect = document.getElementById('walkover-select');
+    const walkoverFormContainer = document.getElementById('walkover-form-container');
+    const submitWalkoverBtn = document.getElementById('submit-walkover-btn');
+    const walkoverWinner = document.getElementById('walkover-winner');
+    const walkoverScore = document.getElementById('walkover-score');
 
-    if (!dateSelect || !matchSelect || !resultsFormContainer || !submitBtn) {
+    if (!dateSelect || !matchSelect || !resultsFormContainer || !submitBtn || !walkoverSelect || !walkoverFormContainer) {
         console.error("One or more elements for results input are missing.");
         return;
     }
@@ -288,7 +293,7 @@ function initializeResultsInput() {
     const populateDateSelect = () => {
         dateSelect.innerHTML = '<option value="">Select a date</option>';
         const uniqueDates = [...new Set(allFixtures.map(f => f.scheduledDate.toDate().toISOString().split('T')[0]))];
-        uniqueDates.sort((a,b) => new Date(a) - new Date(b));
+        uniqueDates.sort((a, b) => new Date(a) - new Date(b));
         uniqueDates.forEach(dateStr => {
             const option = document.createElement('option');
             option.value = dateStr;
@@ -302,7 +307,7 @@ function initializeResultsInput() {
         resultsFormContainer.style.display = 'none';
         fetchAndDisplayCompetitionName(null, 'competition-name');
         const matchesOnDate = allFixtures.filter(f => f.scheduledDate.toDate().toISOString().split('T')[0] === dateSelect.value);
-        
+
         matchesOnDate.forEach(fixture => {
             const homeTeamName = teamsMap.get(fixture.homeTeamId);
             const awayTeamName = teamsMap.get(fixture.awayTeamId);
@@ -319,6 +324,25 @@ function initializeResultsInput() {
         resultsFormContainer.style.display = 'none';
         const fixture = allFixtures.find(f => f.id === matchSelect.value);
         if (fixture) {
+            // Populate Walkover Select
+            walkoverSelect.innerHTML = '<option value="">Match Played</option>';
+            const homeTeamName = teamsMap.get(fixture.homeTeamId);
+            const awayTeamName = teamsMap.get(fixture.awayTeamId);
+
+            const optHome = document.createElement('option');
+            optHome.value = 'home';
+            optHome.textContent = `Walkover: ${homeTeamName} (Home Win)`;
+            walkoverSelect.appendChild(optHome);
+
+            const optAway = document.createElement('option');
+            optAway.value = 'away';
+            optAway.textContent = `Walkover: ${awayTeamName} (Away Win)`;
+            walkoverSelect.appendChild(optAway);
+
+            walkoverSelect.disabled = false;
+            walkoverSelect.value = ""; // Reset to default
+            walkoverFormContainer.style.display = 'none'; // Hide walkover container on new match select
+
             await fetchAndDisplayCompetitionName(fixture.division, 'competition-name');
 
             if (fixture.division === 'ssc-cup') {
@@ -329,12 +353,118 @@ function initializeResultsInput() {
             document.getElementById('away-team-name-header').textContent = teamsMap.get(fixture.awayTeamId);
             document.getElementById('home-bowled-first').value = fixture.homeTeamId;
             document.getElementById('away-bowled-first').value = fixture.awayTeamId;
-            
+
             renderScorecard('home', fixture, allPlayers);
             renderScorecard('away', fixture, allPlayers);
             resultsFormContainer.style.display = 'block';
         } else {
             fetchAndDisplayCompetitionName(null, 'competition-name');
+        }
+    });
+
+    // Walkover Select Listener
+    walkoverSelect.addEventListener('change', async () => {
+        const fixture = allFixtures.find(f => f.id === matchSelect.value);
+        if (!fixture) return;
+
+        if (walkoverSelect.value === "") {
+            // Match Played
+            resultsFormContainer.style.display = 'block';
+            walkoverFormContainer.style.display = 'none';
+        } else {
+            // Walkover Selected
+            resultsFormContainer.style.display = 'none';
+            walkoverFormContainer.style.display = 'block';
+
+            const winningTeamId = walkoverSelect.value === 'home' ? fixture.homeTeamId : fixture.awayTeamId;
+            const winnerName = teamsMap.get(winningTeamId);
+
+            walkoverWinner.textContent = winnerName;
+            walkoverScore.textContent = "Calculating...";
+
+            const avgScore = await calculateAverageScore(winningTeamId, fixture.season, fixture.division);
+            walkoverScore.textContent = avgScore;
+        }
+    });
+
+    // Walkover Submit Listener
+    submitWalkoverBtn.addEventListener('click', async () => {
+        const fixtureId = matchSelect.value;
+        const walkoverType = walkoverSelect.value;
+        const fixture = allFixtures.find(f => f.id === fixtureId);
+
+        if (!fixture || !walkoverType) {
+            alert("Error: Invalid walkover selection.");
+            return;
+        }
+
+        const winningTeamId = walkoverType === 'home' ? fixture.homeTeamId : fixture.awayTeamId;
+        const calculatedScore = parseInt(walkoverScore.textContent) || 0;
+
+        const resultsData = {
+            homeScore: walkoverType === 'home' ? calculatedScore : 0,
+            awayScore: walkoverType === 'away' ? calculatedScore : 0,
+            homeScores: [], // Empty for walkover
+            awayScores: [], // Empty for walkover
+            bowledFirst: null,
+            status: 'completed',
+            walkover: true,
+            note: walkoverType === 'home' ? 'Home Walkover' : 'Away Walkover'
+        };
+
+        if (!confirm(`Confirm Walkover: ${teamsMap.get(winningTeamId)} wins with ${calculatedScore} points?`)) {
+            return;
+        }
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                // Phase 1: READS
+                let leagueRef, leagueSnap, cupRef, cupSnap;
+                if (['premier-division', 'first-division'].includes(fixture.division)) {
+                    leagueRef = doc(db, "league_tables", fixture.season); // Corrected path
+                    leagueSnap = await transaction.get(leagueRef);
+                } else if (fixture.division === 'ssc-cup') {
+                    cupRef = doc(db, "ssc_cup", fixture.season);
+                    cupSnap = await transaction.get(cupRef);
+                }
+
+                // Phase 2: LOGIC
+                const fixtureRef = doc(db, "match_results", fixtureId);
+                // No individual player updates for walkovers as per requirement/logic (no hands bowled)
+                // Assuming we don't update player stats/expiry for walkovers since they didn't play? 
+                // Plan said "assign a victory", "update league_tables". 
+                // I will skip player updates.
+
+                let updatedLeagueStandings, updatedCupData;
+                if (leagueRef && leagueSnap.exists()) {
+                    const leagueData = leagueSnap.data();
+                    if (leagueData[fixture.division] && leagueData[fixture.division].standings) {
+                        updatedLeagueStandings = updateLeagueTable(fixture, resultsData, leagueData[fixture.division].standings);
+                    }
+                }
+                if (cupRef && cupSnap.exists()) {
+                    updatedCupData = updateSscCupStandings(fixture, resultsData, cupSnap.data());
+                }
+
+                // Phase 3: WRITES
+                transaction.update(fixtureRef, resultsData);
+                if (updatedLeagueStandings) {
+                    const updateKey = `${fixture.division}.standings`;
+                    transaction.update(leagueRef, { [updateKey]: updatedLeagueStandings });
+                }
+                if (updatedCupData) {
+                    transaction.update(cupRef, updatedCupData);
+                }
+            });
+
+            alert('Walkover submitted successfully!');
+            await fetchScheduledFixtures();
+            populateDateSelect(); // Reset UI
+            resultsFormContainer.style.display = 'none';
+            walkoverFormContainer.style.display = 'none';
+        } catch (error) {
+            console.error("Error submitting walkover:", error);
+            alert('An error occurred while submitting walkover.');
         }
     });
 
@@ -363,7 +493,7 @@ function initializeResultsInput() {
             alert("Please correct the following issues:\n\n- " + errors.join("\n- "));
             return;
         }
-        
+
         const resultsData = {
             homeScore: parseInt(document.getElementById('home-team-total-display').textContent),
             awayScore: parseInt(document.getElementById('away-team-total-display').textContent),
@@ -375,12 +505,12 @@ function initializeResultsInput() {
 
         try {
             const fixture = allFixtures.find(f => f.id === fixtureId);
-            
+
             await runTransaction(db, async (transaction) => {
                 // Phase 1: READS
                 let leagueRef, leagueSnap, cupRef, cupSnap;
                 if (['premier-division', 'first-division'].includes(fixture.division)) {
-                    leagueRef = doc(db, "league_tables", `${fixture.season}_${fixture.division}`);
+                    leagueRef = doc(db, "league_tables", fixture.season); // Corrected path: season doc, not division doc
                     leagueSnap = await transaction.get(leagueRef);
                 } else if (fixture.division === 'ssc-cup') {
                     cupRef = doc(db, "ssc_cup", fixture.season);
@@ -397,9 +527,12 @@ function initializeResultsInput() {
                 expiryDate.setFullYear(expiryDate.getFullYear() + 1);
                 const registerExpiryTimestamp = Timestamp.fromDate(expiryDate);
 
-                let updatedLeagueData, updatedCupData;
+                let updatedLeagueStandings, updatedCupData;
                 if (leagueRef && leagueSnap.exists()) {
-                    updatedLeagueData = updateLeagueTable(fixture, resultsData, leagueSnap.data());
+                    const leagueData = leagueSnap.data();
+                    if (leagueData[fixture.division] && leagueData[fixture.division].standings) {
+                        updatedLeagueStandings = updateLeagueTable(fixture, resultsData, leagueData[fixture.division].standings);
+                    }
                 }
                 if (cupRef && cupSnap.exists()) {
                     updatedCupData = updateSscCupStandings(fixture, resultsData, cupSnap.data());
@@ -408,8 +541,10 @@ function initializeResultsInput() {
                 // Phase 3: WRITES
                 transaction.update(fixtureRef, resultsData);
 
-                if (updatedLeagueData) {
-                    transaction.update(leagueRef, { teams: updatedLeagueData });
+                if (updatedLeagueStandings) {
+                    // Dynamic update key for the specific division's standings
+                    const updateKey = `${fixture.division}.standings`;
+                    transaction.update(leagueRef, { [updateKey]: updatedLeagueStandings });
                 }
                 if (updatedCupData) {
                     transaction.update(cupRef, updatedCupData);
@@ -425,8 +560,8 @@ function initializeResultsInput() {
             });
 
             alert('Results submitted successfully!');
-            await fetchScheduledFixtures(); 
-            populateDateSelect(); 
+            await fetchScheduledFixtures();
+            populateDateSelect();
             resultsFormContainer.style.display = 'none';
         } catch (error) {
             console.error("Error submitting results:", error);
@@ -467,7 +602,7 @@ function renderScorecard(teamType, fixture, allPlayers) {
         const homeAvg = teamAverages[fixture.homeTeamId] || 0;
         const awayAvg = teamAverages[fixture.awayTeamId] || 0;
         const handicap = Math.round(Math.abs(homeAvg - awayAvg) * 0.95);
-        
+
         if ((teamType === 'home' && homeAvg < awayAvg) || (teamType === 'away' && awayAvg < homeAvg)) {
             handicapValue = handicap;
         }
@@ -501,7 +636,7 @@ function renderScorecard(teamType, fixture, allPlayers) {
             `).join('')}
             ${handicapRow}
         </tbody>`;
-    
+
     const playerSelects = container.querySelectorAll('.player-select');
     playerSelects.forEach(updateSelectOptions);
 
@@ -534,12 +669,13 @@ function updateTeamTotal(container, handicap = 0) {
 
 // --- League Table and Cup Standings Updates ---
 
-function updateLeagueTable(fixture, results, leagueData) {
+function updateLeagueTable(fixture, results, standings) {
     const { homeTeamId, awayTeamId } = fixture;
     const { homeScore, awayScore, bowledFirst } = results;
 
-    const homeTeam = leagueData.teams.find(t => t.teamId === homeTeamId);
-    const awayTeam = leagueData.teams.find(t => t.teamId === awayTeamId);
+    // Use 'teamId' as per correction tool structure, though 'teams' map uses 'teamId' too.
+    const homeTeam = standings.find(t => t.teamId === homeTeamId);
+    const awayTeam = standings.find(t => t.teamId === awayTeamId);
 
     // Determine winner and points
     let homePoints = 0, awayPoints = 0;
@@ -551,12 +687,14 @@ function updateLeagueTable(fixture, results, leagueData) {
         homePoints = 1; // Draw
         awayPoints = 1;
     }
-    
-    // Bonus point for bowled first
-    if (bowledFirst === homeTeamId && homeScore < awayScore) {
-        homePoints++;
-    } else if (bowledFirst === awayTeamId && awayScore < homeScore) {
-        awayPoints++;
+
+    // Bonus point for bowled first - ONLY if not a walkover
+    if (!results.walkover) {
+        if (bowledFirst === homeTeamId && homeScore < awayScore) {
+            homePoints++;
+        } else if (bowledFirst === awayTeamId && awayScore < homeScore) {
+            awayPoints++;
+        }
     }
 
     // Update team stats
@@ -572,15 +710,15 @@ function updateLeagueTable(fixture, results, leagueData) {
 
     if (homeTeam) updateTeamStats(homeTeam, homePoints, homeScore, awayScore);
     if (awayTeam) updateTeamStats(awayTeam, awayPoints, awayScore, homeScore);
-    
-    return leagueData.teams;
+
+    return standings;
 }
 
 
 function updateSscCupStandings(fixture, results, cupData) {
     const { homeTeamId, awayTeamId, round } = fixture;
     const { homeScore, awayScore } = results;
-    
+
     const groupName = round.replace('Group Stage - ', 'Group_');
     const groupData = cupData[groupName];
 
@@ -619,3 +757,57 @@ function updateSscCupStandings(fixture, results, cupData) {
 function initializeAmendPlayerTab() {
     // Placeholder for amend player tab logic
 }
+/**
+ * Calculates the average score for a team in a specific competition.
+ * Excludes matches that were won by walkover to ensure a fair average of actual performance.
+ * @param {string} teamId - The ID of the team.
+ * @param {string} season - The season key.
+ * @param {string} division - The division key.
+ * @returns {Promise<number>} - The rounded average score.
+ */
+async function calculateAverageScore(teamId, season, division) {
+    try {
+        const q = query(collection(db, "match_results"),
+            where("season", "==", season),
+            where("division", "==", division),
+            where("status", "in", ["completed", "walkover"]) // Include completed, check walkover flag manually if status is 'completed'
+        );
+
+        // Note: Firestore 'in' query limitation might affect status check if we use 'completed' for both.
+        // If we use status='completed' for all, we just query that.
+        // User agreed to status: 'completed' with a note.
+        // So just query status == 'completed'.
+
+        const qCompleted = query(collection(db, "match_results"),
+            where("season", "==", season),
+            where("division", "==", division),
+            where("status", "==", "completed")
+        );
+
+        const snapshot = await getDocs(qCompleted);
+        let totalScore = 0;
+        let gamesPlayed = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Check if it was a walkover (we want to exclude these from average calculation presumably, strictly performance based?)
+            // If data.walkover is true, skip.
+            if (data.walkover) return;
+
+            if (data.homeTeamId === teamId) {
+                totalScore += data.homeScore;
+                gamesPlayed++;
+            } else if (data.awayTeamId === teamId) {
+                totalScore += data.awayScore;
+                gamesPlayed++;
+            }
+        });
+
+        if (gamesPlayed === 0) return 0; // Or some default base score?
+        return Math.round(totalScore / gamesPlayed);
+    } catch (error) {
+        console.error("Error calculating average score:", error);
+        return 0;
+    }
+}
+

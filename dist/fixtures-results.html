@@ -1,96 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarnia Skittles Club - Fixtures / Results</title>
-  <script type="module" crossorigin src="/assets/fixtures-results-DTvfeHsE.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarnia Skittles Club - Fixtures / Results</title>
+  <script type="module" crossorigin src="/assets/fixtures-results-Bm_K8W3V.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
-  <link rel="modulepreload" crossorigin href="/assets/icon-component-rmBoP_Yk.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DLzLBIiP.js">
+  <link rel="modulepreload" crossorigin href="/assets/icon-component-BNGfFzw0.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
-  <link rel="stylesheet" crossorigin href="/assets/fixtures-results-page-Bq2ER2pW.css">
+  <link rel="stylesheet" crossorigin href="/assets/fixtures-results-page-CY-5yhBR.css">
   <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
 </head>
+
 <body>
 
-<div w3-include-html="header.html"></div>
+  <div w3-include-html="header.html"></div>
 
-<div class="container">
-  <div w3-include-html="navigation.html"></div>
+  <div class="container">
+    <div w3-include-html="navigation.html"></div>
 
-  <main>
-    <div class="page-header">
-        <h1>Fixtures / Results</h1>
-        <div class="filter-group">
-            <button id="filter-modal-btn" class="btn icon-btn">
-                <icon-component name="select" alt="Filters"></icon-component>
-            </button>
-        </div>
-    </div>
+    <main>
+      <page-header>
+        <span slot="title">Fixtures / Results</span>
+        <popup-menu slot="icon" icon="select" label="Filters">
+          <div class="filter-group">
+            <label for="season-filter">Select Season:</label>
+            <select id="season-filter" class="form-select"></select>
+          </div>
+          <div class="filter-group">
+            <label for="team-filter">Filter by Team:</label>
+            <select id="team-filter" class="form-select">
+              <option value="">All Teams</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="competition-filter">Filter by Competition:</label>
+            <select id="competition-filter" class="form-select">
+              <option value="">All Competitions</option>
+            </select>
+          </div>
+          <div class="filter-group-right">
+            <button id="apply-filters-btn" class="btn">Apply Filters</button>
+          </div>
+        </popup-menu>
+      </page-header>
 
-    <!-- Tab Controls -->
-    <div class="tab-bar">
+      <!-- Tab Controls -->
+      <div class="tab-bar">
         <div class="tabs-main">
-            <button class="tab-link active" data-tab="fixtures">Fixtures</button>
-            <button class="tab-link" data-tab="results">Results</button>
-            <button class="tab-link" data-tab="postponed">Postponed</button>
-        </div>
-    </div>
-
-    <!-- Tab Content Panels -->
-    <div class="tab-content-area">
-      <div id="fixtures" class="tab-pane active">
-        <div id="fixtures-container">
-          <!-- Fixtures will be dynamically loaded here -->
+          <button class="tab-link active" data-tab="fixtures">Fixtures</button>
+          <button class="tab-link" data-tab="results">Results</button>
+          <button class="tab-link" data-tab="postponed">Postponed</button>
         </div>
       </div>
-      <div id="results" class="tab-pane">
-        <div id="results-container">
-          <!-- Results will be dynamically loaded here -->
+
+      <!-- Tab Content Panels -->
+      <div class="tab-content-area">
+        <div id="fixtures" class="tab-pane active">
+          <div id="fixtures-container">
+            <!-- Fixtures will be dynamically loaded here -->
+          </div>
+        </div>
+        <div id="results" class="tab-pane">
+          <div id="results-container">
+            <!-- Results will be dynamically loaded here -->
+          </div>
+        </div>
+        <div id="postponed" class="tab-pane">
+          <div id="postponements-container">
+            <!-- Postponements will be dynamically loaded here -->
+          </div>
         </div>
       </div>
-      <div id="postponed" class="tab-pane">
-        <div id="postponements-container">
-          <!-- Postponements will be dynamically loaded here -->
-        </div>
-      </div>
-    </div>
 
-    <div id="filter-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Filters</h2>
-            <div id="filters-container">
-                <div class="filter-group">
-                    <label for="season-filter">Select Season:</label>
-                    <select id="season-filter" class="form-select"></select>
-                </div>
-                <div class="filter-group">
-                    <label for="team-filter">Filter by Team:</label>
-                    <select id="team-filter" class="form-select">
-                        <option value="">All Teams</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="competition-filter">Filter by Competition:</label>
-                    <select id="competition-filter" class="form-select">
-                        <option value="">All Competitions</option>
-                    </select>
-                </div>
-            </div>
-            <div class="filter-group-right">
-                <button id="apply-filters-btn" class="btn">Apply Filters</button>
-            </div>
-        </div>
-    </div>
+    </main>
+  </div>
 
-  </main>
-</div>
-
-<div w3-include-html="footer.html"></div>
+  <div w3-include-html="footer.html"></div>
 
-    
+
 </body>
+
 </html>

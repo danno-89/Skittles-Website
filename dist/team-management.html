@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Management - Skittles Club Hub</title>
     <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
-  <script type="module" crossorigin src="/assets/team-management-DFFug-1f.js"></script>
+  <script type="module" crossorigin src="/assets/team-management-Bd0hrgOD.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DLzLBIiP.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
   <link rel="stylesheet" crossorigin href="/assets/team-management-DPW-RCnk.css">
-  <link rel="stylesheet" crossorigin href="/assets/fixtures-results-page-Bq2ER2pW.css">
+  <link rel="stylesheet" crossorigin href="/assets/fixtures-results-page-CY-5yhBR.css">
   <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
 </head>
 
@@ -24,16 +24,18 @@
         <div w3-include-html="navigation.html"></div>
 
         <main>
-            <div class="page-header">
-                <h1>Team Management</h1>
-            </div>
+            <page-header>
+                <span slot="title">Team Management</span>
+            </page-header>
 
-            <div class="tabs-container">
-                <div class="tabs-header">
-                    <button class="tab-link active" data-tab="players">Players</button>
-                    <button class="tab-link" data-tab="fixtures">Fixtures</button>
-                    <button class="tab-link" data-tab="results">Results</button>
-                    <button class="tab-link" data-tab="statistics">Statistics</button>
+            <div class="tab-bar">
+                <div class="tabs-main">
+                    <div class="tabs-header tabs-main">
+                        <button class="tab-link active" data-tab="players">Players</button>
+                        <button class="tab-link" data-tab="fixtures">Fixtures</button>
+                        <button class="tab-link" data-tab="results">Results</button>
+                        <button class="tab-link" data-tab="statistics">Statistics</button>
+                    </div>
                 </div>
             </div>
 

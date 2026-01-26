@@ -1,9 +1,10 @@
-import { defineConfig } from 'vite';
+import { defineConfig, normalizePath } from 'vite';
 import { glob } from 'glob';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
     plugins: [
@@ -13,7 +14,10 @@ export default defineConfig({
                     src: '*.png',
                     dest: '.'
                 },
-                // Removed jpg/jpeg/svg as they appear missing and cause build errors
+                {
+                    src: normalizePath(path.resolve(__dirname, 'public/assets/*.svg')),
+                    dest: 'assets'
+                },
                 {
                     src: '*.css',
                     dest: '.'

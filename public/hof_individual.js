@@ -30,7 +30,7 @@ const initializePage = async () => {
         allCompetitions = competitionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         divisionFilter.addEventListener('change', () => {
-            const selectedCompetitionId = document.querySelector('.main-tabs .tab-link.active')?.dataset.competitionId;
+            const selectedCompetitionId = document.querySelector('.tabs-main .tab-link.active')?.dataset.competitionId;
             if (selectedCompetitionId === HIGHEST_INDIVIDUAL_AVERAGE_ID) {
                 renderDivisionTable(currentWinners, 'Highest Individual Average', divisionFilter.value);
             }
@@ -100,13 +100,13 @@ const loadWinners = async (competitionId) => {
 
     try {
         const winnerDoc = await getDoc(doc(db, 'winners', competitionId));
-        
+
         currentWinners = winnerDoc.exists() ? (Object.values(winnerDoc.data()).find(Array.isArray) || []) : [];
         currentWinners.sort((a, b) => String(b.season).localeCompare(String(a.season)));
 
         const competition = allCompetitions.find(c => c.id === competitionId);
         const competitionName = competition ? competition.name : 'Competition';
-        
+
         if (competitionId === HIGHEST_INDIVIDUAL_AVERAGE_ID) {
             allDivisions = new Set(currentWinners.map(w => w.division).filter(Boolean));
             populateDivisionFilter(allDivisions);
@@ -152,8 +152,8 @@ const renderDivisionTable = (winnersArray, competitionName, divisionFilterValue 
     heading.textContent = competitionName;
     hallOfFameContainer.appendChild(heading);
 
-    const filteredWinners = divisionFilterValue === 'all' 
-        ? winnersArray 
+    const filteredWinners = divisionFilterValue === 'all'
+        ? winnersArray
         : winnersArray.filter(w => w.division === divisionFilterValue);
 
     const dataBySeason = {};
@@ -164,10 +164,10 @@ const renderDivisionTable = (winnersArray, competitionName, divisionFilterValue 
         dataBySeason[entry.season][entry.division] = entry.winner;
     });
 
-    const divisionColumns = divisionFilterValue === 'all' 
+    const divisionColumns = divisionFilterValue === 'all'
         ? Array.from(allDivisions)
         : [divisionFilterValue];
-    
+
     const tableContainer = document.createElement('div');
     tableContainer.className = 'winners-table-container';
 
@@ -247,7 +247,7 @@ const renderDetailedWinnersList = (winCounts) => {
         const groupHeading = document.createElement('h3');
         groupHeading.textContent = `${count} ${count > 1 ? 'Wins' : 'Win'}`;
         groupContainer.appendChild(groupHeading);
-        
+
         const list = document.createElement('ul');
         list.className = 'detailed-winner-list';
         winnersByCount[count].sort().forEach(winner => {

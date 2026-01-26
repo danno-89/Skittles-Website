@@ -6,10 +6,10 @@
     <title>Admin - Skittles Club Hub</title>
     <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script type="module" crossorigin src="/assets/admin-Dc1N6P9I.js"></script>
+  <script type="module" crossorigin src="/assets/admin-BQ76bwDi.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CA5my9sR.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DLzLBIiP.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
   <link rel="stylesheet" crossorigin href="/assets/admin-BdIGtbtf.css">
   <link rel="stylesheet" crossorigin href="/assets/tabs-BNpm5iT5.css">
@@ -50,6 +50,24 @@
                             <label for="match-select">Select Match:</label>
                             <select id="match-select" class="form-select" disabled></select>
                         </div>
+                    </div>
+                    <div class="form-section-row">
+                        <div class="form-section">
+                            <label for="walkover-select">Result Type:</label>
+                            <select id="walkover-select" class="form-select" disabled>
+                                <option value="">Match Played</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="walkover-form-container" style="display: none; padding: 20px; text-align: center;">
+                        <h2 class="competition-header">Walkover Submission</h2>
+                        <div style="margin-bottom: 20px;">
+                            <p><strong>Winning Team:</strong> <span id="walkover-winner"></span></p>
+                            <p><strong>Calculated Score:</strong> <span id="walkover-score"></span></p>
+                            <p><em>(Based on average score in this competition)</em></p>
+                        </div>
+                        <button id="submit-walkover-btn" class="btn btn-primary">Submit Walkover</button>
                     </div>
 
                     <div id="results-form-container" style="display: none;">

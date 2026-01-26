@@ -49,6 +49,24 @@
                             <select id="match-select" class="form-select" disabled></select>
                         </div>
                     </div>
+                    <div class="form-section-row">
+                        <div class="form-section">
+                            <label for="walkover-select">Result Type:</label>
+                            <select id="walkover-select" class="form-select" disabled>
+                                <option value="">Match Played</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="walkover-form-container" style="display: none; padding: 20px; text-align: center;">
+                        <h2 class="competition-header">Walkover Submission</h2>
+                        <div style="margin-bottom: 20px;">
+                            <p><strong>Winning Team:</strong> <span id="walkover-winner"></span></p>
+                            <p><strong>Calculated Score:</strong> <span id="walkover-score"></span></p>
+                            <p><em>(Based on average score in this competition)</em></p>
+                        </div>
+                        <button id="submit-walkover-btn" class="btn btn-primary">Submit Walkover</button>
+                    </div>
 
                     <div id="results-form-container" style="display: none;">
                         <h2 id="competition-name" class="competition-header"></h2>

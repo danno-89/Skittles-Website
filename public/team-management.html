@@ -20,16 +20,18 @@
         <div w3-include-html="navigation.html"></div>
 
         <main>
-            <div class="page-header">
-                <h1>Team Management</h1>
-            </div>
+            <page-header>
+                <span slot="title">Team Management</span>
+            </page-header>
 
-            <div class="tabs-container">
-                <div class="tabs-header">
-                    <button class="tab-link active" data-tab="players">Players</button>
-                    <button class="tab-link" data-tab="fixtures">Fixtures</button>
-                    <button class="tab-link" data-tab="results">Results</button>
-                    <button class="tab-link" data-tab="statistics">Statistics</button>
+            <div class="tab-bar">
+                <div class="tabs-main">
+                    <div class="tabs-header tabs-main">
+                        <button class="tab-link active" data-tab="players">Players</button>
+                        <button class="tab-link" data-tab="fixtures">Fixtures</button>
+                        <button class="tab-link" data-tab="results">Results</button>
+                        <button class="tab-link" data-tab="statistics">Statistics</button>
+                    </div>
                 </div>
             </div>
 

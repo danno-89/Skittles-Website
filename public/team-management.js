@@ -98,7 +98,7 @@ async function loadTeamFixtures(teamId) {
 
         const homeFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("homeTeamId", "==", teamId));
         const awayFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("awayTeamId", "==", teamId));
-        
+
         const [homeFixturesSnapshot, awayFixturesSnapshot] = await Promise.all([
             getDocs(homeFixturesQuery),
             getDocs(awayFixturesQuery)
@@ -111,7 +111,7 @@ async function loadTeamFixtures(teamId) {
         const upcomingFixtures = allFixtures.filter(fixture => {
             return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && (!fixture.homeScore || !fixture.awayScore);
         });
-        
+
         upcomingFixtures.sort((a, b) => a.scheduledDate.toDate() - b.scheduledDate.toDate());
 
         if (upcomingFixtures.length === 0) {
@@ -122,7 +122,7 @@ async function loadTeamFixtures(teamId) {
         let lastRenderedDate = null;
         const fixturesHtml = upcomingFixtures.map(fixture => {
             const dateObj = fixture.scheduledDate.toDate();
-            
+
             const date = formatDate(fixture.scheduledDate);
             const time = dateObj.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/London' });
 
@@ -131,7 +131,7 @@ async function loadTeamFixtures(teamId) {
             const awayTeamName = formatTeamName(getTeamName(teamsMap, awayTeamIdentifier));
             const competitionName = competitionsMap.get(fixture.division) || fixture.division;
             const round = fixture.round || '';
-            
+
             const dateCell = (date === lastRenderedDate) ? '' : date;
             if (date !== lastRenderedDate) {
                 lastRenderedDate = date;
@@ -199,7 +199,7 @@ async function loadTeamResults(teamId) {
 
         const homeFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("homeTeamId", "==", teamId));
         const awayFixturesQuery = query(collection(db, "match_results"), where("season", "==", currentSeasonName), where("awayTeamId", "==", teamId));
-        
+
         const [homeFixturesSnapshot, awayFixturesSnapshot] = await Promise.all([
             getDocs(homeFixturesQuery),
             getDocs(awayFixturesQuery)
@@ -212,7 +212,7 @@ async function loadTeamResults(teamId) {
         const playedFixtures = allFixtures.filter(fixture => {
             return fixture.scheduledDate && typeof fixture.scheduledDate.toDate === 'function' && fixture.homeScore && fixture.awayScore;
         });
-        
+
         playedFixtures.sort((a, b) => b.scheduledDate.toDate() - a.scheduledDate.toDate());
 
         if (playedFixtures.length === 0) {
@@ -229,7 +229,7 @@ async function loadTeamResults(teamId) {
             const awayTeamName = formatTeamName(getTeamName(teamsMap, awayTeamIdentifier));
             const competitionName = competitionsMap.get(fixture.division) || fixture.division;
             const round = fixture.round || '';
-            
+
             const dateCell = (date === lastRenderedDate) ? '' : date;
             if (date !== lastRenderedDate) {
                 lastRenderedDate = date;
@@ -316,7 +316,7 @@ async function loadTeamPlayers(teamId) {
             }
 
             if (!hasFixtureBeforeExpiry && p.registerExpiry) {
-                 if (daysLeft <= 30) {
+                if (daysLeft <= 30) {
                     highlightClass = 'player-no-fixtures-danger';
                 } else {
                     highlightClass = 'player-no-fixtures-warn';
@@ -331,7 +331,7 @@ async function loadTeamPlayers(teamId) {
 
         const roleOrder = { "Captain": 1, "Vice Captain": 2, "Player": 3 };
         const sortPlayers = (players) => players.sort((a, b) => (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4));
-        
+
         sortPlayers(activePlayers);
         sortPlayers(expiredPlayers);
 
@@ -367,7 +367,7 @@ async function loadTeamPlayers(teamId) {
                 </div>
             `;
         };
-        
+
         const createExpiredTable = (players) => {
             if (players.length === 0) return '';
             return `
@@ -400,7 +400,7 @@ async function loadTeamPlayers(teamId) {
                 </div>
             `;
         };
-        
+
         let pageHtml = createActiveTable(activePlayers);
         pageHtml += createExpiredTable(expiredPlayers);
 
@@ -415,12 +415,12 @@ async function loadTeamPlayers(teamId) {
 async function getUpcomingFixtures(teamId) {
     const fixtures = [];
     const now = new Date();
-    
+
     const homeQuery = query(collection(db, "match_results"), where("homeTeamId", "==", teamId), where("scheduledDate", ">=", now));
     const awayQuery = query(collection(db, "match_results"), where("awayTeamId", "==", teamId), where("scheduledDate", ">=", now));
 
     const [homeSnapshot, awaySnapshot] = await Promise.all([getDocs(homeQuery), getDocs(awayQuery)]);
-    
+
     homeSnapshot.forEach(doc => fixtures.push(doc.data()));
     awaySnapshot.forEach(doc => fixtures.push(doc.data()));
 
@@ -447,9 +447,12 @@ async function initializePageData(publicData) { // Updated to accept publicData
     const teamDocRef = doc(db, "teams", teamId);
     const teamDocSnap = await getDoc(teamDocRef);
     if (teamDocSnap.exists()) {
-        document.querySelector('.page-header h1').textContent = teamDocSnap.data().name || "Team Management";
+        const titleElement = document.querySelector('page-header span[slot="title"]');
+        if (titleElement) {
+            titleElement.textContent = teamDocSnap.data().name || "Team Management";
+        }
     }
-    
+
     loadTeamPlayers(teamId);
     loadTeamFixtures(teamId);
     loadTeamResults(teamId);

@@ -94,14 +94,14 @@ function generateSpareSlots(fixtures) {
         const scheduledTimes = new Set(dayFixtures.map(f => {
             return f.scheduledDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }).substring(0, 5);
         }));
-    
+
         standardTimes.forEach(time => {
             if (!scheduledTimes.has(time)) {
                 const [hour, minute] = time.split(':');
                 const [year, month, day] = dateStr.split('-').map(Number);
                 const spareDate = new Date(Date.UTC(year, month - 1, day, parseInt(hour, 10), parseInt(minute, 10)));
-    
-                if (spareDate > new Date()) { 
+
+                if (spareDate > new Date()) {
                     spareSlots.push({
                         id: `spare-${dateStr}-${time}`,
                         scheduledDate: spareDate,
@@ -111,7 +111,7 @@ function generateSpareSlots(fixtures) {
             }
         });
     });
-    
+
     return spareSlots;
 }
 
@@ -303,10 +303,10 @@ async function updateView() {
     });
 
     if (activeTab === 'fixtures') {
-        let scheduledFixtures = filteredFixtures.filter(m => 
+        let scheduledFixtures = filteredFixtures.filter(m =>
             (!m.status || m.status === 'scheduled' || m.status === 'rescheduled') && (m.homeScore == null)
         );
-        
+
         let displayFixtures = [...scheduledFixtures];
         if (!isFilterActive) {
             const spareSlots = generateSpareSlots(allFixtures);
@@ -339,7 +339,7 @@ function populateFilterDropdowns() {
         if (teamCache.has(awayTeamId)) availableTeams.add(awayTeamId);
     });
     populateTeamDropdown([...availableTeams]);
-    
+
     document.getElementById('competition-filter').value = competitionFilter;
     document.getElementById('team-filter').value = teamFilter;
 }
@@ -388,7 +388,7 @@ async function populateSeasonFilterAndInitialLoad() {
 
     const allSeasonsQuery = await getDocs(collection(db, "match_results"));
     const uniqueSeasons = [...new Set(allSeasonsQuery.docs.map(doc => doc.data().season).filter(Boolean))].sort((a, b) => b.localeCompare(a));
-    
+
     seasonFilterSelect.innerHTML = '';
     if (!currentSeason && uniqueSeasons.length > 0) {
         currentSeason = uniqueSeasons[0];
@@ -401,14 +401,14 @@ async function populateSeasonFilterAndInitialLoad() {
         if (season === currentSeason) option.selected = true;
         seasonFilterSelect.appendChild(option);
     });
-    
+
     await handleSeasonChange();
 }
 
 async function handleSeasonChange() {
     const selectedSeason = document.getElementById('season-filter').value;
     if (!selectedSeason) return;
-    
+
     document.getElementById('fixtures-container').innerHTML = '<p>Loading fixtures...</p>';
     document.getElementById('results-container').innerHTML = '';
     document.getElementById('postponements-container').innerHTML = '';
@@ -421,19 +421,14 @@ async function handleSeasonChange() {
 // --- Event Listeners & Initialization ---
 
 function setupEventListeners() {
-    const modal = document.getElementById('filter-modal');
-    const filterBtn = document.getElementById('filter-modal-btn');
-    const closeBtn = document.querySelector('.modal .close-btn');
     const applyBtn = document.getElementById('apply-filters-btn');
 
-    filterBtn.onclick = () => modal.style.display = 'block';
-    closeBtn.onclick = () => modal.style.display = 'none';
-    window.onclick = (event) => {
-        if (event.target == modal) modal.style.display = 'none';
-    }
     applyBtn.onclick = () => {
         updateView();
-        modal.style.display = 'none';
+        // Close the popup menu if needed, though standard behavior is to keep it open or user clicks away.
+        // If we want to auto-close, we'd need access to the popup-menu instance.
+        // For now, just updating view is sufficient as per other pages.
+        document.querySelector('popup-menu').shadowRoot.querySelector('.popup-content').classList.remove('visible');
     };
 
     document.querySelector('.tab-bar').addEventListener('click', (e) => {
