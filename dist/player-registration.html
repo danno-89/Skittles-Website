@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sarnia Skittles Club - Player Registration</title>
     <link rel="icon" type="image/png" href="/assets/SSC%20Logo-Dms9a0RB.png">
-  <script type="module" crossorigin src="/assets/player-registration-CvRT2I0Z.js"></script>
+  <script type="module" crossorigin src="/assets/player-registration-1fc9Ya5M.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase.config-IpTQKhZm.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-DLzLBIiP.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-Dy2lRlvP.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-C1vQ0NtZ.css">
   <link rel="stylesheet" crossorigin href="/assets/player-registration-BtxD4rRy.css">
 </head>
+
 <body>
 
     <div w3-include-html="header.html"></div>
@@ -23,12 +25,16 @@
             <div class="page-header">
                 <h1>Player Registration</h1>
             </div>
-            
+
             <div id="registration-container">
-                <p>In order to play for a team in the Sarnia Skittles Club (the "Club") Leagues and Tournaments (the "League"), players must register by completing this form or a paper form which can be found at the Hampshire Lodge Alley (or online via sarniaskittles.leaguerepublic.com).</p>
-                <p>When 1 year has elapsed without any League activity, the registration will be closed. A further form can be submitted / completed to re-register.</p>
-                <p>*Players under 16 may not submit an online form as parent / guardian signature is required. A paper form must be completed in these instances.</p>
-                
+                <p>In order to play for a team in the Sarnia Skittles Club (the "Club") Leagues and Tournaments (the
+                    "League"), players must register by completing this form or a paper form which can be found at the
+                    Hampshire Lodge Alley (or online via sarniaskittles.leaguerepublic.com).</p>
+                <p>When 1 year has elapsed without any League activity, the registration will be closed. A further form
+                    can be submitted / completed to re-register.</p>
+                <p>*Players under 16 may not submit an online form as parent / guardian signature is required. A paper
+                    form must be completed in these instances.</p>
+
                 <form id="registration-form" novalidate>
                     <div class="form-columns">
                         <div class="form-column">
@@ -61,16 +67,18 @@
                                 <select id="division" name="division">
                                     <option value="">Please select</option>
                                     <option value="Men's">Men's</option>
-                                    <option value="Ladies">Ladies</option>
+                                    <option value="Ladies'">Ladies'</option>
                                 </select>
                             </div>
-                             <div class="form-group">
+                            <div class="form-group">
                                 <label for="mobile-number">Mobile Number</label>
-                                <input type="tel" id="mobile-number" name="mobile-number" placeholder="##### ######" maxlength="12">
+                                <input type="tel" id="mobile-number" name="mobile-number" placeholder="##### ######"
+                                    maxlength="12">
                             </div>
                             <div class="form-group">
                                 <label for="home-work-number">Home / Work Number</label>
-                                <input type="tel" id="home-work-number" name="home-work-number" placeholder="##### ######" maxlength="12">
+                                <input type="tel" id="home-work-number" name="home-work-number"
+                                    placeholder="##### ######" maxlength="12">
                             </div>
                         </div>
                         <div class="form-column">
@@ -86,7 +94,7 @@
                                 <label for="address-line-3">Address Line 3</label>
                                 <input type="text" id="address-line-3" name="address-line-3">
                             </div>
-                           <div class="form-group">
+                            <div class="form-group">
                                 <label for="parish">Parish *</label>
                                 <select id="parish" name="parish" required>
                                     <option value="">Select a parish</option>
@@ -118,7 +126,8 @@
                 <div id="confirmation-content"></div>
                 <div class="button-group">
                     <button id="cancel-submission" class="btn btn-secondary">Edit Details</button>
-                    <button id="register-no-account" type="button" class="btn btn-secondary">Confirm & Register (No Account)</button>
+                    <button id="register-no-account" type="button" class="btn btn-secondary">Confirm & Register (No
+                        Account)</button>
                     <button id="proceed-to-account" class="btn btn-success">Confirm & Create Account</button>
                 </div>
             </div>
@@ -154,7 +163,8 @@
     </div>
 
     <div w3-include-html="footer.html"></div>
-    
+
 
 </body>
+
 </html>

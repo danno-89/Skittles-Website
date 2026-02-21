@@ -1,5 +1,4 @@
-import { db } from './firebase.config.js';
-import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { db, collection, getDocs, query, where } from './firebase.config.js';
 
 const countdownElement = document.getElementById('countdown');
 const countdownCard = document.getElementById('countdown-card');
@@ -8,7 +7,7 @@ async function getNextEvent() {
     const eventsRef = collection(db, 'events');
     const q = query(eventsRef, where('registration', '==', true));
     const querySnapshot = await getDocs(q);
-    
+
     let nextEvent = null;
     let nextEventDate = null;
     const now = new Date();
@@ -22,7 +21,7 @@ async function getNextEvent() {
         } else {
             eventDate = new Date(event.date);
         }
-        
+
         if (eventDate > now) {
             if (!nextEventDate || eventDate < nextEventDate) {
                 nextEventDate = eventDate;

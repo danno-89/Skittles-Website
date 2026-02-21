@@ -61,6 +61,8 @@ async function initializeAdminPage() {
         initializeResultsInput();
         initializePostponeFixture();
         initializeAmendPlayerTab();
+        initializeExportData();
+        initializeEmailPlayers();
 
         // Initialise modules for specific tabs
         initAdminEditFixture();
@@ -809,5 +811,139 @@ async function calculateAverageScore(teamId, season, division) {
         console.error("Error calculating average score:", error);
         return 0;
     }
+}
+
+// --- Export Data Tab ---
+
+function initializeExportData() {
+    const exportBtn = document.getElementById('export-player-data-btn');
+    const divisionSelect = document.getElementById('export-division-select');
+    const statusDiv = document.getElementById('export-status');
+
+    if (!exportBtn || !divisionSelect || !statusDiv) return;
+
+    exportBtn.addEventListener('click', () => {
+        const division = divisionSelect.value;
+        const csvContent = generatePlayerCsv(division);
+        downloadCsv(csvContent, `players_export_${division}.csv`);
+
+        statusDiv.textContent = 'Export generated successfully!';
+        statusDiv.className = 'status-success';
+        setTimeout(() => {
+            statusDiv.textContent = '';
+            statusDiv.className = '';
+        }, 3000);
+    });
+}
+
+function generatePlayerCsv(division) {
+    const headers = ['First Name', 'Last Name', 'Email', 'Team', 'Division', 'Role', 'Consent'];
+    const rows = [headers.join(',')];
+
+    allPlayersData.forEach(player => {
+        const publicData = player.public || {};
+        const privateData = player.private || {};
+
+        if (division !== 'all' && publicData.division !== division) return;
+
+        // Escape fields to handle commas and content
+        const escape = (text) => `"${(text || '').toString().replace(/"/g, '""')}"`;
+
+        // Check for Consent in various casing variants in PRIVATE data
+        const consent = privateData.COnsent || privateData.Consent || privateData.consent || 'N/A';
+
+        const row = [
+            escape(publicData.firstName),
+            escape(publicData.lastName),
+            escape(privateData.email),
+            escape(teamsMap.get(publicData.teamId) || publicData.teamId || 'Unknown'),
+            escape(publicData.division),
+            escape(publicData.role),
+            escape(consent)
+        ];
+        rows.push(row.join(','));
+    });
+
+    return rows.join('\n');
+}
+
+function downloadCsv(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// --- Email Players Tab ---
+
+function initializeEmailPlayers() {
+    const sendTestBtn = document.getElementById('send-test-email-btn');
+    const sendAllBtn = document.getElementById('send-all-email-btn');
+    const subjectInput = document.getElementById('email-subject');
+    const bodyInput = document.getElementById('email-body');
+    const statusDiv = document.getElementById('email-status');
+
+    if (!sendTestBtn || !sendAllBtn || !statusDiv) return;
+
+    const sendEmail = async (testMode) => {
+        const subject = subjectInput.value.trim();
+        const body = bodyInput.value.trim();
+
+        if (!subject || !body) {
+            alert('Please enter both a subject and a message.');
+            return;
+        }
+
+        if (!testMode && !confirm(`Are you sure you want to send this email to ALL consenting players?\n\nSubject: ${subject}`)) {
+            return;
+        }
+
+        if (testMode) {
+            statusDiv.textContent = 'Sending test email...';
+            statusDiv.className = 'status-loading';
+        } else {
+            statusDiv.textContent = 'Sending emails to all players (this may take a moment)...';
+            statusDiv.className = 'status-loading';
+        }
+
+        sendTestBtn.disabled = true;
+        sendAllBtn.disabled = true;
+
+        try {
+            // Using the global firebase object to access functions
+            const sendAdminEmail = firebase.functions().httpsCallable('sendAdminEmail');
+            const result = await sendAdminEmail({ subject, body, testMode });
+
+            if (result.data.success) {
+                statusDiv.textContent = testMode
+                    ? `Test email sent successfully! (${result.data.sent} sent)`
+                    : `Emails sent successfully! (${result.data.sent} sent, ${result.data.errors} errors)`;
+                statusDiv.className = 'status-success';
+                if (!testMode) {
+                    subjectInput.value = '';
+                    bodyInput.value = '';
+                }
+            } else {
+                throw new Error(result.data.error || 'Unknown error');
+            }
+        } catch (error) {
+            console.error("Email sending failed:", error);
+            statusDiv.textContent = `Error: ${error.message}`;
+            statusDiv.className = 'status-error';
+        } finally {
+            sendTestBtn.disabled = false;
+            sendAllBtn.disabled = false;
+        }
+    };
+
+    sendTestBtn.addEventListener('click', () => sendEmail(true));
+    sendAllBtn.addEventListener('click', () => sendEmail(false));
 }
 

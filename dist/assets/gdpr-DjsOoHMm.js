@@ -1,4 +1,4 @@
-import"./modulepreload-polyfill-B5Qt9EMX.js";import"./firebase.config-IpTQKhZm.js";import"./main-DLzLBIiP.js";import"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";function i(){const a=`
+import"./modulepreload-polyfill-B5Qt9EMX.js";import"./firebase.config-IpTQKhZm.js";import"./main-Dy2lRlvP.js";import"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";function i(){const a=`
         <h2>General Data Protection Policy</h2>
         <p><em>Last updated 8th April 2019</em></p>
 

@@ -7,8 +7,8 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const { setGlobalOptions } = require("firebase-functions");
+const { onRequest } = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
 
 // For cost control, you can set the maximum number of containers that can be
@@ -30,3 +30,10 @@ setGlobalOptions({ maxInstances: 10 });
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+const playerFunctions = require('./player-functions');
+const adminFunctions = require('./admin-functions');
+
+exports.registerPlayer = playerFunctions.registerPlayer;
+exports.sendAdminEmail = adminFunctions.sendAdminEmail;
+exports.handleUnsubscribe = adminFunctions.handleUnsubscribe;

@@ -5,6 +5,10 @@ import { auth, db, collection, getDocs, query, orderBy, limit } from './firebase
 import { signOut } from "firebase/auth";
 import { authReady } from './auth-manager.js';
 import { getStatistics } from './statistics.js';
+import { initializeAnalytics } from './analytics.js';
+
+const GA_MEASUREMENT_ID = 'G-15HWQGR6TC';
+initializeAnalytics(GA_MEASUREMENT_ID);
 
 import headerHtml from './header.html?raw';
 import footerHtml from './footer.html?raw';
