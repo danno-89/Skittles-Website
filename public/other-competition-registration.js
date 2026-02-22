@@ -1,6 +1,6 @@
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { firebaseConfig } from './firebase.config.js';
 
 // Initialize Firebase
@@ -155,7 +155,7 @@ const updateAvailableTeams = async (competitionId) => {
             const teamId = teamDoc.id;
             const teamData = teamDoc.data();
             const eligibility = teamsWithEligiblePlayers[teamId] || { hasMale: false, hasFemale: false };
-            
+
             let isEligible = false;
             if (competitionName.includes('mixed')) {
                 isEligible = eligibility.hasMale && eligibility.hasFemale;
@@ -227,7 +227,7 @@ const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, f
                     eligiblePlayers.push(player);
                 }
             } else {
-                 eligiblePlayers.push(player); // No division enforcement for other competitions
+                eligiblePlayers.push(player); // No division enforcement for other competitions
             }
         });
 
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         createPlayerDropdown(player2TeamDropdown.value, 'player2-name-wrapper', competitionId, forcedDivision, !isIndividual);
     });
-    
+
     const toggleContactInfo = () => {
         if (player1TeamDropdown.value === 'no-team' && player2TeamDropdown.value === 'no-team') {
             contactInfoSection.classList.remove('hidden');
@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 registrationData.player2Team = player2Team === 'no-team' ? '' : player2Team;
                 registrationData.player2PublicId = player2PublicId;
             }
-            
+
             if (contactNumber) {
                 registrationData.contactNumber = contactNumber;
             }
@@ -419,6 +419,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const docRef = doc(db, 'competition-registrations', competition);
                 const docSnap = await getDoc(docRef);
                 const existingEntries = docSnap.exists() ? docSnap.data().entries : [];
+
+                // Duplicate Check
+                let isDuplicate = false;
+                const newIds = [player1PublicId, player2PublicId].filter(Boolean);
+                const newNames = [player1Name?.toLowerCase(), player2Name?.toLowerCase()].filter(Boolean);
+
+                for (const existingEntry of existingEntries) {
+                    const existingIds = [existingEntry.player1PublicId, existingEntry.player2PublicId].filter(Boolean);
+                    if (newIds.length > 0 && existingIds.length > 0 && newIds.some(id => existingIds.includes(id))) {
+                        isDuplicate = true;
+                        break;
+                    }
+
+                    const existingNames = [existingEntry.player1Name?.toLowerCase(), existingEntry.player2Name?.toLowerCase()].filter(Boolean);
+                    if (newNames.some(name => existingNames.includes(name))) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (isDuplicate) {
+                    alert('Registration failed: One or more of the selected players are already registered for this competition.');
+                    return;
+                }
+
                 await setDoc(docRef, { entries: [...existingEntries, registrationData] });
 
                 alert('Registration successful!');
@@ -429,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Initial setup
     handleCompetitionChange();
 });

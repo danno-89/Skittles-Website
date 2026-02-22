@@ -25,7 +25,7 @@ service cloud.firestore {
     // --- Publicly Readable Data ---
     // This uses a recursive wildcard to allow reads in subcollections.
     match /{collection}/{docId=**} {
-      allow read: if collection in ['competitions', 'teams', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners', 'ssc_cup'];
+      allow read: if collection in ['competitions', 'teams', 'league_tables', 'players_public', 'match_results', 'events', 'knockout_competitions', 'winners', 'ssc_cup', 'tournament_brackets'];
     }
 
     // --- User-Specific Documents ---
@@ -67,5 +67,9 @@ service cloud.firestore {
     match /ssc_cup/{seasonId} {
         allow write: if request.auth != null && isCommitteeMember(request.auth.uid);
     }
+    match /tournament_brackets/{bracketId} {
+        allow write: if request.auth != null && isCommitteeMember(request.auth.uid);
+    }
   }
 }
+

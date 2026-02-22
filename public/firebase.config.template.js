@@ -1,11 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { 
     getAuth, 
     onAuthStateChanged, 
     signOut, 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 import { 
     getFirestore, 
     collection, 
@@ -26,17 +26,17 @@ import {
     writeBatch,
     serverTimestamp,
     runTransaction
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { 
     getFunctions, 
     connectFunctionsEmulator, 
     httpsCallable 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-functions.js";
 import { 
     getDatabase, 
     ref, 
     onValue 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 // Your web app's Firebase configuration
 // keys are replaced with environment variables for security

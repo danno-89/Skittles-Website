@@ -2,7 +2,7 @@
 import './components/page-header.js';
 import './components/popup-menu.js';
 import { auth, db, collection, getDocs, query, orderBy, limit } from './firebase.config.js';
-import { signOut } from "firebase/auth";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 import { authReady } from './auth-manager.js';
 import { getStatistics } from './statistics.js';
 import { initializeAnalytics } from './analytics.js';
@@ -10,44 +10,37 @@ import { initializeAnalytics } from './analytics.js';
 const GA_MEASUREMENT_ID = 'G-15HWQGR6TC';
 initializeAnalytics(GA_MEASUREMENT_ID);
 
-import headerHtml from './header.html?raw';
-import footerHtml from './footer.html?raw';
-import navigationHtml from './navigation.html?raw';
-
-const htmlTemplates = {
-    'header.html': headerHtml,
-    'footer.html': footerHtml,
-    'navigation.html': navigationHtml
-};
-
 async function includeHTML() {
     const includeElements = Array.from(document.querySelectorAll('[w3-include-html]'));
 
-    includeElements.forEach(el => {
+    await Promise.all(includeElements.map(async (el) => {
         const file = el.getAttribute('w3-include-html');
-        if (htmlTemplates[file]) {
-            el.innerHTML = htmlTemplates[file];
-            el.removeAttribute('w3-include-html');
+        try {
+            const response = await fetch(file);
+            if (response.ok) {
+                const html = await response.text();
+                el.innerHTML = html;
+                el.removeAttribute('w3-include-html');
 
-            // Execute any scripts found in the injected HTML (specifically for header/favicon)
-            const scripts = el.querySelectorAll('script');
-            scripts.forEach(oldScript => {
-                const newScript = document.createElement('script');
-                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                oldScript.parentNode.replaceChild(newScript, oldScript);
-            });
-        } else {
-            console.warn(`Template ${file} not found in bundle.`);
-            // Fallback for others if needed, though we expect only these 3
-            // Not implementing fetch fallback to force bundling usage
+                // Execute any scripts found in the injected HTML (specifically for header/favicon)
+                const scripts = el.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            } else {
+                console.warn(`Template ${file} not found.`);
+                el.innerHTML = "Page not found.";
+            }
+        } catch (error) {
+            console.error(`Error loading template ${file}:`, error);
             el.innerHTML = "Page not found.";
         }
-    });
+    }));
 
-    // Dispatch event immediately since we are sync now (or close to it)
-    // We keep it async function signature to match previous contract if called elsewhere, 
-    // but execution is sync.
+    // Dispatch event once all includes are loaded and processed
     document.dispatchEvent(new CustomEvent('htmlIncludesLoaded'));
 }
 

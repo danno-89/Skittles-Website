@@ -18,6 +18,7 @@ import { initAdminEditFixture } from './admin-edit-fixture.js';
 import { initRescheduleFixture } from './admin-reschedule.js';
 import { initNewsManagement } from './news-management.js';
 import { initCorrectionTool } from './admin-correction.js';
+import { initAdminBrackets } from './admin-brackets.js';
 
 // --- Globals for Admin Page Data ---
 const teamsMap = new Map();
@@ -69,6 +70,7 @@ async function initializeAdminPage() {
         initRescheduleFixture(teamsMap);
         initNewsManagement();
         initCorrectionTool();
+        initAdminBrackets();
 
     } catch (error) {
         console.error("An error occurred during admin page initialisation:", error);

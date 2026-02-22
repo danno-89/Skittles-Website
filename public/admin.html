@@ -38,6 +38,7 @@
                     <button class="tab-link" data-tab="correction-tool">Correction Tool</button>
                     <button class="tab-link" data-tab="export-data">Export Data</button>
                     <button class="tab-link" data-tab="email-players">Email Players</button>
+                    <button class="tab-link" data-tab="brackets-management">Manage Brackets</button>
                 </div>
             </div>
 
@@ -287,9 +288,52 @@
                         <div id="email-status" class="status-message"></div>
                     </div>
                 </div>
+
+                <!-- MANAGE BRACKETS TAB PANE -->
+                <div id="brackets-management-content" class="tab-pane">
+                    <h2>Manage Tournament Brackets</h2>
+                    <div class="form-section">
+                        <p>Use this tool to manage knockout tournament brackets. Select a competition and season to
+                            create or edit its bracket.</p>
+
+                        <div class="form-group row">
+                            <label for="bracket-competition-select">Select Competition:</label>
+                            <select id="bracket-competition-select" class="form-select">
+                                <option value="">Loading competitions...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="bracket-season-select">Select Season:</label>
+                            <select id="bracket-season-select" class="form-select">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+
+                        <button id="load-bracket-btn" class="btn btn-primary" disabled>Load Bracket</button>
+
+                        <div id="bracket-editor-container" style="display: none; margin-top: var(--spacing-lg);">
+                            <div class="bracket-editor-header">
+                                <h3 id="current-bracket-title">Bracket Editor</h3>
+                                <div class="bracket-actions">
+                                    <label style="display: flex; align-items: center; gap: 5px; margin-right: 15px;">
+                                        <input type="checkbox" id="bracket-provisional-checkbox">
+                                        Provisional Draw
+                                    </label>
+                                    <button id="add-round-btn" class="btn btn-secondary">Add Round</button>
+                                    <button id="save-bracket-btn" class="btn btn-success">Save Bracket</button>
+                                </div>
+                            </div>
+
+                            <div id="bracket-rounds-container">
+                                <!-- Dynamic Bracket Rounds go here -->
+                            </div>
+                        </div>
+                        <div id="bracket-status-message" class="status-message"></div>
+                    </div>
+                </div>
             </div>
-    </div>
-    </main>
+        </main>
     </div>
 
     <div w3-include-html="footer.html"></div>
@@ -302,6 +346,7 @@
     <script type="module" src="admin-reschedule.js"></script>
     <script type="module" src="news-management.js"></script>
     <script type="module" src="admin-correction.js"></script>
+    <script type="module" src="admin-brackets.js"></script>
 
 </body>
 

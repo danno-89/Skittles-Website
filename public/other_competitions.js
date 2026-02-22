@@ -35,7 +35,7 @@ const fetchAndRenderTabs = async () => {
 
     try {
         const competitionsSnapshot = await getDocs(collection(db, "competitions"));
-        
+
         competitionsSnapshot.docs.forEach((doc) => {
             const data = doc.data();
             const type = data.type || data.Type || null;
@@ -86,7 +86,7 @@ const fetchAndRenderTabs = async () => {
 };
 
 const fetchCompetitionDates = async () => {
-    if(!competitionDatesContainer) return;
+    if (!competitionDatesContainer) return;
     competitionDatesContainer.innerHTML = '<h2>Competition Dates</h2>';
     try {
         const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
@@ -128,7 +128,7 @@ const renderCompetitionEvents = (eventDocs) => {
 };
 
 const fetchWinners = async (competitionId, competitionName) => {
-    if(!competitionDatesContainer) return;
+    if (!competitionDatesContainer) return;
     competitionDatesContainer.innerHTML = `<h2>Past Winners</h2>`;
     try {
         const docSnap = await getDoc(doc(db, "winners", competitionId));
@@ -153,16 +153,19 @@ const renderWinners = (history, competitionName) => {
     winnersList.className = 'winners-list';
     history.sort((a, b) => (b.season || "").localeCompare(a.season || ""));
     history.forEach(entry => {
-        if(entry.season && entry.winner){
+        if (entry.season && entry.winner) {
             const listItem = document.createElement('li');
             let winnerText;
             if (typeof entry.winner === 'object' && entry.winner.player1 && entry.winner.player2) {
-                winnerText = `${entry.winner.player1} & ${entry.winner.player2}`;
+                winnerText = `${entry.winner.player1}<br>& ${entry.winner.player2}`;
             }
             else if (typeof entry.winner === 'object' && entry.winner.male && entry.winner.female) {
-                winnerText = `${entry.winner.female} & ${entry.winner.male}`;
+                winnerText = `${entry.winner.female}<br>& ${entry.winner.male}`;
             } else {
                 winnerText = entry.winner;
+                if (competitionName.toLowerCase().includes('pair') && typeof winnerText === 'string') {
+                    winnerText = winnerText.replace(' & ', '<br>& ');
+                }
             }
             listItem.innerHTML = `<span class="season">${entry.season}</span><span class="winner">${winnerText}</span>`;
             winnersList.appendChild(listItem);
@@ -217,7 +220,7 @@ const renderCompetitionDetails = (eventData, competitionName, registrations, com
 
     if (eventData) {
         const competitionDate = eventData.date ? parseDate(eventData.date) : null;
-        
+
         // Calculate registration close date as 7 days before the competition date
         let registrationClosedDate = null;
         if (competitionDate) {
@@ -232,7 +235,6 @@ const renderCompetitionDetails = (eventData, competitionName, registrations, com
             <div class="competition-details">
                 <p><strong>Competition Date:</strong> ${formattedCompetitionDate}</p>
                 <p><strong>Registration Closes:</strong> ${formattedRegistrationDate}</p>
-                <p><strong>Tournament Draw:</strong> Not yet available</p>
             </div>
         `;
     } else {
@@ -245,7 +247,7 @@ const renderCompetitionDetails = (eventData, competitionName, registrations, com
     const registrationSection = document.createElement('div');
     registrationSection.className = 'registrations-section';
     registrationSection.innerHTML = '<h3>Current Entrants</h3>';
-    
+
     if (registrations && registrations.length > 0) {
         const registrationList = document.createElement('ul');
         registrationList.className = 'registration-list';
@@ -289,6 +291,105 @@ const renderCompetitionDetails = (eventData, competitionName, registrations, com
         registrationSection.appendChild(noRegistrations);
     }
     competitionContentContainer.appendChild(registrationSection);
+
+    // Create bracket container AFTER registrations
+    const bracketContainer = document.createElement('div');
+    bracketContainer.id = 'tournament-bracket-container';
+    bracketContainer.innerHTML = '<p>Loading bracket...</p>';
+    competitionContentContainer.appendChild(bracketContainer);
+
+    // Fetch and render the tournament bracket
+    fetchAndRenderBracket(competitionId);
+};
+
+const fetchAndRenderBracket = async (competitionId) => {
+    const bracketContainer = document.getElementById('tournament-bracket-container');
+    if (!bracketContainer) return;
+
+    try {
+        const seasonQuery = await getDocs(query(collection(db, "seasons"), where("status", "==", "current"), limit(1)));
+        if (seasonQuery.empty) {
+            bracketContainer.innerHTML = '<p><strong>Tournament Draw:</strong> Not yet available for current season.</p>';
+            return;
+        }
+        const seasonName = seasonQuery.docs[0].data().name;
+
+        const docRef = doc(db, 'tournament_brackets', `${competitionId}_${seasonName}`);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists() && docSnap.data().rounds && docSnap.data().rounds.length > 0) {
+            const data = docSnap.data();
+            renderBracketUI(data, bracketContainer);
+
+            if (!data.isProvisional) {
+                const regSection = document.querySelector('.registrations-section');
+                if (regSection) regSection.style.display = 'none';
+            }
+        } else {
+            bracketContainer.innerHTML = '<p><strong>Tournament Draw:</strong> Not yet available</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching bracket data:", error);
+        bracketContainer.innerHTML = '<p><strong>Tournament Draw:</strong> Could not load draw.</p>';
+    }
+};
+
+const renderBracketUI = (bracketData, container) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tournament-bracket-container';
+
+    const bracketDiv = document.createElement('div');
+    bracketDiv.className = 'tournament-bracket';
+
+    bracketData.rounds.forEach(round => {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'bracket-column';
+
+        const header = document.createElement('div');
+        header.className = 'bracket-round-header';
+        header.textContent = round.name;
+        colDiv.appendChild(header);
+
+        if (round.matches) {
+            round.matches.forEach(match => {
+                const homeName = match.homeName || 'TBA';
+                const awayName = match.awayName || 'TBA';
+                const homeScore = match.homeScore !== null ? Number(match.homeScore) : '-';
+                const awayScore = match.awayScore !== null ? Number(match.awayScore) : '-';
+
+                let homeWinnerClass = '';
+                let awayWinnerClass = '';
+
+                if (match.homeScore !== null && match.awayScore !== null) {
+                    if (homeScore > awayScore) {
+                        homeWinnerClass = 'bracket-team-winner';
+                    } else if (awayScore > homeScore) {
+                        awayWinnerClass = 'bracket-team-winner';
+                    }
+                }
+
+                const matchCard = document.createElement('div');
+                matchCard.className = 'bracket-match-card';
+                matchCard.innerHTML = `
+                    <div class="bracket-team-row ${homeWinnerClass}">
+                        <span class="bracket-team-name" title="${homeName}">${homeName}</span>
+                        <span class="bracket-team-score">${homeScore}</span>
+                    </div>
+                    <div class="bracket-team-row ${awayWinnerClass}">
+                        <span class="bracket-team-name" title="${awayName}">${awayName}</span>
+                        <span class="bracket-team-score">${awayScore}</span>
+                    </div>
+                `;
+                colDiv.appendChild(matchCard);
+            });
+        }
+
+        bracketDiv.appendChild(colDiv);
+    });
+
+    wrapper.appendChild(bracketDiv);
+    container.innerHTML = '';
+    container.appendChild(wrapper);
 };
 
 

@@ -57,7 +57,8 @@
     border-collapse: collapse;
 }
 
-.scorecard th, .scorecard td {
+.scorecard th,
+.scorecard td {
     padding: var(--spacing-xs);
     text-align: center;
     border: 1px solid var(--light-grey);
@@ -106,6 +107,7 @@
 
 .hand-score[type=number] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .player-select {
@@ -128,7 +130,8 @@
     margin-top: var(--spacing-md);
 }
 
-.data-edit-table th, .data-edit-table td {
+.data-edit-table th,
+.data-edit-table td {
     border: 1px solid var(--light-grey);
     padding: var(--spacing-sm);
     text-align: left;
@@ -158,7 +161,8 @@
 /* --- Responsive Styles for Admin Page --- */
 
 .mobile-header-icons {
-    display: none; /* Hidden by default on desktop */
+    display: none;
+    /* Hidden by default on desktop */
 }
 
 @media (max-width: 768px) {
@@ -178,7 +182,7 @@
         display: flex;
         align-items: center;
     }
-    
+
     .icon-btn {
         padding: var(--spacing-sm);
         border-radius: var(--border-radius);
@@ -190,7 +194,7 @@
         font-size: 1.5rem;
         color: var(--club-green);
     }
-    
+
     /* Make tabs container collapsible */
     #admin-tabs-container {
         display: none;
@@ -203,7 +207,7 @@
         border-radius: var(--border-radius);
         margin-bottom: var(--spacing-lg);
     }
-    
+
     /* Stack tabs vertically */
     .tabs-main {
         flex-direction: column;
@@ -211,11 +215,111 @@
         gap: var(--spacing-sm);
         border-bottom: none;
     }
+
     .tab-link {
         text-align: center;
         border-bottom: 1px solid var(--light-grey);
     }
+
     .tab-link.active {
         border-bottom-color: var(--club-yellow);
     }
+}
+
+/* --- Manage Brackets Tab --- */
+.bracket-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--club-green);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.bracket-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.bracket-round {
+    background-color: var(--off-white);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.round-header input {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--club-green);
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0.2rem 0.5rem;
+    width: 60%;
+}
+
+.round-header input:focus {
+    border: 1px solid var(--club-green);
+    background: white;
+}
+
+.bracket-matches {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.bracket-match-edit {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: white;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--light-grey);
+    border-radius: var(--border-radius);
+}
+
+.bracket-match-edit .match-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex-grow: 1;
+}
+
+.bracket-match-edit select,
+.bracket-match-edit input {
+    width: 100%;
+    padding: 0.4rem;
+}
+
+.score-input {
+    width: 60px !important;
+    text-align: center;
+}
+
+.match-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.remove-match-btn,
+.remove-round-btn {
+    background-color: transparent !important;
+    color: var(--warning-red);
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.add-match-btn {
+    margin-top: var(--spacing-sm);
 }

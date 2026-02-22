@@ -1,11 +1,11 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {
     getAuth,
     onAuthStateChanged,
     signOut,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword
-} from "firebase/auth";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 import {
     getFirestore,
     collection,
@@ -26,28 +26,28 @@ import {
     writeBatch,
     serverTimestamp,
     runTransaction
-} from "firebase/firestore";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import {
     getFunctions,
     connectFunctionsEmulator,
     httpsCallable
-} from "firebase/functions";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-functions.js";
 import {
     getDatabase,
     ref,
     onValue
-} from "firebase/database";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 // Your web app's Firebase configuration
 // keys are replaced with environment variables for security
 export const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: "AIzaSyByuL3NC2ieRb-IXT9ZQE9BNvhrgS6Pnko",
+    authDomain: "sarnia-skittles-club.firebaseapp.com",
+    databaseURL: "https://sarnia-skittles-club-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "sarnia-skittles-club",
+    storageBucket: "sarnia-skittles-club.appspot.com",
+    messagingSenderId: "119131555624",
+    appId: "1:119131555624:web:b8c3fa25e1182d5d5ef21d"
 };
 
 // Initialize Firebase

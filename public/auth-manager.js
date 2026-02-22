@@ -1,5 +1,5 @@
 import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, collection, query, where, getDocs } from './firebase.config.js';
-import { updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 let resolveAuthReady;
 export const authReady = new Promise(resolve => {
@@ -27,9 +27,9 @@ async function fetchUserProfile(uid) {
 
         if (!publicDocSnap.exists()) return null;
 
-        return { 
-            publicData: { publicId: publicPlayerId, ...publicDocSnap.data() }, 
-            privateData: privateDoc.data() 
+        return {
+            publicData: { publicId: publicPlayerId, ...publicDocSnap.data() },
+            privateData: privateDoc.data()
         };
 
     } catch (error) {
@@ -91,10 +91,10 @@ document.addEventListener('htmlIncludesLoaded', () => {
         } else {
             await updateTeamManagementLink(null);
         }
-        
+
         // Resolve the promise with the final auth state and profile
-        resolveAuthReady({ 
-            user, 
+        resolveAuthReady({
+            user,
             publicData: userProfile?.publicData,
             privateData: userProfile?.privateData
         });

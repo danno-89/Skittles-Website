@@ -1,5 +1,5 @@
 import { functions } from './firebase.config.js';
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-functions.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     const messageDiv = document.getElementById('message');

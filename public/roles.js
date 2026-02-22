@@ -1,5 +1,5 @@
 import { auth } from './firebase.config.js';
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-functions.js";
 
 const mainContent = document.getElementById('main-content');
 const authCheck = document.getElementById('auth-check');
