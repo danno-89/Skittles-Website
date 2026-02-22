@@ -82,7 +82,8 @@
     width: 10%;
 }
 
-.hand-score {
+.hand-score,
+.player-total-score-input {
     width: 100%;
     padding: 0.6rem 1rem;
     box-sizing: border-box;
@@ -92,7 +93,8 @@
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
-.hand-score:focus {
+.hand-score:focus,
+.player-total-score-input:focus {
     border-color: var(--club-green);
     outline: 0;
     box-shadow: 0 0 0 0.25rem hsla(120, 100%, 20%, 0.25);
@@ -100,12 +102,15 @@
 
 /* Hide the number input spinners */
 .hand-score::-webkit-outer-spin-button,
-.hand-score::-webkit-inner-spin-button {
+.hand-score::-webkit-inner-spin-button,
+.player-total-score-input::-webkit-outer-spin-button,
+.player-total-score-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-.hand-score[type=number] {
+.hand-score[type=number],
+.player-total-score-input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
 }

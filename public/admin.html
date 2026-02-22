@@ -76,25 +76,39 @@
 
                     <div id="results-form-container" style="display: none;">
                         <h2 id="competition-name" class="competition-header"></h2>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <label for="bowled-first-select" style="font-weight: bold; margin-right: 10px;">Bowled
+                                First:</label>
+                            <select id="bowled-first-select" class="form-select"
+                                style="width: 250px; display: inline-block;">
+                                <option value="" disabled selected>Select Team</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <label
+                                style="font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="total-only-toggle" style="width: 18px; height: 18px;">
+                                Input Total Scores Only
+                            </label>
+                        </div>
                         <div class="scores-grid">
                             <div id="home-team-card" class="scorecard-container">
                                 <div class="scorecard-header">
                                     <h3 id="home-team-name-header"></h3>
-                                    <div class="bowled-first-section">
-                                        <input type="radio" id="home-bowled-first" name="bowled-first" value="">
-                                        <label for="home-bowled-first">Bowled First</label>
-                                    </div>
                                     <div id="home-team-total-display" class="team-total-display">0</div>
+                                </div>
+                                <div id="home-team-total-input-wrapper"
+                                    style="display: none; text-align: center; padding: 20px;">
+                                    <label><strong>Total Score:</strong></label>
+                                    <input type="number" id="home-team-total-input" class="form-input"
+                                        style="width: 120px; display: inline-block; margin-left: 10px;" min="0">
                                 </div>
                                 <table id="home-team-scorecard" class="scorecard"></table>
                             </div>
                             <div id="away-team-card" class="scorecard-container">
                                 <div class="scorecard-header">
                                     <h3 id="away-team-name-header"></h3>
-                                    <div class="bowled-first-section">
-                                        <input type="radio" id="away-bowled-first" name="bowled-first" value="">
-                                        <label for="away-bowled-first">Bowled First</label>
-                                    </div>
                                     <div id="away-team-total-display" class="team-total-display">0</div>
                                 </div>
                                 <table id="away-team-scorecard" class="scorecard"></table>
@@ -119,15 +133,26 @@
 
                     <div id="edit-results-form-container" style="display: none;">
                         <h2 id="edit-competition-name" class="competition-header"></h2>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <label for="edit-bowled-first-select" style="font-weight: bold; margin-right: 10px;">Bowled
+                                First:</label>
+                            <select id="edit-bowled-first-select" class="form-select"
+                                style="width: 250px; display: inline-block;">
+                                <option value="" disabled selected>Select Team</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <label
+                                style="font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="edit-total-only-toggle" style="width: 18px; height: 18px;">
+                                Input Total Scores Only
+                            </label>
+                        </div>
                         <div class="scores-grid">
                             <div id="edit-home-team-card" class="scorecard-container">
                                 <div class="scorecard-header">
                                     <h3 id="edit-home-team-name-header"></h3>
-                                    <div class="bowled-first-section">
-                                        <input type="radio" id="edit-home-bowled-first" name="edit-bowled-first"
-                                            value="">
-                                        <label for="edit-home-bowled-first">Bowled First</label>
-                                    </div>
                                     <div id="edit-home-team-total-display" class="team-total-display">0</div>
                                 </div>
                                 <table id="edit-home-team-scorecard" class="scorecard"></table>
@@ -135,11 +160,6 @@
                             <div id="edit-away-team-card" class="scorecard-container">
                                 <div class="scorecard-header">
                                     <h3 id="edit-away-team-name-header"></h3>
-                                    <div class="bowled-first-section">
-                                        <input type="radio" id="edit-away-bowled-first" name="edit-bowled-first"
-                                            value="">
-                                        <label for="edit-away-bowled-first">Bowled First</label>
-                                    </div>
                                     <div id="edit-away-team-total-display" class="team-total-display">0</div>
                                 </div>
                                 <table id="edit-away-team-scorecard" class="scorecard"></table>

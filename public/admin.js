@@ -276,12 +276,62 @@ function initializeResultsInput() {
     const walkoverSelect = document.getElementById('walkover-select');
     const walkoverFormContainer = document.getElementById('walkover-form-container');
     const submitWalkoverBtn = document.getElementById('submit-walkover-btn');
-    const walkoverWinner = document.getElementById('walkover-winner');
     const walkoverScore = document.getElementById('walkover-score');
+
+    const totalOnlyToggle = document.getElementById('total-only-toggle');
+    const homeScorecard = document.getElementById('home-team-scorecard');
+    const awayScorecard = document.getElementById('away-team-scorecard');
+    const homeTotalDisplay = document.getElementById('home-team-total-display');
+    const awayTotalDisplay = document.getElementById('away-team-total-display');
 
     if (!dateSelect || !matchSelect || !resultsFormContainer || !submitBtn || !walkoverSelect || !walkoverFormContainer) {
         console.error("One or more elements for results input are missing.");
         return;
+    }
+
+    if (totalOnlyToggle) {
+        totalOnlyToggle.addEventListener('change', (e) => {
+            const isTotalOnly = e.target.checked;
+
+            const toggleScorecardMode = (id) => {
+                const table = document.getElementById(id);
+                if (!table) return;
+
+                const headers = table.querySelectorAll('th');
+                if (headers.length > 6) {
+                    for (let i = 1; i <= 5; i++) {
+                        headers[i].style.display = isTotalOnly ? 'none' : '';
+                    }
+                }
+
+                const rows = table.querySelectorAll('tbody tr:not([id*="-handicap-row"])');
+                rows.forEach(row => {
+                    const handCols = row.querySelectorAll('.hand-score-col');
+                    handCols.forEach(col => col.style.display = isTotalOnly ? 'none' : '');
+
+                    const textSpan = row.querySelector('.player-total-score-text');
+                    const input = row.querySelector('.player-total-score-input');
+                    if (textSpan) textSpan.style.display = isTotalOnly ? 'none' : '';
+                    if (input) input.style.display = isTotalOnly ? 'inline-block' : 'none';
+                });
+
+                const handicapRow = table.querySelector('tr[id*="-handicap-row"]');
+                let handicap = 0;
+                if (handicapRow) {
+                    const spacer = handicapRow.querySelector('td[colspan]');
+                    if (spacer) {
+                        spacer.colSpan = isTotalOnly ? 1 : 5;
+                    }
+                    const tdTotal = handicapRow.querySelector('.total-score-col');
+                    if (tdTotal) handicap = parseInt(tdTotal.textContent) || 0;
+                }
+
+                updateTeamTotal(table, handicap);
+            };
+
+            toggleScorecardMode('home-team-scorecard');
+            toggleScorecardMode('away-team-scorecard');
+        });
     }
 
     let allPlayers = new Map();
@@ -326,6 +376,12 @@ function initializeResultsInput() {
 
     matchSelect.addEventListener('change', async () => {
         resultsFormContainer.style.display = 'none';
+
+        if (totalOnlyToggle) {
+            totalOnlyToggle.checked = false;
+            totalOnlyToggle.dispatchEvent(new Event('change'));
+        }
+
         const fixture = allFixtures.find(f => f.id === matchSelect.value);
         if (fixture) {
             // Populate Walkover Select
@@ -355,8 +411,15 @@ function initializeResultsInput() {
 
             document.getElementById('home-team-name-header').textContent = teamsMap.get(fixture.homeTeamId);
             document.getElementById('away-team-name-header').textContent = teamsMap.get(fixture.awayTeamId);
-            document.getElementById('home-bowled-first').value = fixture.homeTeamId;
-            document.getElementById('away-bowled-first').value = fixture.awayTeamId;
+
+            const bowledFirstSelect = document.getElementById('bowled-first-select');
+            if (bowledFirstSelect) {
+                bowledFirstSelect.innerHTML = `<option value="" disabled selected>Select Team</option>
+                    <option value="unknown">Unknown</option>
+                    <option value="${fixture.homeTeamId}">${teamsMap.get(fixture.homeTeamId)}</option>
+                    <option value="${fixture.awayTeamId}">${teamsMap.get(fixture.awayTeamId)}</option>`;
+                bowledFirstSelect.value = "";
+            }
 
             renderScorecard('home', fixture, allPlayers);
             renderScorecard('away', fixture, allPlayers);
@@ -474,24 +537,36 @@ function initializeResultsInput() {
 
     submitBtn.addEventListener('click', async () => {
         const fixtureId = matchSelect.value;
+        const bowledFirstSelect = document.getElementById('bowled-first-select');
+        const bowledFirst = bowledFirstSelect ? bowledFirstSelect.value : "";
+        const errors = [];
+
+        if (!bowledFirst) errors.push("Please select which team bowled first.");
+
         const getScores = (containerId) => {
             return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => {
                 if (row.id.endsWith('-handicap-row')) return null;
                 const playerId = row.querySelector('.player-select').value;
-                const hands = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
-                const score = hands.reduce((a, b) => a + b, 0);
-                return { playerId, hands, score };
-            }).filter(s => s && s.playerId && s.hands.length === 5);
+                if (!playerId) return null;
+
+                if (totalOnlyToggle && totalOnlyToggle.checked) {
+                    const score = parseInt(row.querySelector('.player-total-score-input').value) || 0;
+                    return { playerId, hands: [], score };
+                } else {
+                    const hands = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
+                    const score = hands.reduce((a, b) => a + b, 0);
+                    return { playerId, hands, score };
+                }
+            }).filter(s => s && s.playerId && (totalOnlyToggle && totalOnlyToggle.checked ? true : s.hands.length === 5));
         };
 
         const homeScores = getScores('home-team-scorecard');
         const awayScores = getScores('away-team-scorecard');
-        const bowledFirst = document.querySelector('input[name="bowled-first"]:checked')?.value;
+        const finalHomeScore = parseInt(document.getElementById('home-team-total-display').textContent) || 0;
+        const finalAwayScore = parseInt(document.getElementById('away-team-total-display').textContent) || 0;
 
-        const errors = [];
         if (homeScores.length < 6) errors.push("Home team has incomplete scores.");
         if (awayScores.length < 6) errors.push("Away team has incomplete scores.");
-        if (!bowledFirst) errors.push("Please select which team bowled first.");
 
         if (errors.length > 0) {
             alert("Please correct the following issues:\n\n- " + errors.join("\n- "));
@@ -499,8 +574,8 @@ function initializeResultsInput() {
         }
 
         const resultsData = {
-            homeScore: parseInt(document.getElementById('home-team-total-display').textContent),
-            awayScore: parseInt(document.getElementById('away-team-total-display').textContent),
+            homeScore: finalHomeScore,
+            awayScore: finalAwayScore,
             homeScores,
             awayScores,
             bowledFirst,
@@ -635,7 +710,10 @@ function renderScorecard(teamType, fixture, allPlayers) {
                 <tr>
                     <td class="player-name-col"><select class="form-select player-select"></select></td>
                     ${Array(5).fill().map(() => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27"></td>`).join('')}
-                    <td class="total-score-col">0</td>
+                    <td class="total-score-col">
+                        <span class="player-total-score-text">0</span>
+                        <input type="number" class="player-total-score-input form-input" min="0" max="150" style="display:none; width:60px;">
+                    </td>
                 </tr>
             `).join('')}
             ${handicapRow}
@@ -656,7 +734,10 @@ function renderScorecard(teamType, fixture, allPlayers) {
         if (e.target.classList.contains('hand-score')) {
             const row = e.target.closest('tr');
             const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
-            row.querySelector('.total-score-col').textContent = handScores.reduce((a, b) => a + b, 0);
+            const textSpan = row.querySelector('.player-total-score-text');
+            if (textSpan) textSpan.textContent = handScores.reduce((a, b) => a + b, 0);
+            updateTeamTotal(container, handicapValue);
+        } else if (e.target.classList.contains('player-total-score-input')) {
             updateTeamTotal(container, handicapValue);
         }
     });
@@ -665,10 +746,18 @@ function renderScorecard(teamType, fixture, allPlayers) {
 }
 
 function updateTeamTotal(container, handicap = 0) {
-    const playerTotals = Array.from(container.querySelectorAll('tbody tr:not([id*="-handicap-row"]) .total-score-col')).map(td => parseInt(td.textContent) || 0);
+    const playerTotals = Array.from(container.querySelectorAll('tbody tr:not([id*="-handicap-row"]) .total-score-col')).map(td => {
+        const input = td.querySelector('.player-total-score-input');
+        if (input && input.style.display !== 'none') {
+            return parseInt(input.value) || 0;
+        }
+        const textSpan = td.querySelector('.player-total-score-text');
+        if (textSpan) return parseInt(textSpan.textContent) || 0;
+        return parseInt(td.textContent) || 0;
+    });
     const teamTotal = playerTotals.reduce((a, b) => a + b, 0) + handicap;
     const totalDisplay = container.id.includes('home') ? document.getElementById('home-team-total-display') : document.getElementById('away-team-total-display');
-    totalDisplay.textContent = teamTotal;
+    if (totalDisplay) totalDisplay.textContent = teamTotal;
 }
 
 // --- League Table and Cup Standings Updates ---

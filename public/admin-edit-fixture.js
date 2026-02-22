@@ -50,6 +50,28 @@ function initializeEditFixture() {
     const matchSelect = document.getElementById('edit-match-select');
     const resultsFormContainer = document.getElementById('edit-results-form-container');
 
+    const editTotalOnlyToggle = document.getElementById('edit-total-only-toggle');
+    const editHomeTotalInputWrapper = document.getElementById('edit-home-team-total-input-wrapper');
+    const editAwayTotalInputWrapper = document.getElementById('edit-away-team-total-input-wrapper');
+    const editHomeTotalInput = document.getElementById('edit-home-team-total-input');
+    const editAwayTotalInput = document.getElementById('edit-away-team-total-input');
+    const editHomeScorecard = document.getElementById('edit-home-team-scorecard');
+    const editAwayScorecard = document.getElementById('edit-away-team-scorecard');
+    const editHomeTotalDisplay = document.getElementById('edit-home-team-total-display');
+    const editAwayTotalDisplay = document.getElementById('edit-away-team-total-display');
+
+    if (editTotalOnlyToggle) {
+        editTotalOnlyToggle.addEventListener('change', (e) => {
+            const isTotalOnly = e.target.checked;
+            editHomeScorecard.style.display = isTotalOnly ? 'none' : 'table';
+            editAwayScorecard.style.display = isTotalOnly ? 'none' : 'table';
+            editHomeTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
+            editAwayTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
+            editHomeTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
+            editAwayTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
+        });
+    }
+
     if (!dateSelect) return;
 
     dateSelect.addEventListener('change', () => {
@@ -73,17 +95,24 @@ function initializeEditFixture() {
         resultsFormContainer.style.display = 'none';
         const fixtureId = matchSelect.value;
         const fixture = completedFixtures.find(f => f.id === fixtureId);
+
         if (fixture) {
+            if (editTotalOnlyToggle) {
+                editTotalOnlyToggle.checked = false;
+                editTotalOnlyToggle.dispatchEvent(new Event('change'));
+                editHomeTotalInput.value = fixture.homeScore || '';
+                editAwayTotalInput.value = fixture.awayScore || '';
+            }
+
             document.getElementById('edit-home-team-name-header').textContent = teamsMap.get(fixture.homeTeamId);
             document.getElementById('edit-away-team-name-header').textContent = teamsMap.get(fixture.awayTeamId);
 
-            document.getElementById('edit-home-bowled-first').value = fixture.homeTeamId;
-            document.getElementById('edit-away-bowled-first').value = fixture.awayTeamId;
-
-            if (fixture.bowledFirst === fixture.homeTeamId) {
-                document.getElementById('edit-home-bowled-first').checked = true;
-            } else {
-                document.getElementById('edit-away-bowled-first').checked = true;
+            const editBowledFirstSelect = document.getElementById('edit-bowled-first-select');
+            if (editBowledFirstSelect) {
+                editBowledFirstSelect.innerHTML = `<option value="unknown">Unknown</option>
+                    <option value="${fixture.homeTeamId}">${teamsMap.get(fixture.homeTeamId)}</option>
+                    <option value="${fixture.awayTeamId}">${teamsMap.get(fixture.awayTeamId)}</option>`;
+                editBowledFirstSelect.value = fixture.bowledFirst || "unknown";
             }
 
             const homeScorecard = document.getElementById('edit-home-team-scorecard');
@@ -94,7 +123,7 @@ function initializeEditFixture() {
 
             updateTeamTotal(homeScorecard, document.getElementById('edit-home-team-total-display'));
             updateTeamTotal(awayScorecard, document.getElementById('edit-away-team-total-display'));
-            
+
             resultsFormContainer.style.display = 'block';
         }
     });
@@ -102,43 +131,61 @@ function initializeEditFixture() {
     document.getElementById('submit-edited-results-btn').addEventListener('click', async () => {
         const fixtureId = matchSelect.value;
         const originalFixture = completedFixtures.find(f => f.id === fixtureId);
-    
-        const getScores = (containerId) => {
-            return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => ({
-                playerId: row.querySelector('.player-select').value,
-                hands: Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0),
-                score: parseInt(row.querySelector('.total-score-col').textContent)
-            })).filter(s => s.playerId && s.hands.length === 5);
-        };
-    
-        const homeScores = getScores('edit-home-team-scorecard');
-        const awayScores = getScores('edit-away-team-scorecard');
-        const bowledFirst = document.querySelector('input[name="edit-bowled-first"]:checked')?.value;
-    
+        const editBowledFirstSelect = document.getElementById('edit-bowled-first-select');
+        const bowledFirst = editBowledFirstSelect ? editBowledFirstSelect.value : "";
         const errors = [];
+
+        let homeScores = [];
+        let awayScores = [];
+        let finalHomeScore = 0;
+        let finalAwayScore = 0;
+
+        if (!bowledFirst) errors.push("Please select which team bowled first.");
+        const getScores = (containerId) => {
+            return Array.from(document.querySelectorAll(`#${containerId} tbody tr`)).map(row => {
+                const playerId = row.querySelector('.player-select').value;
+                if (!playerId) return null;
+
+                if (editTotalOnlyToggle && editTotalOnlyToggle.checked) {
+                    const score = parseInt(row.querySelector('.player-total-score-input').value) || 0;
+                    return { playerId, hands: [], score };
+                } else {
+                    const hands = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
+                    // Use textContent from either the span or the parent td
+                    const textSpan = row.querySelector('.player-total-score-text');
+                    const score = textSpan ? parseInt(textSpan.textContent) || 0 : parseInt(row.querySelector('.total-score-col').textContent) || 0;
+                    return { playerId, hands, score };
+                }
+            }).filter(s => s && s.playerId && (editTotalOnlyToggle && editTotalOnlyToggle.checked ? true : s.hands.length === 5));
+        };
+
+        homeScores = getScores('edit-home-team-scorecard');
+        awayScores = getScores('edit-away-team-scorecard');
+        finalHomeScore = parseInt(document.getElementById('edit-home-team-total-display').textContent) || 0;
+        finalAwayScore = parseInt(document.getElementById('edit-away-team-total-display').textContent) || 0;
+
         if (homeScores.length < 6) errors.push("Home team has incomplete scores.");
         if (awayScores.length < 6) errors.push("Away team has incomplete scores.");
-        if (!bowledFirst) errors.push("Please select which team bowled first.");
-    
+
         if (errors.length > 0) {
             alert("Please correct the following issues:\n\n- " + errors.join("\n- "));
             return;
         }
-    
+
         const resultsData = {
-            homeScore: parseInt(document.getElementById('edit-home-team-total-display').textContent),
-            awayScore: parseInt(document.getElementById('edit-away-team-total-display').textContent),
+            homeScore: finalHomeScore,
+            awayScore: finalAwayScore,
             homeScores,
             awayScores,
             bowledFirst,
             status: 'completed'
         };
-    
+
         try {
             await revertLeagueTableStats(originalFixture);
             await updateDoc(doc(db, "match_results", fixtureId), resultsData);
             await updateLeagueTable(originalFixture, resultsData);
-    
+
             alert('Results updated and league table adjusted successfully!');
             await fetchCompletedFixtures();
             populateDateSelect();
@@ -174,8 +221,11 @@ async function renderScorecardForEdit(teamId, container, allPlayers, scores) {
                             ${teamPlayers.map(p => `<option value="${p.id}">${p.firstName} ${p.lastName}</option>`).join('')}
                         </select>
                     </td>
-                    ${playerScore.hands.map(hand => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27" value="${hand}"></td>`).join('')}
-                    <td class="total-score-col">${playerScore.score}</td>
+                    ${Array(5).fill().map((_, i) => `<td class="hand-score-col"><input type="number" class="hand-score" min="0" max="27" value="${playerScore.hands ? (playerScore.hands[i] !== undefined ? playerScore.hands[i] : '') : ''}"></td>`).join('')}
+                    <td class="total-score-col">
+                        <span class="player-total-score-text">${playerScore.score}</span>
+                        <input type="number" class="player-total-score-input form-input" min="0" max="150" style="display:none; width:60px;" value="${playerScore.score}">
+                    </td>
                 </tr>
             `).join('')}
         </tbody>`;
@@ -221,11 +271,17 @@ async function renderScorecardForEdit(teamId, container, allPlayers, scores) {
             const row = e.target.closest('tr');
             if (row) {
                 const handScores = Array.from(row.querySelectorAll('.hand-score')).map(input => parseInt(input.value) || 0);
-                row.querySelector('.total-score-col').textContent = handScores.reduce((a, b) => a + b, 0);
+                const textSpan = row.querySelector('.player-total-score-text');
+                if (textSpan) textSpan.textContent = handScores.reduce((a, b) => a + b, 0);
                 const totalDisplay = container.id.includes('home') ? document.getElementById('edit-home-team-total-display') : document.getElementById('edit-away-team-total-display');
                 if (totalDisplay) {
                     updateTeamTotal(container, totalDisplay);
                 }
+            }
+        } else if (e.target.classList.contains('player-total-score-input')) {
+            const totalDisplay = container.id.includes('home') ? document.getElementById('edit-home-team-total-display') : document.getElementById('edit-away-team-total-display');
+            if (totalDisplay) {
+                updateTeamTotal(container, totalDisplay);
             }
         }
     });
@@ -233,7 +289,15 @@ async function renderScorecardForEdit(teamId, container, allPlayers, scores) {
 
 function updateTeamTotal(table, totalDisplay) {
     if (!table || !totalDisplay) return;
-    const playerTotals = Array.from(table.querySelectorAll('tbody .total-score-col')).map(td => parseInt(td.textContent) || 0);
+    const playerTotals = Array.from(table.querySelectorAll('tbody .total-score-col')).map(td => {
+        const input = td.querySelector('.player-total-score-input');
+        if (input && input.style.display !== 'none') {
+            return parseInt(input.value) || 0;
+        }
+        const textSpan = td.querySelector('.player-total-score-text');
+        if (textSpan) return parseInt(textSpan.textContent) || 0;
+        return parseInt(td.textContent) || 0;
+    });
     totalDisplay.textContent = playerTotals.reduce((a, b) => a + b, 0);
 }
 
@@ -312,7 +376,7 @@ async function updateLeagueTable(fixture, resultsData) {
     }
 
     const leagueTableData = leagueTableSnap.data();
-    
+
     if (!leagueTableData[division]) {
         leagueTableData[division] = {
             leagueName: division.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -323,12 +387,12 @@ async function updateLeagueTable(fixture, resultsData) {
 
     const updateStatsForTeam = (teamId, outcome, pinsFor, pinsAgainst) => {
         let teamIndex = standings.findIndex(t => t.teamId === teamId);
-        
+
         if (teamIndex === -1) {
             standings.push({ teamId, teamName: teamsMap.get(teamId) });
             teamIndex = standings.length - 1;
         }
-        
+
         const teamStats = standings[teamIndex];
 
         teamStats.played = (teamStats.played ?? 0) + 1;
