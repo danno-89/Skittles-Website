@@ -63,12 +63,12 @@ function initializeEditFixture() {
     if (editTotalOnlyToggle) {
         editTotalOnlyToggle.addEventListener('change', (e) => {
             const isTotalOnly = e.target.checked;
-            editHomeScorecard.style.display = isTotalOnly ? 'none' : 'table';
-            editAwayScorecard.style.display = isTotalOnly ? 'none' : 'table';
-            editHomeTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
-            editAwayTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
-            editHomeTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
-            editAwayTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
+            if (editHomeScorecard) editHomeScorecard.style.display = isTotalOnly ? 'none' : 'table';
+            if (editAwayScorecard) editAwayScorecard.style.display = isTotalOnly ? 'none' : 'table';
+            if (editHomeTotalInputWrapper) editHomeTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
+            if (editAwayTotalInputWrapper) editAwayTotalInputWrapper.style.display = isTotalOnly ? 'block' : 'none';
+            if (editHomeTotalDisplay) editHomeTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
+            if (editAwayTotalDisplay) editAwayTotalDisplay.style.display = isTotalOnly ? 'none' : 'block';
         });
     }
 
@@ -100,8 +100,8 @@ function initializeEditFixture() {
             if (editTotalOnlyToggle) {
                 editTotalOnlyToggle.checked = false;
                 editTotalOnlyToggle.dispatchEvent(new Event('change'));
-                editHomeTotalInput.value = fixture.homeScore || '';
-                editAwayTotalInput.value = fixture.awayScore || '';
+                if (editHomeTotalInput) editHomeTotalInput.value = fixture.homeScore || '';
+                if (editAwayTotalInput) editAwayTotalInput.value = fixture.awayScore || '';
             }
 
             document.getElementById('edit-home-team-name-header').textContent = teamsMap.get(fixture.homeTeamId);
@@ -215,7 +215,7 @@ async function renderScorecardForEdit(teamId, container, allPlayers, scores) {
             ${scores.map(playerScore => `
                 <tr>
                     <td class="player-name-col">
-                        <select class="player-select">
+                        <select class="form-select player-select">
                             <option value="">Select player</option>
                             <option value="sixthPlayer">6th Player</option>
                             ${teamPlayers.map(p => `<option value="${p.id}">${p.firstName} ${p.lastName}</option>`).join('')}
