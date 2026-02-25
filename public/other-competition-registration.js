@@ -140,11 +140,11 @@ const updateAvailableTeams = async (competitionId) => {
             if (!teamsWithEligiblePlayers[playerData.teamId]) {
                 teamsWithEligiblePlayers[playerData.teamId] = { hasMale: false, hasFemale: false };
             }
-            if (playerData.division === "Men's") {
-                teamsWithEligiblePlayers[playerData.teamId].hasMale = true;
-            }
-            if (playerData.division === "Ladies'") {
+            const div = (playerData.division || "").toLowerCase();
+            if (div.includes("ladies")) {
                 teamsWithEligiblePlayers[playerData.teamId].hasFemale = true;
+            } else {
+                teamsWithEligiblePlayers[playerData.teamId].hasMale = true;
             }
         });
 
@@ -156,22 +156,34 @@ const updateAvailableTeams = async (competitionId) => {
             const teamData = teamDoc.data();
             const eligibility = teamsWithEligiblePlayers[teamId] || { hasMale: false, hasFemale: false };
 
-            let isEligible = false;
+            let isEligible1 = false;
+            let isEligible2 = false;
+
             if (competitionName.includes('mixed')) {
-                isEligible = eligibility.hasMale && eligibility.hasFemale;
+                isEligible1 = eligibility.hasMale;
+                isEligible2 = eligibility.hasFemale;
             } else if (competitionName.includes('ladies')) {
-                isEligible = eligibility.hasFemale;
+                isEligible1 = eligibility.hasFemale;
+                isEligible2 = eligibility.hasFemale;
             } else if (competitionName.includes("men's")) {
-                isEligible = eligibility.hasMale;
+                isEligible1 = eligibility.hasMale;
+                isEligible2 = eligibility.hasMale;
             } else { // For other competitions, all active teams are eligible
-                isEligible = true;
+                isEligible1 = true;
+                isEligible2 = true;
             }
 
-            if (isEligible) {
+            if (isEligible1) {
                 const option = document.createElement('option');
                 option.value = teamData.name;
                 option.textContent = teamData.name;
                 player1TeamDropdown.appendChild(option.cloneNode(true));
+            }
+
+            if (isEligible2) {
+                const option = document.createElement('option');
+                option.value = teamData.name;
+                option.textContent = teamData.name;
                 player2TeamDropdown.appendChild(option.cloneNode(true));
             }
         });
@@ -223,7 +235,11 @@ const createPlayerDropdown = async (teamName, wrapperElementId, competitionId, f
             const player = { id: playerDoc.id, name: fullName };
 
             if (forcedDivision) {
-                if (playerData.division === forcedDivision) {
+                const playerDiv = (playerData.division || "").toLowerCase();
+                const isLadies = playerDiv.includes("ladies");
+                if (forcedDivision === "Ladies'" && isLadies) {
+                    eligiblePlayers.push(player);
+                } else if (forcedDivision === "Men's" && !isLadies) {
                     eligiblePlayers.push(player);
                 }
             } else {
@@ -273,6 +289,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const player2Section = document.getElementById('player2-label').nextElementSibling;
     const contactInfoSection = document.getElementById('contact-info-section');
 
+    const toggleContactInfo = () => {
+        const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
+        const competitionName = selectedOption ? selectedOption.text.toLowerCase() : '';
+        const isIndividual = competitionName.includes('singles') || competitionName.includes('individual');
+
+        if (isIndividual) {
+            if (player1TeamDropdown.value === 'no-team') {
+                contactInfoSection.classList.remove('hidden');
+            } else {
+                contactInfoSection.classList.add('hidden');
+            }
+        } else {
+            if (player1TeamDropdown.value === 'no-team' && player2TeamDropdown.value === 'no-team') {
+                contactInfoSection.classList.remove('hidden');
+            } else {
+                contactInfoSection.classList.add('hidden');
+            }
+        }
+    };
+
     const handleCompetitionChange = () => {
         const competitionId = competitionDropdown.value;
         const selectedOption = competitionDropdown.options[competitionDropdown.selectedIndex];
@@ -306,6 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
             player1Label.textContent = 'Player 1';
             player2Label.textContent = 'Player 2';
         }
+
+        toggleContactInfo();
     };
 
     competitionDropdown.addEventListener('change', handleCompetitionChange);
@@ -341,14 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         createPlayerDropdown(player2TeamDropdown.value, 'player2-name-wrapper', competitionId, forcedDivision, !isIndividual);
     });
-
-    const toggleContactInfo = () => {
-        if (player1TeamDropdown.value === 'no-team' && player2TeamDropdown.value === 'no-team') {
-            contactInfoSection.classList.remove('hidden');
-        } else {
-            contactInfoSection.classList.add('hidden');
-        }
-    };
 
     player1TeamDropdown.addEventListener('change', toggleContactInfo);
     player2TeamDropdown.addEventListener('change', toggleContactInfo);
@@ -394,7 +424,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (player1Team === 'no-team' && (player2Team === 'no-team' || isIndividual) && !contactNumber) {
-                alert('A contact number is required as neither player is registered to a team.');
+                if (isIndividual) {
+                    alert('A contact number is required if you are not registered to a team.');
+                } else {
+                    alert('A contact number is required as neither player is registered to a team.');
+                }
                 return;
             }
 
