@@ -28,8 +28,8 @@
                     Hampshire Lodge Alley (or online via sarniaskittles.leaguerepublic.com).</p>
                 <p>When 1 year has elapsed without any League activity, the registration will be closed. A further form
                     can be submitted / completed to re-register.</p>
-                <p>*Players under 16 may not submit an online form as parent / guardian signature is required. A paper
-                    form must be completed in these instances.</p>
+                <p>*Players under 18 must have their registration countersigned by a registered adult from their team
+                    during this process. A paper form may also be completed in these instances.</p>
 
                 <form id="registration-form" novalidate>
                     <div class="form-columns">
@@ -112,6 +112,32 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="countersignature-section" class="hidden"
+                        style="margin-bottom: 20px; padding: 15px; background: #eef2f5; border-radius: 8px; border: 1px solid #c8d4df;">
+                        <h3 style="margin-top: 0; color: #d9534f; margin-bottom: 10px;">Under 18 Consent Required</h3>
+                        <p style="margin-bottom: 15px; font-size: 0.9em;">As you are under 18, a registered adult from
+                            your selected team must authenticate this registration by providing their Date of Birth.</p>
+                        <div class="form-columns" style="gap: 15px;">
+                            <div class="form-group">
+                                <label for="sponsor-id">Adult Sponsor *</label>
+                                <select id="sponsor-id" name="sponsor-id">
+                                    <option value="">Select an adult from your team</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sponsor-dob">Sponsor's Date of Birth *</label>
+                                <input type="text" id="sponsor-dob" name="sponsor-dob" placeholder="dd/mm/yyyy">
+                            </div>
+                        </div>
+                        <div class="form-group"
+                            style="display: flex; align-items: flex-start; gap: 10px; margin-top: 5px;">
+                            <input type="checkbox" id="sponsor-confirm" name="sponsor-confirm" style="margin-top: 4px;">
+                            <label for="sponsor-confirm" style="font-weight: normal; font-size: 0.9em;">I confirm that
+                                the selected adult sponsor is present and consents to this registration.</label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Review Details</button>
                 </form>
             </div>

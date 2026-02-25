@@ -32,7 +32,7 @@ async function generateUniquePlayerId(firstName, lastName) {
     const capitalizedFirstName = capitalizeFirstLetter(firstName);
     const capitalizedLastName = capitalizeFirstLetter(lastName);
     const baseId = `${capitalizedFirstName}-${capitalizedLastName}`;
-    
+
     const playersRef = db.collection("players_public");
 
     const querySnapshot = await playersRef
@@ -57,23 +57,65 @@ async function generateUniquePlayerId(firstName, lastName) {
     return `${baseId}${paddedNumber}`;
 }
 
+exports.verifySponsor = functions.https.onCall(async (data, context) => {
+    const { sponsorId, sponsorDob } = data;
+
+    if (!sponsorId || !sponsorDob) {
+        return { success: false, error: 'Missing sponsor details.' };
+    }
+
+    const expectedDobTimestamp = parseDateToTimestamp(sponsorDob);
+    if (!expectedDobTimestamp) {
+        return { success: false, error: 'Invalid date format.' };
+    }
+
+    try {
+        const sponsorRef = db.collection('players_private').doc(sponsorId);
+        const sponsorDoc = await sponsorRef.get();
+
+        if (!sponsorDoc.exists) {
+            return { success: false, error: 'Sponsor not found.' };
+        }
+
+        const storedDobTimestamp = sponsorDoc.data().dob;
+
+        if (!storedDobTimestamp) {
+            return { success: false, error: 'Sponsor DOB record unavailable.' };
+        }
+
+        const storedDate = storedDobTimestamp.toDate();
+        const expectedDate = expectedDobTimestamp.toDate();
+
+        if (storedDate.getFullYear() === expectedDate.getFullYear() &&
+            storedDate.getMonth() === expectedDate.getMonth() &&
+            storedDate.getDate() === expectedDate.getDate()) {
+            return { success: true };
+        } else {
+            return { success: false, error: 'Authentication failed.' };
+        }
+    } catch (err) {
+        console.error("Error verifying sponsor:", err);
+        return { success: false, error: 'Server error verifying sponsor.' };
+    }
+});
+
 exports.registerPlayer = functions.https.onCall(async (data, context) => {
     let {
-        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId,
+        firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId, sponsorId, sponsorName
     } = data;
 
     const dobTimestamp = parseDateToTimestamp(dob);
     if (!dobTimestamp) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid date of birth format. Please use dd/mm/yyyy.');
     }
-    
+
     const registrationDate = new Date();
     const expiryDate = new Date(registrationDate);
     expiryDate.setDate(expiryDate.getDate() + 365);
     const expiryTimestamp = admin.firestore.Timestamp.fromDate(expiryDate);
-    
+
     const uniqueId = await generateUniquePlayerId(firstName, lastName);
-    
+
     const privatePlayerData = {
         address: {
             line1: address.line1, line2: address.line2, line3: address.line3,
@@ -84,6 +126,11 @@ exports.registerPlayer = functions.https.onCall(async (data, context) => {
 
     if (authId) {
         privatePlayerData.authId = authId;
+    }
+
+    if (sponsorId) {
+        privatePlayerData.sponsorId = sponsorId;
+        privatePlayerData.sponsorName = sponsorName;
     }
 
     const publicPlayerData = {

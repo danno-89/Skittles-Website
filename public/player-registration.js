@@ -16,6 +16,30 @@ function capitalizeFirstLetter(string) {
 }
 
 /**
+ * Calculates a person's age based on a dd/mm/yyyy date string.
+ * @param {string} dobString - Date of birth string in dd/mm/yyyy format
+ * @returns {number} Age in years, or -1 if invalid
+ */
+function calculateAge(dobString) {
+    if (!dobString) return -1;
+    const parts = dobString.split('/');
+    if (parts.length !== 3) return -1;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return -1;
+
+    const dob = new Date(year, month - 1, day);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+/**
  * Populates the team selection dropdown with active teams from Firestore.
  */
 async function populateTeamsDropdown() {
@@ -26,9 +50,9 @@ async function populateTeamsDropdown() {
         const teamsRef = collection(db, 'teams');
         const q = query(teamsRef, where("status", "==", "active"));
         const querySnapshot = await getDocs(q);
-        
+
         teamSelect.innerHTML = '<option value="">Please select a team</option>';
-        
+
         querySnapshot.forEach((doc) => {
             const team = doc.data();
             const option = document.createElement('option');
@@ -39,6 +63,46 @@ async function populateTeamsDropdown() {
     } catch (error) {
         console.error("Error fetching teams: ", error);
         teamSelect.innerHTML = '<option value="">Could not load teams</option>';
+    }
+}
+
+function setupTeamDropdownListener() {
+    const teamSelect = document.getElementById('team');
+    if (teamSelect) {
+        teamSelect.addEventListener('change', (e) => {
+            populateSponsorsDropdown(e.target.value);
+        });
+    }
+}
+
+async function populateSponsorsDropdown(teamId) {
+    const sponsorSelect = document.getElementById('sponsor-id');
+    if (!sponsorSelect) return;
+
+    if (!teamId) {
+        sponsorSelect.innerHTML = '<option value="">Select an adult from your team</option>';
+        return;
+    }
+
+    sponsorSelect.innerHTML = '<option value="">Loading sponsors...</option>';
+
+    try {
+        const playersRef = collection(db, 'players_public');
+        const q = query(playersRef, where("teamId", "==", teamId));
+        const querySnapshot = await getDocs(q);
+
+        sponsorSelect.innerHTML = '<option value="">Select an adult from your team</option>';
+
+        querySnapshot.forEach((doc) => {
+            const player = doc.data();
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = `${player.firstName} ${player.lastName}`;
+            sponsorSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error fetching sponsors: ", error);
+        sponsorSelect.innerHTML = '<option value="">Could not load sponsors</option>';
     }
 }
 
@@ -65,11 +129,51 @@ function setupDobInput() {
             const date = new Date(year, month - 1, day);
             const isValid = date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
             e.target.setCustomValidity(isValid ? '' : 'Please enter a valid date.');
+            checkAgeRequirement(isValid ? e.target.value : null);
         } else if (e.target.value) {
             e.target.setCustomValidity('Please use dd/mm/yyyy format.');
+            checkAgeRequirement(null);
         } else {
             e.target.setCustomValidity('');
+            checkAgeRequirement(null);
         }
+    });
+}
+
+function checkAgeRequirement(dobString) {
+    const age = calculateAge(dobString);
+    const section = document.getElementById('countersignature-section');
+    const select = document.getElementById('sponsor-id');
+    const dobInput = document.getElementById('sponsor-dob');
+    const confirm = document.getElementById('sponsor-confirm');
+
+    if (!section || !select || !dobInput || !confirm) return;
+
+    if (age >= 0 && age < 18) {
+        section.classList.remove('hidden');
+        select.required = true;
+        dobInput.required = true;
+        confirm.required = true;
+    } else {
+        section.classList.add('hidden');
+        select.required = false;
+        dobInput.required = false;
+        confirm.required = false;
+        select.value = '';
+        dobInput.value = '';
+        confirm.checked = false;
+    }
+}
+
+function setupSponsorDobInput() {
+    const dobInput = document.getElementById('sponsor-dob');
+    if (!dobInput) return;
+
+    dobInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) value = `${value.substring(0, 2)}/${value.substring(2)}`;
+        if (value.length > 5) value = `${value.substring(0, 5)}/${value.substring(5, 9)}`;
+        e.target.value = value;
     });
 }
 
@@ -113,7 +217,7 @@ function handleFormSubmit() {
     const form = document.getElementById('registration-form');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // Custom validation: at least one phone number is required.
@@ -126,33 +230,70 @@ function handleFormSubmit() {
             form.reportValidity();
             return;
         }
-        
+
         // Check standard browser validation
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
         }
 
-        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying...';
 
-        registrationData = {
-            firstName: formData.get('first-name'),
-            lastName: formData.get('last-name'),
-            dob: formData.get('dob'),
-            email: formData.get('email'),
-            teamId: formData.get('team'),
-            division: formData.get('division'),
-            mobileNo: formData.get('mobile-number'),
-            homeNo: formData.get('home-work-number'),
-            address: {
-                line1: formData.get('address-line-1'),
-                line2: formData.get('address-line-2'),
-                line3: formData.get('address-line-3'),
-                parish: formData.get('parish'),
-                postCode: formData.get('postcode'),
+        try {
+            const formData = new FormData(form);
+            const dobVal = formData.get('dob');
+            const age = calculateAge(dobVal);
+
+            let sponsorId = null;
+            let sponsorName = null;
+
+            if (age >= 0 && age < 18) {
+                sponsorId = formData.get('sponsor-id');
+                const sponsorDob = formData.get('sponsor-dob');
+                const sponsorSelect = document.getElementById('sponsor-id');
+                sponsorName = sponsorSelect.options[sponsorSelect.selectedIndex].text;
+
+                const verifySponsor = httpsCallable(functions, 'verifySponsor');
+                const result = await verifySponsor({ sponsorId, sponsorDob });
+
+                if (!result.data.success) {
+                    alert('Sponsor authentication failed. Please double-check the sponsor\'s Date of Birth.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                    return;
+                }
             }
-        };
-        displayConfirmation(registrationData);
+
+            registrationData = {
+                firstName: formData.get('first-name'),
+                lastName: formData.get('last-name'),
+                dob: dobVal,
+                email: formData.get('email'),
+                teamId: formData.get('team'),
+                division: formData.get('division'),
+                mobileNo: formData.get('mobile-number'),
+                homeNo: formData.get('home-work-number'),
+                sponsorId: sponsorId,
+                sponsorName: sponsorName,
+                address: {
+                    line1: formData.get('address-line-1'),
+                    line2: formData.get('address-line-2'),
+                    line3: formData.get('address-line-3'),
+                    parish: formData.get('parish'),
+                    postCode: formData.get('postcode'),
+                }
+            };
+            displayConfirmation(registrationData);
+        } catch (error) {
+            console.error("Verification error: ", error);
+            alert('An error occurred during verification. Please try again.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
     });
 }
 
@@ -168,7 +309,12 @@ function displayConfirmation(data) {
     const teamName = document.getElementById('team').options[document.getElementById('team').selectedIndex].text;
     const addressParts = [data.address.line1, data.address.line2, data.address.line3, data.address.parish, data.address.postCode];
     const addressString = addressParts.filter(part => part).join(', ');
-    
+
+    let sponsorHtml = '';
+    if (data.sponsorId) {
+        sponsorHtml = `<strong>Sponsor:</strong> <span>${data.sponsorName}</span>`;
+    }
+
     confirmationContent.innerHTML = `
         <div class="summary-grid">
             <strong>First Name:</strong> <span>${data.firstName}</span>
@@ -179,6 +325,7 @@ function displayConfirmation(data) {
             <strong>Division:</strong> <span>${data.division || 'N/A'}</span>
             <strong>Mobile Number:</strong> <span>${data.mobileNo || 'N/A'}</span>
             <strong>Home/Work Number:</strong> <span>${data.homeNo || 'N/A'}</span>
+            ${sponsorHtml}
             <strong>Address:</strong> <span>${addressString}</span>
         </div>
     `;
@@ -192,7 +339,7 @@ function displayConfirmation(data) {
  */
 function handleAccountCreation() {
     const form = document.getElementById('account-creation-form');
-    if(!form) return;
+    if (!form) return;
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -251,6 +398,11 @@ function displaySummary(data) {
     const addressParts = [data.address.line1, data.address.line2, data.address.line3, data.address.parish, data.address.postCode];
     const addressString = addressParts.filter(part => part).join(', ');
 
+    let sponsorHtml = '';
+    if (data.sponsorId) {
+        sponsorHtml = `<strong>Sponsor:</strong> <span>${data.sponsorName}</span>`;
+    }
+
     summaryContent.innerHTML = `
         <p>Thank you for registering! Your registration for <strong>${teamName}</strong> has been submitted.</p>
         <hr>
@@ -263,10 +415,11 @@ function displaySummary(data) {
             <strong>Division:</strong> <span>${data.division || 'N/A'}</span>
             <strong>Mobile Number:</strong> <span>${data.mobileNo}</span>
             <strong>Home/Work Number:</strong> <span>${data.homeNo || 'N/A'}</span>
+            ${sponsorHtml}
             <strong>Address:</strong> <span>${addressString}</span>
         </div>
     `;
-    
+
     document.getElementById('confirmation-section').classList.add('hidden');
     document.getElementById('account-creation-section').classList.add('hidden');
     summarySection.classList.remove('hidden');
@@ -287,7 +440,7 @@ function setupNavigationButtons() {
         document.getElementById('confirmation-section').classList.add('hidden');
         document.getElementById('registration-container').classList.remove('hidden');
     });
-    
+
     registerNoAccountBtn?.addEventListener('click', () => {
         delete registrationData.authId; // Ensure no authId is sent
         submitRegistration();
@@ -315,7 +468,9 @@ function setupNavigationButtons() {
  */
 document.addEventListener('DOMContentLoaded', () => {
     populateTeamsDropdown();
+    setupTeamDropdownListener();
     setupDobInput();
+    setupSponsorDobInput();
     setupPhoneNumberInput('mobile-number');
     setupPhoneNumberInput('home-work-number');
     setupPostcodeInput();

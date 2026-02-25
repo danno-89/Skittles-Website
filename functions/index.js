@@ -31,9 +31,13 @@ setGlobalOptions({ maxInstances: 10 });
 //   response.send("Hello from Firebase!");
 // });
 
+const admin = require('firebase-admin');
+admin.initializeApp();
+
 const playerFunctions = require('./player-functions');
 const adminFunctions = require('./admin-functions');
 
 exports.registerPlayer = playerFunctions.registerPlayer;
+exports.verifySponsor = playerFunctions.verifySponsor;
 exports.sendAdminEmail = adminFunctions.sendAdminEmail;
 exports.handleUnsubscribe = adminFunctions.handleUnsubscribe;
