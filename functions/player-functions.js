@@ -3,22 +3,29 @@ const admin = require('firebase-admin');
 const db = admin.firestore();
 
 function parseDateToTimestamp(dateString) {
-    // Check if the dateString is already in a format that can be directly used by Date.parse,
-    // which is the case for the expiry date sent from the client.
-    if (Date.parse(dateString)) {
-        return admin.firestore.Timestamp.fromDate(new Date(dateString));
-    }
+    if (!dateString) return null;
 
-    // Handle the dd/mm/yyyy format for DOB
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const year = parseInt(parts[2], 10);
-        if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-            return admin.firestore.Timestamp.fromDate(new Date(year, month, day));
+    // Handle the dd/mm/yyyy format first for DOB parsing (strict check)
+    if (typeof dateString === 'string' && dateString.includes('/')) {
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JS Date
+            const year = parseInt(parts[2], 10);
+
+            // Validate the date naturally (e.g., month max 11, day max 31)
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                return admin.firestore.Timestamp.fromDate(new Date(year, month, day));
+            }
         }
     }
+
+    // Fallback if the date is sent from the client as an ISO string (e.g., expiryDate)
+    const parsedTime = Date.parse(dateString);
+    if (!isNaN(parsedTime)) {
+        return admin.firestore.Timestamp.fromDate(new Date(parsedTime));
+    }
+
     return null;
 }
 
