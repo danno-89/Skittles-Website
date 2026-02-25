@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'profile.html';
+                window.location.href = 'profile';
             } catch (error) {
                 console.error('Error logging in:', error);
                 loginMessageContainer.textContent = `Error: ${error.message}`;

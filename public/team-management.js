@@ -17,7 +17,7 @@ onAuthStateChanged(auth, async (user) => {
         }
     } else {
         // If no user is logged in, redirect to the login page
-        window.location.href = 'create.html?form=login';
+        window.location.href = 'create?form=login';
     }
 });
 
@@ -259,7 +259,7 @@ async function loadTeamResults(teamId) {
                     <td class="team-name ${fixture.awayTeamId === teamId ? 'highlight-green' : ''}">${awayTeamName}</td>
                     <td>${competitionName}</td>
                     <td>${round}</td>
-                    <td><a href="match_details.html?matchId=${fixture.id}&from=team-management" class="btn-details">View Details</a></td>
+                    <td><a href="match_details?matchId=${fixture.id}&from=team-management" class="btn-details">View Details</a></td>
                 </tr>
             `;
         }).join('');
@@ -457,3 +457,4 @@ async function initializePageData(publicData) { // Updated to accept publicData
     loadTeamFixtures(teamId);
     loadTeamResults(teamId);
 }
+

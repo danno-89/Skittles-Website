@@ -318,7 +318,7 @@ function renderAverages() {
 
         tableHTML += `<tr class="${rowClass.trim()}">
             <td>${rankDisplay}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
+            <td class="profile-icon-cell"><a href="public-profile?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
             <td class="player-col">${player.name}</td>
             <td class="team-col">${player.teamName}</td>
             <td class="division-col">${player.division}</td>
@@ -357,7 +357,7 @@ function renderSpares() {
         if (lastPlayerStats && player.spares === lastPlayerStats.spares && player.extraPins === lastPlayerStats.extraPins) rank = `=`;
         tableHTML += `<tr>
             <td>${rank}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
+            <td class="profile-icon-cell"><a href="public-profile?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
             <td class="player-col">${player.name}</td>
             <td class="team-col">${player.teamName}</td>
             <td class="main-stat">${player.spares}</td>
@@ -393,7 +393,7 @@ function renderHighScores() {
         if (lastScore && player.score === lastScore) rank = `=`;
         tableHTML += `<tr>
             <td>${rank}</td>
-            <td class="profile-icon-cell"><a href="public-profile.html?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
+            <td class="profile-icon-cell"><a href="public-profile?playerId=${player.playerId}"><icon-component name="user-id"></icon-component></a></td>
             <td class="player-col">${player.name}</td>
             <td class="team-col">${player.teamName}</td>
             <td class="main-stat">${player.score}</td>
@@ -473,3 +473,4 @@ async function initializePage() {
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
+

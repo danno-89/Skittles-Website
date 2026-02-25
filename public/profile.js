@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
     authReady.then(async ({ user, publicData, privateData }) => {
         const profileForm = document.getElementById('profile-form');
         if (!user) {
-            profileForm.innerHTML = `<div class="page-header"><h1>My Profile</h1></div><div class="card"><p>Please log in to view your profile.</p><a href="/index.html" class="btn btn-primary">Log In</a></div>`;
+            profileForm.innerHTML = `<div class="page-header"><h1>My Profile</h1></div><div class="card"><p>Please log in to view your profile.</p><a href="/index" class="btn btn-primary">Log In</a></div>`;
             return;
         }
 
@@ -373,3 +373,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Error initializing profile page:", error);
     });
 });
+

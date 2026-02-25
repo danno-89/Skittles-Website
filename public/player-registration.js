@@ -305,7 +305,7 @@ function setupNavigationButtons() {
     });
 
     closeSummaryBtn?.addEventListener('click', () => {
-        window.location.href = '/index.html'; // Redirect to home page
+        window.location.href = '/index'; // Redirect to home page
     });
 }
 

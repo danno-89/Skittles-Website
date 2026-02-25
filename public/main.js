@@ -50,7 +50,7 @@ function setupSignOutListeners() {
             e.preventDefault();
             signOut(auth).then(() => {
                 alert("You have been signed out.");
-                window.location.href = '/index.html';
+                window.location.href = '/index';
             }).catch(console.error);
         });
     });
@@ -198,3 +198,4 @@ authReady.then(({ user, publicData }) => {
         if (skittlesHubTitle) skittlesHubTitle.style.display = 'none';
     }
 });
+

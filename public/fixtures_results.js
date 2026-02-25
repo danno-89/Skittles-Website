@@ -247,7 +247,7 @@ function renderFixturesTable(fixtures, containerId) {
                     let homeTeamHtml = homeTeamName;
                     let awayTeamHtml = awayTeamName;
                     let status = match.status || (hasResult ? 'completed' : 'scheduled');
-                    let statusCell = `<a href="match_details.html?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>`;
+                    let statusCell = `<a href="match_details?matchId=${match.id}&from=fixtures" class="details-link"><icon-component name="notebook"></icon-component></a>`;
 
                     if (hasResult) {
                         const homeScore = parseInt(match.homeScore, 10);
@@ -452,3 +452,4 @@ async function initializePage() {
 }
 
 initializePage();
+

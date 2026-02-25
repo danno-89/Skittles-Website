@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     messageContainer.textContent = "Could not find user details to link. Please start again.";
                 }
             } else {
-                window.location.href = 'create.html';
+                window.location.href = 'create';
             }
         });
     }
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (successfulVerifications >= 2) {
                 await updateDoc(privateDocRef, { authId: currentUser.uid });
                 messageContainer.textContent = "Account linked successfully! You will be redirected to your profile.";
-                setTimeout(() => { window.location.href = 'profile.html'; }, 3000);
+                setTimeout(() => { window.location.href = 'profile'; }, 3000);
             } else {
                 messageContainer.textContent = "The verification details did not match our records. Please try again.";
             }
