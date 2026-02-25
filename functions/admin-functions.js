@@ -1,4 +1,5 @@
-const functions = require('firebase-functions');
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const v1functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 
@@ -10,8 +11,8 @@ const db = admin.firestore();
 // User will need to set: firebase functions:config:set gmail.email="user@gmail.com" gmail.password="app-password"
 const getSchema = () => {
     return {
-        email: functions.config().gmail?.email,
-        password: functions.config().gmail?.password
+        email: v1functions.config().gmail?.email,
+        password: v1functions.config().gmail?.password
     };
 };
 
@@ -39,17 +40,17 @@ async function isCommitteeMember(uid) {
     return userDoc.exists && userDoc.data().committee === true;
 }
 
-exports.sendAdminEmail = functions.https.onCall(async (data, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
+exports.sendAdminEmail = onCall({ region: "europe-west1" }, async (request) => {
+    if (!request.auth) {
+        throw new HttpsError('unauthenticated', 'User must be logged in.');
     }
 
-    const { subject, body, testMode } = data;
+    const { subject, body, testMode } = request.data;
 
     // 1. Verify Authorization
-    const authorized = await isCommitteeMember(context.auth.uid);
+    const authorized = await isCommitteeMember(request.auth.uid);
     if (!authorized) {
-        throw new functions.https.HttpsError('permission-denied', 'Only committee members can send emails.');
+        throw new HttpsError('permission-denied', 'Only committee members can send emails.');
     }
 
     const transporter = createTransporter();
@@ -61,7 +62,7 @@ exports.sendAdminEmail = functions.https.onCall(async (data, context) => {
     let recipients = [];
     if (testMode) {
         // Send only to the caller
-        recipients.push({ email: context.auth.token.email, id: context.auth.uid });
+        recipients.push({ email: request.auth.token.email, id: request.auth.uid });
     } else {
         // Fetch all consenting players
         // We need to query players_private where consent is NOT 'No'
@@ -121,10 +122,10 @@ exports.sendAdminEmail = functions.https.onCall(async (data, context) => {
     return { success: true, sent: sentCount, errors: errors };
 });
 
-exports.handleUnsubscribe = functions.https.onCall(async (data, context) => {
-    const { uid } = data;
+exports.handleUnsubscribe = onCall({ region: "europe-west1" }, async (request) => {
+    const { uid } = request.data;
     if (!uid) {
-        throw new functions.https.HttpsError('invalid-argument', 'Missing User ID.');
+        throw new HttpsError('invalid-argument', 'Missing User ID.');
     }
 
     try {
@@ -134,6 +135,6 @@ exports.handleUnsubscribe = functions.https.onCall(async (data, context) => {
         return { success: true };
     } catch (error) {
         console.error("Unsubscribe failed:", error);
-        throw new functions.https.HttpsError('internal', 'Failed to update subscription status.');
+        throw new HttpsError('internal', 'Failed to update subscription status.');
     }
 });

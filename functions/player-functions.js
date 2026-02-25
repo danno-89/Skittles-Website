@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require('firebase-admin');
 const db = admin.firestore();
 
@@ -57,8 +57,8 @@ async function generateUniquePlayerId(firstName, lastName) {
     return `${baseId}${paddedNumber}`;
 }
 
-exports.verifySponsor = functions.https.onCall(async (data, context) => {
-    const { sponsorId, sponsorDob } = data;
+exports.verifySponsor = onCall({ region: "europe-west1" }, async (request) => {
+    const { sponsorId, sponsorDob } = request.data;
 
     if (!sponsorId || !sponsorDob) {
         return { success: false, error: 'Missing sponsor details.' };
@@ -99,14 +99,14 @@ exports.verifySponsor = functions.https.onCall(async (data, context) => {
     }
 });
 
-exports.registerPlayer = functions.https.onCall(async (data, context) => {
+exports.registerPlayer = onCall({ region: "europe-west1" }, async (request) => {
     let {
         firstName, lastName, teamId, division, address, dob, email, homeNo, mobileNo, authId, sponsorId, sponsorName
-    } = data;
+    } = request.data;
 
     const dobTimestamp = parseDateToTimestamp(dob);
     if (!dobTimestamp) {
-        throw new functions.https.HttpsError('invalid-argument', 'Invalid date of birth format. Please use dd/mm/yyyy.');
+        throw new HttpsError('invalid-argument', 'Invalid date of birth format. Please use dd/mm/yyyy.');
     }
 
     const registrationDate = new Date();
