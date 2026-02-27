@@ -258,23 +258,13 @@ const renderCompetitionDetails = (eventData, competitionName, registrations, com
             const listItem = document.createElement('li');
 
             // Player 1
-            let player1HTML;
             const player1Team = entry.player1Team ? ` (${entry.player1Team})` : '';
-            if (entry.player1PublicId) {
-                player1HTML = `<span class="player-name">${entry.player1Name}</span>${player1Team}`;
-            } else {
-                player1HTML = `${entry.player1Name}${player1Team}`;
-            }
+            const player1HTML = `<span class="player-name">${entry.player1Name}</span>${player1Team}`;
 
             // Player 2 (check if it exists for pairs competitions)
             if (entry.player2Name) {
-                let player2HTML;
                 const player2Team = entry.player2Team ? ` (${entry.player2Team})` : '';
-                if (entry.player2PublicId) {
-                    player2HTML = `<span class="player-name">${entry.player2Name}</span>${player2Team}`;
-                } else {
-                    player2HTML = `${entry.player2Name}${player2Team}`;
-                }
+                const player2HTML = `<span class="player-name">${entry.player2Name}</span>${player2Team}`;
                 listItem.innerHTML = `<span>${player1HTML} & ${player2HTML}</span>`;
             } else {
                 // Only display Player 1 for singles competitions
