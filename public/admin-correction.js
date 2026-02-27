@@ -21,7 +21,7 @@ export async function initCorrectionTool() {
 
     await fetchTeams();
     await populateSeasons(seasonSelect, divisionSelect);
-    
+
     seasonSelect.addEventListener('change', () => populateDivisions(seasonSelect.value, divisionSelect));
 
     generateBtn.addEventListener('click', () => generateCorrectedTable(seasonSelect.value, divisionSelect.value, correctionContainer, currentTableContainer, correctedTableContainer, confirmBtn));
@@ -38,12 +38,12 @@ async function fetchTeams() {
 async function populateSeasons(seasonSelect, divisionSelect) {
     const seasonsSnapshot = await getDocs(collection(db, 'league_tables'));
     const seasons = [...new Set(seasonsSnapshot.docs.map(doc => doc.id))].sort((a, b) => b.localeCompare(a));
-    
+
     seasonSelect.innerHTML = '<option value="">Select a Season</option>';
     seasons.forEach(seasonId => {
         const option = document.createElement('option');
-        option.value = seasonId; 
-        option.textContent = seasonId.replace('-', ' - '); 
+        option.value = seasonId;
+        option.textContent = seasonId.replace('-', ' - ');
         seasonSelect.appendChild(option);
     });
 
@@ -63,7 +63,7 @@ async function populateDivisions(season, divisionSelect) {
     if (leagueDocSnap.exists()) {
         const data = leagueDocSnap.data();
         const divisions = Object.keys(data)
-            .filter(key => key !== 'season') 
+            .filter(key => key !== 'season')
             .map(key => ({ id: key, name: data[key].leagueName || key }));
 
         divisions
@@ -93,13 +93,13 @@ async function generateCorrectedTable(season, division, correctionContainer, cur
     renderTable(currentTable, currentTableContainer, 'Current');
 
     const completedMatches = await fetchCompletedMatches(season, division);
-    
+
     correctedTableData = recalculateTable(completedMatches, currentTable);
     renderTable(correctedTableData, correctedTableContainer, 'Corrected', currentTable);
 
     const sortFn = (a, b) => (a.id || a.teamId).localeCompare(b.id || b.teamId);
-    const currentSorted = JSON.stringify(currentTable.map(t => ({...t, teamName: undefined})).sort(sortFn));
-    const correctedSorted = JSON.stringify(correctedTableData.map(t => ({...t, teamName: undefined})).sort(sortFn));
+    const currentSorted = JSON.stringify(currentTable.map(t => ({ ...t, teamName: undefined })).sort(sortFn));
+    const correctedSorted = JSON.stringify(correctedTableData.map(t => ({ ...t, teamName: undefined })).sort(sortFn));
 
     if (currentSorted !== correctedSorted) {
         confirmBtn.style.display = 'block';
@@ -115,7 +115,7 @@ async function fetchCurrentTable(season, division) {
         if (data[division] && data[division].standings) {
             return data[division].standings.map(team => ({
                 ...team,
-                id: team.teamId, 
+                id: team.teamId,
                 teamName: teamsMap.get(team.teamId) || 'Unknown'
             }));
         }
@@ -138,7 +138,7 @@ function recalculateTable(matches, currentTable) {
     const newTableMap = new Map();
     currentTable.forEach(team => {
         const teamId = team.id || team.teamId;
-        newTableMap.set(teamId, { id: teamId, played: 0, won: 0, drawn: 0, lost: 0, points: 0, pinsFor: 0, pinsAgainst: 0 });
+        newTableMap.set(teamId, { id: teamId, played: 0, won: 0, drawn: 0, lost: 0, points: 0, pinsFor: 0, pinsAgainst: 0, max_score: 0 });
     });
 
     matches.forEach(match => {
@@ -174,6 +174,10 @@ function updateTeamStats(team, result, points, scoreFor, scoreAgainst) {
     team.points += points;
     team.pinsFor += scoreFor;
     team.pinsAgainst += scoreAgainst;
+
+    if (!team.max_score || scoreFor > team.max_score) {
+        team.max_score = scoreFor;
+    }
 }
 
 function renderTable(data, container, type, comparisonData = null) {
@@ -187,7 +191,7 @@ function renderTable(data, container, type, comparisonData = null) {
     sortedData.forEach(team => {
         const row = document.createElement('tr');
         const teamName = teamsMap.get(team.id) || 'Unknown';
-        
+
         row.innerHTML = `
             <td>${teamName}</td>
             <td>${team.played}</td>
@@ -230,8 +234,8 @@ async function confirmUpdate(season, division) {
 
     try {
         const dataToUpdate = correctedTableData.map(team => {
-            const { teamName, ...rest } = team; 
-            return { ...rest, teamId: team.id }; 
+            const { teamName, ...rest } = team;
+            return { ...rest, teamId: team.id };
         });
 
         const updatePayload = {};

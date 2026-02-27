@@ -772,37 +772,37 @@ function updateLeagueTable(fixture, results, standings) {
 
     // Determine winner and points
     let homePoints = 0, awayPoints = 0;
+    let homeResult = 'lost', awayResult = 'lost';
     if (homeScore > awayScore) {
         homePoints = 2; // Win
+        homeResult = 'won';
     } else if (awayScore > homeScore) {
         awayPoints = 2; // Win
+        awayResult = 'won';
     } else {
         homePoints = 1; // Draw
         awayPoints = 1;
-    }
-
-    // Bonus point for bowled first - ONLY if not a walkover
-    if (!results.walkover) {
-        if (bowledFirst === homeTeamId && homeScore < awayScore) {
-            homePoints++;
-        } else if (bowledFirst === awayTeamId && awayScore < homeScore) {
-            awayPoints++;
-        }
+        homeResult = 'drawn';
+        awayResult = 'drawn';
     }
 
     // Update team stats
-    const updateTeamStats = (team, points, scoreFor, scoreAgainst) => {
+    const updateTeamStats = (team, result, points, scoreFor, scoreAgainst) => {
         team.played = (team.played || 0) + 1;
-        team.won = (team.won || 0) + (points >= 2 ? 1 : 0);
-        team.drawn = (team.drawn || 0) + (points === 1 ? 1 : 0);
-        team.lost = (team.lost || 0) + (points < 1 ? 1 : 0);
+        team.won = (team.won || 0) + (result === 'won' ? 1 : 0);
+        team.drawn = (team.drawn || 0) + (result === 'drawn' ? 1 : 0);
+        team.lost = (team.lost || 0) + (result === 'lost' ? 1 : 0);
         team.points = (team.points || 0) + points;
         team.pinsFor = (team.pinsFor || 0) + scoreFor;
         team.pinsAgainst = (team.pinsAgainst || 0) + scoreAgainst;
+
+        if (!team.max_score || scoreFor > team.max_score) {
+            team.max_score = scoreFor;
+        }
     };
 
-    if (homeTeam) updateTeamStats(homeTeam, homePoints, homeScore, awayScore);
-    if (awayTeam) updateTeamStats(awayTeam, awayPoints, awayScore, homeScore);
+    if (homeTeam) updateTeamStats(homeTeam, homeResult, homePoints, homeScore, awayScore);
+    if (awayTeam) updateTeamStats(awayTeam, awayResult, awayPoints, awayScore, homeScore);
 
     return standings;
 }
