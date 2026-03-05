@@ -1,0 +1,17 @@
+{
+    "name": "Sarnia Skittles Club",
+    "short_name": "Skittles Club",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1f2937",
+    "theme_color": "#2563eb",
+    "description": "Your home for skittles in Guernsey, providing league and tournament fixtures for players of all abilities.",
+    "icons": [
+        {
+            "src": "/SSC%20Logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
