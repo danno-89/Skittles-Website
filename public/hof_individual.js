@@ -115,9 +115,9 @@ const loadWinners = async (competitionId) => {
             statsContent.innerHTML = '<p>Statistics are not applicable for this view.</p>';
         } else {
             renderAsTable(currentWinners, competitionName);
-            const winCounts = getWinCounts(currentWinners);
-            renderStatistics(winCounts);
-            renderDetailedWinnersList(winCounts);
+            const playerStats = getPlayerStats(currentWinners);
+            renderStatistics(playerStats);
+            renderDetailedWinnersList(playerStats);
         }
     } catch (error) {
         console.error(`Error loading winners for ${competitionId}:`, error);
@@ -169,10 +169,10 @@ const renderDivisionTable = (winnersArray, competitionName, divisionFilterValue 
         : [divisionFilterValue];
 
     const tableContainer = document.createElement('div');
-    tableContainer.className = 'winners-table-container';
+    tableContainer.className = 'table-container';
 
     const table = document.createElement('table');
-    table.className = 'division-winner-table';
+    table.className = 'styled-table';
     const thead = table.createTHead();
     const headerRow = thead.insertRow();
     headerRow.innerHTML = `<th>Season</th>`;
@@ -198,76 +198,193 @@ const renderAsTable = (winnersArray, competitionName) => {
     hallOfFameContainer.appendChild(heading);
 
     const tableContainer = document.createElement('div');
-    tableContainer.className = 'winners-table-container';
+    tableContainer.className = 'table-container';
 
     const table = document.createElement('table');
-    table.className = 'winners-table';
+    table.className = 'styled-table';
+    
     const thead = table.createTHead();
-    thead.innerHTML = '<tr><th>Season</th><th>Winner</th></tr>';
+    thead.innerHTML = '<tr><th>Season</th><th>Winner</th><th>Runner-Up</th></tr>';
+    
     const tbody = table.createTBody();
 
     winnersArray.forEach(entry => {
         const row = tbody.insertRow();
         const winnerText = entry.winner || 'N/A';
-        row.innerHTML = `<td>${entry.season}</td><td>${winnerText}</td>`;
+        const runnerUpText = entry['runner-up'] || entry.runnerUp || '-';
+        
+        row.innerHTML = `
+            <td><strong>${entry.season}</strong></td>
+            <td style="font-weight: bold; color: var(--club-green);">${winnerText}</td>
+            <td style="color: var(--medium-grey);">${runnerUpText}</td>
+        `;
     });
-    tableContainer.appendChild(table)
+    
+    tableContainer.appendChild(table);
     hallOfFameContainer.appendChild(tableContainer);
 };
 
-const renderStatistics = (winCounts) => {
-    if (winCounts.size === 0) {
+const renderStatistics = (playerStats) => {
+    if (playerStats.size === 0) {
         statsContent.innerHTML = '<p>No winners to calculate stats for.</p>';
         return;
     }
-    const sortedWinners = [...winCounts.entries()].sort((a, b) => b[1] - a[1]);
-    const maxWins = sortedWinners.length > 0 ? sortedWinners[0][1] : 0;
-    const mostSuccessful = sortedWinners.filter(w => w[1] === maxWins);
+    
+    const players = [...playerStats.entries()];
+    
+    const maxWins = Math.max(...players.map(p => p[1].wins));
+    const mostWinsPlayers = players.filter(p => p[1].wins === maxWins && maxWins > 0);
+    
+    const maxRunnerUps = Math.max(...players.map(p => p[1].runnerUps));
+    const mostRunnerUpsPlayers = players.filter(p => p[1].runnerUps === maxRunnerUps && maxRunnerUps > 0);
+
+    const maxFinals = Math.max(...players.map(p => p[1].total));
+    const mostFinalsPlayers = players.filter(p => p[1].total === maxFinals && maxFinals > 0);
+
+    const maxGap = Math.max(...players.map(p => p[1].maxGap));
+    const maxGapPlayers = players.filter(p => p[1].maxGap === maxGap && maxGap > 0);
+
+    const maxWinGap = Math.max(...players.map(p => p[1].maxWinGap));
+    const maxWinGapPlayers = players.filter(p => p[1].maxWinGap === maxWinGap && maxWinGap > 0);
+
+    const maxStreak = Math.max(...players.map(p => p[1].maxStreak));
+    const maxStreakPlayers = players.filter(p => p[1].maxStreak === maxStreak && maxStreak > 1);
+
+    const perfectPlayers = players.filter(p => p[1].perfectRecord);
+
+    const formatPlayerList = (list, count, suffix = '') => {
+        if (list.length === 0 || count === 0) return '-';
+        const namesText = list.map(p => p[0]).join(', ');
+        return `${count}${suffix} <span style="font-weight: normal; color: var(--charcoal);">- ${namesText}</span>`;
+    };
+
+    const totalUniqueWinners = players.filter(p => p[1].wins > 0).length;
+
     statsContent.innerHTML = `
-        <div class="stat-item"><strong>Total Unique Winners:</strong><span>${winCounts.size}</span></div>
-        <div class="stat-item"><strong>Most Wins:</strong><span>${mostSuccessful.map(w => `${w[0]} (${w[1]})`).join(', ')}</span></div>`;
+        <div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Total Unique Winners:</strong><span style="align-self: flex-start;">${totalUniqueWinners}</span></div>
+        <div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Most Wins:</strong><span style="align-self: flex-start;">${formatPlayerList(mostWinsPlayers, maxWins)}</span></div>
+        <div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Most Runner-Up Finishes:</strong><span style="align-self: flex-start;">${formatPlayerList(mostRunnerUpsPlayers, maxRunnerUps)}</span></div>
+        <div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Most Finals Appearances:</strong><span style="align-self: flex-start;">${formatPlayerList(mostFinalsPlayers, maxFinals)}</span></div>
+        ${maxStreak > 1 ? `<div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Longest Finals Streak:</strong><span style="align-self: flex-start;">${formatPlayerList(maxStreakPlayers, maxStreak, ' consecutive seasons')}</span></div>` : ''}
+        ${maxGap > 0 ? `<div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Longest Wait Between Finals:</strong><span style="align-self: flex-start;">${formatPlayerList(maxGapPlayers, maxGap, ' seasons')}</span></div>` : ''}
+        ${maxWinGap > 0 ? `<div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Longest Wait Between Wins:</strong><span style="align-self: flex-start;">${formatPlayerList(maxWinGapPlayers, maxWinGap, ' seasons')}</span></div>` : ''}
+        ${perfectPlayers.length > 0 ? `<div class="stat-item" style="flex-direction: column; align-items: flex-start;"><strong style="padding-bottom: 4px;">Undefeated in Finals (2+ apps):</strong><span style="align-self: flex-start; font-size: 0.9em;">${formatPlayerList(perfectPlayers, '100% Win Rate')}</span></div>` : ''}
+    `;
 };
 
-const renderDetailedWinnersList = (winCounts) => {
+const renderDetailedWinnersList = (playerStats) => {
     detailedWinnersContainer.innerHTML = '';
-    if (winCounts.size === 0) return;
+    if (playerStats.size === 0) return;
 
     const heading = document.createElement('h2');
-    heading.textContent = 'All Winners by Wins';
+    heading.textContent = 'Finals Record';
     detailedWinnersContainer.appendChild(heading);
 
-    const winnersByCount = [...winCounts.entries()].reduce((acc, [winner, count]) => {
-        (acc[count] = acc[count] || []).push(winner);
-        return acc;
-    }, {});
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+    
+    const table = document.createElement('table');
+    table.className = 'styled-table';
+    table.style.fontSize = '0.9rem';
+    
+    const thead = table.createTHead();
+    thead.innerHTML = '<tr><th>Player</th><th style="text-align: center;">🏆</th><th style="text-align: center;">🥈</th><th style="text-align: center;">Total</th></tr>';
+    
+    const tbody = table.createTBody();
 
-    Object.keys(winnersByCount).sort((a, b) => b - a).forEach(count => {
-        const groupContainer = document.createElement('div');
-        groupContainer.className = 'winner-group';
-        const groupHeading = document.createElement('h3');
-        groupHeading.textContent = `${count} ${count > 1 ? 'Wins' : 'Win'}`;
-        groupContainer.appendChild(groupHeading);
-
-        const list = document.createElement('ul');
-        list.className = 'detailed-winner-list';
-        winnersByCount[count].sort().forEach(winner => {
-            const listItem = document.createElement('li');
-            listItem.textContent = winner;
-            list.appendChild(listItem);
-        });
-        groupContainer.appendChild(list);
-        detailedWinnersContainer.appendChild(groupContainer);
+    const sortedPlayers = [...playerStats.entries()].sort((a, b) => {
+        if (b[1].wins !== a[1].wins) return b[1].wins - a[1].wins;
+        if (b[1].runnerUps !== a[1].runnerUps) return b[1].runnerUps - a[1].runnerUps;
+        return a[0].localeCompare(b[0]);
     });
+
+    sortedPlayers.forEach(([name, stats]) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><strong>${name}</strong></td>
+            <td style="text-align: center; color: var(--club-green); font-weight: bold;">${stats.wins || '-'}</td>
+            <td style="text-align: center; color: var(--medium-grey);">${stats.runnerUps || '-'}</td>
+            <td style="text-align: center; font-weight: bold;">${stats.total}</td>
+        `;
+    });
+
+    tableContainer.appendChild(table);
+    detailedWinnersContainer.appendChild(tableContainer);
 };
 
-function getWinCounts(winnersArray) {
-    return winnersArray.reduce((acc, entry) => {
-        const winnerName = entry.winner;
-        if (winnerName && typeof winnerName === 'string') {
-            acc.set(winnerName, (acc.get(winnerName) || 0) + 1);
+function getPlayerStats(winnersArray) {
+    const stats = new Map();
+    
+    winnersArray.forEach(entry => {
+        const winner = entry.winner;
+        const runnerUp = entry['runner-up'] || entry.runnerUp;
+        const startYearMatch = (entry.season || '').match(/^(\d{4})/);
+        const year = startYearMatch ? parseInt(startYearMatch[1], 10) : null;
+
+        const initPlayer = (name) => {
+            if (!stats.has(name)) {
+                stats.set(name, { wins: 0, runnerUps: 0, total: 0, appearances: [], winSeasons: [] });
+            }
+        };
+
+        if (winner && typeof winner === 'string') {
+            initPlayer(winner);
+            stats.get(winner).wins += 1;
+            stats.get(winner).total += 1;
+            if (year) {
+                stats.get(winner).appearances.push(year);
+                stats.get(winner).winSeasons.push(year);
+            }
         }
-        return acc;
-    }, new Map());
+
+        if (runnerUp && typeof runnerUp === 'string') {
+             initPlayer(runnerUp);
+             stats.get(runnerUp).runnerUps += 1;
+             stats.get(runnerUp).total += 1;
+             if (year) stats.get(runnerUp).appearances.push(year);
+        }
+    });
+
+    stats.forEach((data, name) => {
+        data.appearances.sort((a, b) => a - b);
+        data.winSeasons.sort((a, b) => a - b);
+        
+        let maxGap = 0;
+        let currentStreak = 1;
+        let maxStreak = 1;
+        let maxWinGap = 0;
+
+        for (let i = 1; i < data.appearances.length; i++) {
+            const gap = data.appearances[i] - data.appearances[i-1];
+            if (gap > maxGap) {
+                maxGap = gap;
+            }
+            if (gap === 1 || gap === 2) { 
+                if (gap === 1) {
+                    currentStreak++;
+                }
+                if (currentStreak > maxStreak) {
+                    maxStreak = currentStreak;
+                }
+            } else {
+                currentStreak = 1;
+            }
+        }
+
+        for (let i = 1; i < data.winSeasons.length; i++) {
+            const gap = data.winSeasons[i] - data.winSeasons[i-1];
+            if (gap > maxWinGap) {
+                maxWinGap = gap;
+            }
+        }
+        
+        data.maxGap = maxGap;
+        data.maxWinGap = maxWinGap;
+        data.maxStreak = data.appearances.length > 0 ? maxStreak : 0;
+        data.perfectRecord = (data.total > 1 && data.wins === data.total);
+    });
+
+    return stats;
 }
 
 // --- SCRIPT EXECUTION ---
