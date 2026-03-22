@@ -45,6 +45,12 @@
 
 html {
     font-size: 100%;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
@@ -56,7 +62,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden; 
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* --- Base & Typography --- */

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'skittles-app-cache-v5';
+const CACHE_NAME = 'skittles-app-cache-v6';
 const urlsToCache = [
   '/',
   '/index.html',
