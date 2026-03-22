@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="main-page.css">
     <link rel="stylesheet" href="countdown.css">
+    <link rel="stylesheet" href="tables.css">
+    <link rel="stylesheet" href="tabs.css">
     <link rel="icon" type="image/png" href="SSC%20Logo.png">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/SSC%20Logo.png">
@@ -20,17 +22,21 @@
     <div w3-include-html="navigation.html"></div>
     
     <main>
-        <div class="page-header">
-            <h1>Welcome to the Sarnia Skittles Club</h1>
-            <a href="player-registration" class="btn btn-cta">Register Now</a>
+        <div class="hero-banner" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('skittles-hero.jpg');">
+            <div class="hero-content">
+                <h1>Welcome to the Sarnia Skittles Club</h1>
+                <p class="hero-intro">The home of Guernsey Skittles.</p>
+                <div class="hero-buttons">
+                    <a href="player-registration" class="btn btn-cta">Register Now</a>
+                    <a href="create" class="btn btn-primary">Skittles Hub</a>
+                </div>
+            </div>
         </div>
-
-        <p class="page-intro">Your home for skittles in Guernsey, providing league and tournament fixtures for players of all abilities.</p>
 
         <div class="main-grid">
 
             <div class="main-content">
-                <section class="content-section card">
+                <section class="content-section card" style="display: none;">
                     <h2>Individual and Pairs Competitions Now Open!</h2>
                     <div id="news-container">
                         <p>Registration for the Individual and Pairs Competitions is now open.</p>
@@ -41,6 +47,51 @@
                         </div>
                     </div>
                 </section>
+
+                <section class="content-section card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--club-yellow); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">League Standings</h2>
+                        <a href="league-tables" class="btn btn-details">Full Tables</a>
+                    </div>
+                    
+                    <div id="mini-league-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);"></div>
+                </section>
+
+                <section class="content-section card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--club-yellow); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                        <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">Recent Results & Upcoming Fixtures</h2>
+                        <a href="fixtures-results" class="btn btn-details">Full Fixtures</a>
+                    </div>
+                    
+                    <div id="mini-fixtures-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+                        <div>
+                            <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--club-green); font-size: 1.2rem;">Recent Results</h3>
+                            <div id="mini-results-list"></div>
+                        </div>
+                        <div>
+                            <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--club-green); font-size: 1.2rem;">Upcoming Fixtures</h3>
+                            <div id="mini-fixtures-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-section card" id="updates-card">
+                    <h2>Website Updates</h2>
+                    <div class="update-list">
+                        <div class="update-item">
+                            <span class="update-date">Mar 22, 2026</span>
+                            <p><strong>Homepage Refresh:</strong> Added the new Skittles Hub quick-access button and a "Website Updates" timeline.</p>
+                        </div>
+                        <div class="update-item">
+                            <span class="update-date">Feb 27, 2026</span>
+                            <p><strong>League Tables Fixed:</strong> The "Highest Score" column is now displaying properly and bonus bugs were resolved.</p>
+                        </div>
+                        <div class="update-item">
+                            <span class="update-date">Feb 25, 2026</span>
+                            <p><strong>Mobile Fixes:</strong> Addressed a few layout quirks on mobile devices and spacing on the U18 content.</p>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <aside class="sidebar-right">
@@ -48,21 +99,11 @@
                     <h2>Next Competition Countdown</h2>
                     <div id="countdown"></div>
                 </section>
-                <div class="action-box-card">
-                    <h2>Get Started</h2>
-                    <div class="action-item">
-                        <p>Ready to play?</p>
-                        <a href="player-registration" class="btn btn-info">Register Here</a>
-                    </div>
-                    <div class="action-item">
-                        <p>Registered but don't have an account?</p>
-                        <a href="create" class="btn btn-cta">Create Account</a>
-                    </div>
-                    <div class="action-item">
-                        <p>Already have an account?</p>
-                        <a href="create" class="btn btn-primary">Login</a>
-                    </div>
-                </div>
+
+                <section class="content-section card" id="postponed-card">
+                    <h2>Outstanding Postponements</h2>
+                    <div id="mini-postponed-list"></div>
+                </section>
             </aside>
         </div>
     </main>
@@ -73,6 +114,8 @@
 <script type="module" src="auth-manager.js"></script>
 <script type="module" src="main.js"></script>
 <script type="module" src="countdown.js"></script>
+<script type="module" src="mini-league.js"></script>
+<script type="module" src="mini-fixtures.js"></script>
 </body>
 </html>
 
