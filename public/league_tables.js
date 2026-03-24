@@ -143,11 +143,12 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                 const winPercentage = team.played > 0 ? `${((team.won / team.played) * 100).toFixed(1)}%` : '-';
                 const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '-';
 
-                let displayName = team.teamName;
+                const teamLink = `<a href="public-team-profile.html?teamId=${team.teamId}&returnUrl=${encodeURIComponent(window.location.href)}" class="team-profile-link" style="text-decoration: none; color: inherit; font-weight: inherit;">${team.teamName}</a>`;
+                let displayName = teamLink;
                 if (team.teamId === championTeamId) {
-                    displayName = `<span style="font-weight: bold;">${team.teamName} <span title="League Champions!" style="color: #d4af37; margin-left: 5px;">🏆</span></span>`;
+                    displayName = `<span style="font-weight: bold;">${teamLink} <span title="League Champions!" style="color: #d4af37; margin-left: 5px;">🏆</span></span>`;
                 } else if (team.teamId === relegatedTeamId) {
-                    displayName = `<span style="color: var(--danger);">${team.teamName} <span title="Relegated" style="margin-left: 5px;">🔽</span></span>`;
+                    displayName = `<span style="color: var(--danger);">${teamLink} <span title="Relegated" style="margin-left: 5px;">🔽</span></span>`;
                 }
 
                 row.append(

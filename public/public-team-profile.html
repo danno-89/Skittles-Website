@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarnia Skittles Club - Team Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile-page.css">
+    <link rel="stylesheet" href="tabs.css">
+    <link rel="icon" type="image/png" href="SSC%20Logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/SSC%20Logo.png">
+    <meta name="theme-color" content="#1f2937">
+</head>
+<body>
+
+    <div w3-include-html="header.html"></div>
+
+    <div class="container">
+        <div w3-include-html="navigation.html"></div>
+
+        <main id="profile-form">
+            <div class="page-header">
+                <div class="header-title-container">
+                    <h1 id="stats-team-name-header">Team Profile</h1>
+                    <h3 id="stats-division-header" style="margin-left: 12px; color: var(--medium-grey); font-weight: normal;"></h3>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="season-filter" class="form-select" style="padding: 0.5rem; border-radius: 4px; border: 1px solid var(--medium-grey);"></select>
+                    <a href="#" id="back-btn" class="btn btn-primary">← Back</a>
+                </div>
+            </div>
+
+            <div id="statistics-content" class="tab-pane active" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div class="stats-main" style="flex: 1 1 65%; min-width: 300px;">
+                    <div id="main-stats-grid" class="stats-summary-grid">
+                        <!-- Main stat boxes will be inserted here by JavaScript -->
+                    </div>
+                    <div id="streak-stats-grid" class="stats-summary-grid">
+                        <!-- Additional stat boxes will be inserted here by JavaScript -->
+                    </div>
+                    <div class="stats-results-table">
+                        <!-- Detailed results table will be inserted here by JavaScript -->
+                    </div>
+                </div>
+                <div class="stats-sidebar" style="flex: 1 1 25%; min-width: 250px;">
+                    <div id="awards-section" class="stat-box" style="text-align: left; position: sticky; top: 20px; box-shadow: var(--shadow-elevation-medium);">
+                        <h3 style="margin-top: 0; color: #d4af37; border-bottom: 2px solid #d4af37; padding-bottom: 10px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>🏆</span> Team Awards <span>🏆</span>
+                        </h3>
+                        <div id="awards-list" style="margin-top: 15px;">
+                            <!-- Awards will be dynamically populated -->
+                            <p style="text-align: center; color: var(--medium-grey);">Loading awards...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div w3-include-html="footer.html"></div>
+    
+    <script type="module" src="main.js"></script>
+    <script type="module" src="firebase.config.js"></script>
+    <script type="module" src="public-team-profile.js"></script>
+
+</body>
+</html>
