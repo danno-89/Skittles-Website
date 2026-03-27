@@ -359,10 +359,8 @@ function getPlayerStats(winnersArray) {
             if (gap > maxGap) {
                 maxGap = gap;
             }
-            if (gap === 1 || gap === 2) { 
-                if (gap === 1) {
-                    currentStreak++;
-                }
+            if (gap === 1) { 
+                currentStreak++;
                 if (currentStreak > maxStreak) {
                     maxStreak = currentStreak;
                 }
