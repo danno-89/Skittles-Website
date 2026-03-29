@@ -25,7 +25,8 @@ import {
     documentId,
     writeBatch,
     serverTimestamp,
-    runTransaction
+    runTransaction,
+    arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import {
     getFunctions,
@@ -37,6 +38,11 @@ import {
     ref,
     onValue
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { 
+    getMessaging, 
+    getToken, 
+    onMessage 
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging.js";
 
 // Your web app's Firebase configuration
 // keys are replaced with environment variables for security
@@ -56,6 +62,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app, 'europe-west1');
 const rtdb = getDatabase(app);
+const messaging = getMessaging(app);
 
 // If you are using the local emulator, uncomment the following line
 // connectFunctionsEmulator(functions, "localhost", 5001);
@@ -91,9 +98,14 @@ export {
     writeBatch,
     serverTimestamp,
     runTransaction,
+    arrayUnion,
     // Functions
     httpsCallable,
     // Realtime DB
     ref,
-    onValue
+    onValue,
+    // Messaging
+    messaging,
+    getToken,
+    onMessage
 };

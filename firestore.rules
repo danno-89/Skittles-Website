@@ -70,6 +70,14 @@ service cloud.firestore {
     match /tournament_brackets/{bracketId} {
         allow write: if request.auth != null && isCommitteeMember(request.auth.uid);
     }
+
+    // --- Social Media Admin ---
+    match /social_templates/{templateId} {
+        allow read, write: if request.auth != null && isCommitteeMember(request.auth.uid);
+    }
+    match /social_pending_posts/{postId} {
+        allow read, write: if request.auth != null && isCommitteeMember(request.auth.uid);
+    }
   }
 }
 

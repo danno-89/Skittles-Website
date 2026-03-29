@@ -81,3 +81,29 @@ self.addEventListener('activate', event => {
     }).then(() => self.clients.claim())
   );
 });
+
+/* --- Firebase Cloud Messaging Background Handler --- */
+importScripts("https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging-compat.js");
+
+firebase.initializeApp({
+    apiKey: "AIzaSyByuL3NC2ieRb-IXT9ZQE9BNvhrgS6Pnko",
+    authDomain: "sarnia-skittles-club.firebaseapp.com",
+    databaseURL: "https://sarnia-skittles-club-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "sarnia-skittles-club",
+    storageBucket: "sarnia-skittles-club.appspot.com",
+    messagingSenderId: "119131555624",
+    appId: "1:119131555624:web:b8c3fa25e1182d5d5ef21d"
+});
+
+const fbmessaging = firebase.messaging();
+
+fbmessaging.onBackgroundMessage((payload) => {
+    console.log('[Service Worker] Received background message ', payload);
+    const notificationTitle = payload.notification.title || "Skittles Admin Alert";
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: '/SSC%20Logo.png'
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});

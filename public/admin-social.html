@@ -1,0 +1,122 @@
+<h2>Social Media Automations</h2>
+
+<!-- TEMPLATES MANAGEMENT -->
+<div class="form-section">
+    <h3>Post Templates</h3>
+    <p>Define templates for automated posts. Use placeholders like <code>{top_scorer}</code>, <code>{team_name}</code>, etc.</p>
+    
+    <div id="social-templates-list" style="margin-bottom: 15px;">
+        <p>Loading templates...</p>
+    </div>
+    
+    <button id="create-template-btn" class="btn btn-secondary">Create New Template</button>
+    
+    <div id="template-editor-container" style="display: none; margin-top: 15px; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+        <h4>Template Editor</h4>
+        <input type="hidden" id="social-template-id">
+        <div class="form-group">
+            <label for="social-template-name">Template Name:</label>
+            <input type="text" id="social-template-name" class="form-select" placeholder="e.g., Weekly Stats Update">
+        </div>
+        <div class="form-group">
+            <label for="social-template-trigger">Post Type (Data Source):</label>
+            <select id="social-template-trigger" class="form-select">
+                <option value="weekly_stats">Dynamic Weekly Stats</option>
+                <option value="news_publish">Dynamic News Update</option>
+                <option value="static">Static Regular Post</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-top: 15px; margin-bottom: 5px;">
+            <label>
+                <input type="checkbox" id="social-template-is-scheduled"> Automatically Generate on a Schedule?
+            </label>
+        </div>
+        <div class="form-group" id="social-template-schedule-settings" style="display: none; background: #f9f9f9; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+            <label><strong>Schedule Window:</strong></label>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <select id="social-template-day" class="form-select">
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                </select>
+                <select id="social-template-hour" class="form-select">
+                    <option value="6">06:00 AM</option>
+                    <option value="7">07:00 AM</option>
+                    <option value="8">08:00 AM</option>
+                    <option value="9">09:00 AM</option>
+                    <option value="10">10:00 AM</option>
+                    <option value="11">11:00 AM</option>
+                    <option value="12">12:00 PM</option>
+                    <option value="13">01:00 PM</option>
+                    <option value="14">02:00 PM</option>
+                    <option value="15">03:00 PM</option>
+                    <option value="16">04:00 PM</option>
+                    <option value="17">05:00 PM</option>
+                    <option value="18">06:00 PM</option>
+                    <option value="19">07:00 PM</option>
+                    <option value="20">08:00 PM</option>
+                    <option value="21">09:00 PM</option>
+                    <option value="22">10:00 PM</option>
+                    <option value="23">11:00 PM</option>
+                </select>
+            </div>
+            <small style="color: gray;">Time follows Europe/London timezone. Post will queue at exactly the top of the hour.</small>
+        </div>
+        <div class="form-group" style="margin-top: 15px;">
+            <label for="social-template-format">Post Format:</label>
+            <select id="social-template-format" class="form-select">
+                <option value="text">Standard Text Post</option>
+                <option value="link">Website Link Preview</option>
+                <option value="image">Attached Photo URL</option>
+            </select>
+        </div>
+        <div class="form-group" id="social-template-link-settings" style="display: none; margin-bottom: 15px;">
+            <label for="social-template-link-url">Website Link Target:</label>
+            <select id="social-template-link-url" class="form-select">
+                <option value="https://sarniaskittlesclub.com/league-tables.html">League Tables</option>
+                <option value="https://sarniaskittlesclub.com/fixtures-results.html">Fixtures & Results</option>
+                <option value="https://sarniaskittlesclub.com/index.html">Home Page</option>
+            </select>
+            <small style="color: gray;">Facebook will automatically render a giant, clickable preview card from this link.</small>
+        </div>
+        <div class="form-group" id="social-template-image-settings" style="display: none; margin-bottom: 15px;">
+            <label for="social-template-image-url">Direct Image URL:</label>
+            <input type="url" id="social-template-image-url" class="form-select" placeholder="e.g. https://your-image-generator.com/photo1.jpg">
+            <small style="color: gray;">Facebook will upload this exact image to your timeline along with your caption.</small>
+        </div>
+        <div class="form-group">
+            <label for="social-template-content">Post Caption:</label>
+            <textarea id="social-template-content" class="form-select" style="min-height: 120px;" placeholder="Write your Facebook post template here..."></textarea>
+            <small style="color: #6b7280; margin-top: 5px; display: block;">Available tags: <code>{date}</code>, <code>{league_table}</code></small>
+        </div>
+        <button id="save-social-template-btn" class="btn btn-success">Save Template</button>
+        <button id="cancel-social-template-btn" class="btn btn-secondary" style="margin-left: 10px;">Cancel</button>
+    </div>
+</div>
+
+<!-- PENDING APPROVALS QUEUE -->
+<div class="form-section" style="margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <h3>Pending Posts Queue</h3>
+            <p>Automated posts will appear here for your review before publishing to Facebook.</p>
+        </div>
+        <button id="manual-generate-stats-btn" class="btn btn-warning" style="margin-bottom: 10px;">Test Generate Stats Now</button>
+    </div>
+    
+    <div id="social-pending-queue">
+        <p>Loading pending posts...</p>
+    </div>
+</div>
+
+<!-- PUSH NOTIFICATIONS -->
+<div class="form-section" style="margin-top: 20px;">
+    <h3>Push Notifications</h3>
+    <p>Enable Web Push Notifications on this device to receive instant alerts when new posts are drafted.</p>
+    <button id="enable-notifications-btn" class="btn btn-primary">Enable Push Notifications</button>
+    <div id="notification-status" style="margin-top: 10px; font-weight: bold;"></div>
+</div>

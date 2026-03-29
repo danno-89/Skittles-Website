@@ -19,6 +19,7 @@ import { initRescheduleFixture } from './admin-reschedule.js';
 import { initNewsManagement } from './news-management.js';
 import { initCorrectionTool } from './admin-correction.js';
 import { initAdminBrackets } from './admin-brackets.js';
+import { initAdminSocial } from './admin-social.js';
 
 // --- Globals for Admin Page Data ---
 const teamsMap = new Map();
@@ -71,6 +72,7 @@ async function initializeAdminPage() {
         initNewsManagement();
         initCorrectionTool();
         initAdminBrackets();
+        initAdminSocial();
 
     } catch (error) {
         console.error("An error occurred during admin page initialisation:", error);
@@ -167,10 +169,17 @@ async function fetchAndDisplayCompetitionName(competitionId, elementId) {
 function initializeTabs() {
     const tabsContainer = document.getElementById('admin-tabs-container');
     const tabContentContainer = document.getElementById('tab-content-container');
+    const mobileMenuBtn = document.getElementById('admin-mobile-menu-btn');
 
     if (!tabsContainer || !tabContentContainer) {
         console.error("Tab containers not found. Tab functionality will be disabled.");
         return;
+    }
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            tabsContainer.classList.toggle('visible');
+        });
     }
 
     const tabs = tabsContainer.querySelectorAll('.tab-link');
@@ -184,6 +193,8 @@ function initializeTabs() {
             tabPanes.forEach(pane => {
                 pane.classList.toggle('active', pane.id === `${tabName}-content`);
             });
+            // Hide menu on mobile after selecting a tab
+            tabsContainer.classList.remove('visible');
         });
     });
 }

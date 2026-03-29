@@ -22,8 +22,14 @@ admin.initializeApp();
 
 const playerFunctions = require('./player-functions');
 const adminFunctions = require('./admin-functions');
+const socialFunctions = require('./social-functions');
 
 exports.registerPlayer = playerFunctions.registerPlayer;
 exports.verifySponsor = playerFunctions.verifySponsor;
 exports.sendAdminEmail = adminFunctions.sendAdminEmail;
 exports.handleUnsubscribe = adminFunctions.handleUnsubscribe;
+
+exports.publishFacebookPost = socialFunctions.publishFacebookPost;
+exports.masterSocialScheduler = socialFunctions.masterSocialScheduler;
+exports.notifyAdminOnNewDraft = socialFunctions.notifyAdminOnNewDraft;
+exports.manuallyGenerateStatsDraft = socialFunctions.manuallyGenerateStatsDraft;

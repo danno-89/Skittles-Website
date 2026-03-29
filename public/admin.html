@@ -28,6 +28,11 @@
         <main>
             <page-header>
                 <span slot="title">Admin</span>
+                <div slot="icon" class="mobile-header-icons">
+                    <button id="admin-mobile-menu-btn" class="icon-btn">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                </div>
             </page-header>
 
             <div id="admin-tabs-container" class="tab-bar hanging-tabs">
@@ -42,6 +47,7 @@
                     <button class="tab-link" data-tab="export-data">Export Data</button>
                     <button class="tab-link" data-tab="email-players">Email Players</button>
                     <button class="tab-link" data-tab="brackets-management">Manage Brackets</button>
+                    <button class="tab-link" data-tab="social-media">Social Media</button>
                 </div>
             </div>
 
@@ -238,6 +244,8 @@
                     </div>
                 </div>
                 <div id="news-management-content" class="tab-pane" w3-include-html="news-management.html"></div>
+                <!-- SOCIAL MEDIA TAB PANE -->
+                <div id="social-media-content" class="tab-pane" w3-include-html="admin-social.html"></div>
                 <div id="correction-tool-content" class="tab-pane">
                     <h2>League Table Correction Tool</h2>
                     <div class="form-section-row">
@@ -370,6 +378,7 @@
     <script type="module" src="news-management.js"></script>
     <script type="module" src="admin-correction.js"></script>
     <script type="module" src="admin-brackets.js"></script>
+    <script type="module" src="admin-social.js"></script>
 
 </body>
 
