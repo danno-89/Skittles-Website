@@ -69,6 +69,23 @@
 
 <div w3-include-html="footer.html"></div>
 
+<!-- Position Graph Modal -->
+<div id="graph-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Season Progression</h2>
+            <button id="close-graph-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="canvas-wrapper" style="flex-grow: 1; position: relative; min-height: 0; width: 100%;">
+                <canvas id="position-graph-canvas"></canvas>
+            </div>
+            <div id="custom-chart-legend"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="main.js"></script>
 <script type="module" src="firebase.config.js"></script>
 <script type="module" src="auth-manager.js"></script>

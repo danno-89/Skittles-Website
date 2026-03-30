@@ -5,6 +5,19 @@ const seasonFilter = document.getElementById('season-filter');
 const divisionTabsContainer = document.getElementById('division-tabs-container');
 
 if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
+    let showPostponedMatches = false;
+    let positionChart = null;
+    let cachedLeagueData = null;
+    let cachedTeamsMap = null;
+    let cachedAllMatches = null;
+    let cachedSortedDivisionKeys = [];
+
+    const modalOverlay = document.getElementById('graph-modal');
+    if (document.getElementById('close-graph-modal')) {
+        document.getElementById('close-graph-modal').addEventListener('click', () => {
+            if (modalOverlay) modalOverlay.style.display = 'none';
+        });
+    }
 
     const fetchCollection = async (collectionName) => {
         const snapshot = await getDocs(collection(db, collectionName));
@@ -85,54 +98,86 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         thead.appendChild(headerRow);
         table.appendChild(thead);
 
-        const standingsWithMeta = divisionData.standings
-            .map(team => {
-                const teamName = teamsMap.get(team.teamId) || 'N/A';
-                const played = team.played ?? 0;
-                const won = team.won ?? 0;
-                const drawn = team.drawn ?? 0;
-                const lost = team.lost ?? 0;
-                const points = team.points ?? 0;
-                const pinsFor = team.pinsFor ?? 0;
-                const pinsAgainst = team.pinsAgainst ?? 0;
-                const max_score = team.max_score ?? 0;
+        const buildStandingsMeta = (standings) => {
+            return standings
+                .map(team => {
+                    const teamName = teamsMap.get(team.teamId) || 'N/A';
+                    const played = team.played ?? 0;
+                    const won = team.won ?? 0;
+                    const drawn = team.drawn ?? 0;
+                    const lost = team.lost ?? 0;
+                    const points = team.points ?? 0;
+                    const pinsFor = team.pinsFor ?? 0;
+                    const pinsAgainst = team.pinsAgainst ?? 0;
+                    const max_score = team.max_score ?? 0;
 
-                const remainingMatches = allMatches.filter(m => 
-                    (m.homeTeamId === team.teamId || m.awayTeamId === team.teamId) && 
-                    m.homeScore == null && m.status !== 'spare' && m.division === divisionKey
-                ).length;
+                    const remainingMatches = allMatches.filter(m => 
+                        (m.homeTeamId === team.teamId || m.awayTeamId === team.teamId) && 
+                        m.homeScore == null && m.status !== 'spare' && m.division === divisionKey
+                    ).length;
+                    
+                    const maxPossiblePoints = points + (remainingMatches * 2);
+
+                    return {
+                        ...team, teamName, played, won, drawn, lost, points, pinsFor, pinsAgainst, max_score, remainingMatches, maxPossiblePoints
+                    };
+                })
+                .sort((a, b) => {
+                    const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
+                    const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
+                    if (b.points !== a.points) return b.points - a.points;
+                    if (bAve !== aAve) return bAve - aAve;
+                    if (b.pinsFor !== a.pinsFor) return b.pinsFor - a.pinsFor;
+                    if (b.max_score !== a.max_score) return b.max_score - a.max_score;
+                    return a.teamName.localeCompare(b.teamName);
+                });
+        };
+
+        const originalStandingsWithMeta = buildStandingsMeta(divisionData.standings.map(t => ({...t})));
+
+        let calculatedStandings = divisionData.standings.map(t => ({...t}));
+
+        if (showPostponedMatches) {
+            const postponedMatches = allMatches.filter(m => m.division === divisionKey && m.status === 'postponed' && m.postponedBy);
+            postponedMatches.forEach(m => {
+                const postponingTeamId = m.postponedBy;
+                const otherTeamId = (m.homeTeamId === postponingTeamId) ? (m.awayTeamId || m.awayTeamis) : (m.homeTeamId || m.homeTeamis);
                 
-                const maxPossiblePoints = points + (remainingMatches * 2);
-
-                return {
-                    ...team, teamName, played, won, drawn, lost, points, pinsFor, pinsAgainst, max_score, remainingMatches, maxPossiblePoints
-                };
-            })
-            .sort((a, b) => {
-                const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
-                const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
-                if (b.points !== a.points) return b.points - a.points;
-                if (bAve !== aAve) return bAve - aAve;
-                if (b.pinsFor !== a.pinsFor) return b.pinsFor - a.pinsFor;
-                if (b.max_score !== a.max_score) return b.max_score - a.max_score;
-                return a.teamName.localeCompare(b.teamName);
+                const postponingTeamDiv = calculatedStandings.find(t => t.teamId === postponingTeamId);
+                const otherTeamDiv = calculatedStandings.find(t => t.teamId === otherTeamId);
+                
+                if (postponingTeamDiv) {
+                    postponingTeamDiv.played = (postponingTeamDiv.played ?? 0) + 1;
+                    postponingTeamDiv.lost = (postponingTeamDiv.lost ?? 0) + 1;
+                }
+                if (otherTeamDiv) {
+                    otherTeamDiv.played = (otherTeamDiv.played ?? 0) + 1;
+                    otherTeamDiv.won = (otherTeamDiv.won ?? 0) + 1;
+                    otherTeamDiv.points = (otherTeamDiv.points ?? 0) + 2;
+                }
             });
-
-        let championTeamId = null;
-        if (standingsWithMeta.length > 1) {
-            const firstPlace = standingsWithMeta[0];
-            const maxPointsOthers = Math.max(...standingsWithMeta.slice(1).map(t => t.maxPossiblePoints));
-            if (firstPlace.points > maxPointsOthers) {
-                championTeamId = firstPlace.teamId;
-            }
         }
 
+        const standingsWithMeta = buildStandingsMeta(calculatedStandings);
+
+        let championTeamId = null;
         let relegatedTeamId = null;
-        if (isPremierDivision && standingsWithMeta.length > 1) {
-            const lastPlace = standingsWithMeta[standingsWithMeta.length - 1];
-            const secondLastPlace = standingsWithMeta[standingsWithMeta.length - 2];
-            if (lastPlace.maxPossiblePoints < secondLastPlace.points) {
-                relegatedTeamId = lastPlace.teamId;
+
+        if (!showPostponedMatches) {
+            if (standingsWithMeta.length > 1) {
+                const firstPlace = standingsWithMeta[0];
+                const maxPointsOthers = Math.max(...standingsWithMeta.slice(1).map(t => t.maxPossiblePoints));
+                if (firstPlace.points > maxPointsOthers) {
+                    championTeamId = firstPlace.teamId;
+                }
+            }
+
+            if (isPremierDivision && standingsWithMeta.length > 1) {
+                const lastPlace = standingsWithMeta[standingsWithMeta.length - 1];
+                const secondLastPlace = standingsWithMeta[standingsWithMeta.length - 2];
+                if (lastPlace.maxPossiblePoints < secondLastPlace.points) {
+                    relegatedTeamId = lastPlace.teamId;
+                }
             }
         }
 
@@ -176,9 +221,40 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         container.appendChild(table);
         wrapper.appendChild(container);
 
-        if (standingsWithMeta.length > 1) {
-            const first = standingsWithMeta[0];
-            const second = standingsWithMeta[1];
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'table-actions';
+        
+        const togglePostponedBtn = document.createElement('button');
+        togglePostponedBtn.className = showPostponedMatches ? 'btn btn-cta' : 'btn btn-primary';
+        togglePostponedBtn.textContent = showPostponedMatches ? 'Hide Postponed Games' : 'Include Postponed Games';
+        togglePostponedBtn.onclick = () => {
+            showPostponedMatches = !showPostponedMatches;
+            renderAllDivisions();
+        };
+
+        const viewGraphBtn = document.createElement('button');
+        viewGraphBtn.className = 'btn btn-primary';
+        viewGraphBtn.textContent = 'View Position Graph';
+        viewGraphBtn.onclick = () => renderPositionGraph(divisionKey);
+
+        actionsDiv.appendChild(viewGraphBtn);
+        actionsDiv.appendChild(togglePostponedBtn);
+        wrapper.appendChild(actionsDiv);
+
+        if (showPostponedMatches) {
+            const warningContainer = document.createElement('div');
+            warningContainer.style.marginTop = 'var(--spacing-md)';
+            warningContainer.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+            warningContainer.style.backgroundColor = 'var(--off-white)';
+            warningContainer.style.borderLeft = '4px solid var(--danger)';
+            warningContainer.style.borderRadius = 'var(--border-radius)';
+            warningContainer.style.fontSize = '0.95rem';
+            warningContainer.style.color = 'var(--darker-green)';
+            warningContainer.innerHTML = `⚠️ <strong>Note:</strong> This table displays the potential standings if all postponed fixtures were resolved as unplayed (whereby the postponing team forfeits the match). This is only a representation and not the official active standings.`;
+            wrapper.appendChild(warningContainer);
+        } else if (originalStandingsWithMeta.length > 1) {
+            const first = originalStandingsWithMeta[0];
+            const second = originalStandingsWithMeta[1];
             
             const narrativeContainer = document.createElement('div');
             narrativeContainer.style.marginTop = 'var(--spacing-md)';
@@ -284,6 +360,37 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         document.dispatchEvent(new CustomEvent('divisionChanged', { detail: divisionKey }));
     };
 
+    const renderAllDivisions = () => {
+        let activeDivKey = cachedSortedDivisionKeys[0];
+        const currentActiveBtn = divisionTabsContainer.querySelector('.tab-link.active');
+        if (currentActiveBtn) {
+            activeDivKey = currentActiveBtn.dataset.division;
+        }
+
+        leagueTableContainer.innerHTML = '';
+        divisionTabsContainer.innerHTML = '';
+
+        cachedSortedDivisionKeys.forEach((divisionKey, index) => {
+            const divisionData = cachedLeagueData[divisionKey];
+            const tableContainer = renderTable(divisionKey, divisionData, cachedTeamsMap, cachedAllMatches);
+            tableContainer.classList.add('division-table');
+            tableContainer.dataset.divisionContent = divisionKey;
+            
+            tableContainer.style.display = (divisionKey === activeDivKey) ? 'block' : 'none';
+            leagueTableContainer.appendChild(tableContainer);
+
+            const tab = document.createElement('button');
+            tab.className = 'tab-link';
+            if (divisionKey === activeDivKey) {
+                tab.classList.add('active');
+            }
+            tab.dataset.division = divisionKey;
+            tab.textContent = divisionData.leagueName || divisionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            tab.onclick = () => switchTab(divisionKey);
+            divisionTabsContainer.appendChild(tab);
+        });
+    };
+
     const loadLeagueData = async (seasonId) => {
         leagueTableContainer.innerHTML = '<p>Loading table...</p>';
         divisionTabsContainer.innerHTML = '';
@@ -296,11 +403,11 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
         try {
             const docSnap = await getDoc(doc(db, 'league_tables', seasonId));
             if (docSnap.exists()) {
-                const leagueData = docSnap.data();
-                const teamsMap = await fetchCollection('teams').then(createTeamMap);
+                cachedLeagueData = docSnap.data();
+                cachedTeamsMap = await fetchCollection('teams').then(createTeamMap);
 
                 const matchesSnap = await fetchCollection('match_results');
-                const allMatches = matchesSnap
+                cachedAllMatches = matchesSnap
                     .filter(m => m.season === seasonId)
                     .map(m => ({ 
                         ...m, 
@@ -320,39 +427,20 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
                     return 100;
                 };
 
-                const sortedDivisionKeys = Object.keys(leagueData)
+                cachedSortedDivisionKeys = Object.keys(cachedLeagueData)
                     .filter(key => {
                         if (key === 'season') return false;
-                        const division = leagueData[key];
+                        const division = cachedLeagueData[key];
                         if (typeof division !== 'object' || division === null) return false;
                         const leagueName = division.leagueName || key;
                         return !leagueName.toLowerCase().includes('knockout');
                     })
                     .sort((a, b) => getDivisionRank(a) - getDivisionRank(b) || a.localeCompare(b));
 
-                leagueTableContainer.innerHTML = '';
+                renderAllDivisions();
 
-                sortedDivisionKeys.forEach((divisionKey, index) => {
-                    const divisionData = leagueData[divisionKey];
-                    const tableContainer = renderTable(divisionKey, divisionData, teamsMap, allMatches);
-                    tableContainer.classList.add('division-table');
-                    tableContainer.dataset.divisionContent = divisionKey;
-                    tableContainer.style.display = index === 0 ? 'block' : 'none';
-                    leagueTableContainer.appendChild(tableContainer);
-
-                    const tab = document.createElement('button');
-                    tab.className = 'tab-link';
-                    if (index === 0) {
-                        tab.classList.add('active');
-                    }
-                    tab.dataset.division = divisionKey;
-                    tab.textContent = divisionData.leagueName || divisionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    tab.onclick = () => switchTab(divisionKey);
-                    divisionTabsContainer.appendChild(tab);
-                });
-
-                if (sortedDivisionKeys.length > 0) {
-                    document.dispatchEvent(new CustomEvent('divisionChanged', { detail: sortedDivisionKeys[0] }));
+                if (cachedSortedDivisionKeys.length > 0) {
+                    document.dispatchEvent(new CustomEvent('divisionChanged', { detail: cachedSortedDivisionKeys[0] }));
                 }
             } else {
                 leagueTableContainer.innerHTML = `<p>No league data found for the ${seasonId} season.</p>`;
@@ -361,6 +449,201 @@ if (leagueTableContainer && seasonFilter && divisionTabsContainer) {
             console.error("Error loading league tables:", error);
             leagueTableContainer.innerHTML = "<p>Error loading league table data.</p>";
         }
+    };
+
+    const calculateHistoricalPositions = (divisionKey) => {
+        if (!cachedLeagueData || !cachedAllMatches || !cachedTeamsMap) return { datasets: [], labels: [] };
+        
+        let initialStandings = cachedLeagueData[divisionKey].standings.map(t => ({
+            teamId: t.teamId,
+            teamName: cachedTeamsMap.get(t.teamId) || 'N/A',
+            played: 0, won: 0, drawn: 0, lost: 0, points: 0, pinsFor: 0, pinsAgainst: 0, max_score: 0
+        }));
+        
+        let historicalMatches = cachedAllMatches.filter(m => m.division === divisionKey && m.status === 'completed' && m.scheduledDate);
+        historicalMatches.sort((a, b) => a.scheduledDate - b.scheduledDate);
+
+        let teamHistory = {};
+        initialStandings.forEach(t => teamHistory[t.teamId] = []);
+        
+        let currentStandings = [...initialStandings];
+
+        const sortStandings = (standings) => {
+            return standings.sort((a, b) => {
+                const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
+                const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
+                if (b.points !== a.points) return b.points - a.points;
+                if (bAve !== aAve) return bAve - aAve;
+                if (b.pinsFor !== a.pinsFor) return b.pinsFor - a.pinsFor;
+                if (b.max_score !== a.max_score) return b.max_score - a.max_score;
+                return a.teamName.localeCompare(b.teamName);
+            });
+        };
+
+        let matchWeeks = [];
+        historicalMatches.forEach(m => {
+            let d = new Date(m.scheduledDate);
+            d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1)); // Anchor to Monday
+            d.setHours(0,0,0,0);
+            let weekKey = d.getTime();
+            
+            let weekObj = matchWeeks.find(w => w.key === weekKey);
+            if (!weekObj) {
+                weekObj = { key: weekKey, matches: [] };
+                matchWeeks.push(weekObj);
+            }
+            weekObj.matches.push(m);
+        });
+
+        matchWeeks.sort((a, b) => a.key - b.key);
+
+        matchWeeks.forEach(week => {
+            week.matches.forEach(match => {
+                const home = currentStandings.find(t => t.teamId === (match.homeTeamId || match.homeTeamis));
+                const away = currentStandings.find(t => t.teamId === (match.awayTeamId || match.awayTeamis));
+                if (!home || !away) return;
+                
+                home.played++; away.played++;
+                home.pinsFor += (Number(match.homeScore) || 0);
+                home.pinsAgainst += (Number(match.awayScore) || 0);
+                if ((Number(match.homeScore) || 0) > home.max_score) home.max_score = Number(match.homeScore);
+
+                away.pinsFor += (Number(match.awayScore) || 0);
+                away.pinsAgainst += (Number(match.homeScore) || 0);
+                if ((Number(match.awayScore) || 0) > away.max_score) away.max_score = Number(match.awayScore);
+
+                let homeScore = Number(match.homeScore) || 0;
+                let awayScore = Number(match.awayScore) || 0;
+
+                if (homeScore > awayScore) { home.won++; home.points += 2; away.lost++; }
+                else if (awayScore > homeScore) { away.won++; away.points += 2; home.lost++; }
+                else { home.drawn++; away.drawn++; home.points += 1; away.points += 1; }
+            });
+
+            const ranked = sortStandings([...currentStandings]);
+            
+            ranked.forEach((team, rankIndex) => {
+                teamHistory[team.teamId].push(rankIndex + 1);
+            });
+        });
+
+        const datasets = [];
+        const colors = ['#dc2626','#16a34a','#2563eb','#ca8a04','#9333ea','#06b6d4','#c026d3','#ea580c','#475569','#000000','#d97706','#10b981','#be123c','#0f766e'];
+
+        const finalStandings = sortStandings([...currentStandings]);
+
+        finalStandings.forEach((teamCurrent, index) => {
+            const teamId = teamCurrent.teamId;
+            datasets.push({
+                label: cachedTeamsMap.get(teamId) || 'Unknown',
+                data: teamHistory[teamId],
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length],
+                tension: 0.1,
+                fill: false,
+                spanGaps: true
+            });
+        });
+
+        const labels = Array.from({length: matchWeeks.length}, (_, i) => `Week ${i + 1}`);
+        return { datasets, labels };
+    };
+
+    const renderPositionGraph = (divisionKey) => {
+        if (modalOverlay) modalOverlay.style.display = 'flex';
+        const canvas = document.getElementById('position-graph-canvas');
+        if (!canvas) return;
+
+        const { datasets, labels } = calculateHistoricalPositions(divisionKey);
+        
+        if (positionChart) {
+            positionChart.destroy();
+        }
+
+        const teamCount = cachedLeagueData[divisionKey].standings.length;
+
+        positionChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        reverse: true,
+                        min: 1,
+                        max: teamCount,
+                        offset: true,
+                        ticks: { 
+                            stepSize: 1,
+                            callback: (val) => {
+                                const s = ["th", "st", "nd", "rd"];
+                                const v = val % 100;
+                                return val + (s[(v - 20) % 10] || s[v] || s[0]);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        let legendContainer = document.getElementById('custom-chart-legend');
+        if (!legendContainer) {
+            legendContainer = document.createElement('div');
+            legendContainer.id = 'custom-chart-legend';
+            canvas.parentNode.appendChild(legendContainer);
+        }
+        legendContainer.innerHTML = '';
+        
+        const cols = Math.ceil(datasets.length / 2);
+        legendContainer.style.display = 'grid';
+        legendContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        legendContainer.style.gap = '8px';
+        legendContainer.style.marginTop = '15px';
+        legendContainer.style.flexShrink = '0';
+        legendContainer.style.fontSize = '0.85rem';
+
+        datasets.forEach((ds, i) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.cursor = 'pointer';
+            
+            const colorBox = document.createElement('span');
+            colorBox.style.display = 'inline-block';
+            colorBox.style.width = '12px';
+            colorBox.style.height = '12px';
+            colorBox.style.backgroundColor = ds.backgroundColor;
+            colorBox.style.marginRight = '6px';
+            colorBox.style.borderRadius = '2px';
+            colorBox.style.flexShrink = '0';
+            
+            const label = document.createElement('span');
+            label.textContent = ds.label;
+            label.style.whiteSpace = 'nowrap';
+            label.style.overflow = 'hidden';
+            label.style.textOverflow = 'ellipsis';
+            label.title = ds.label;
+
+            item.appendChild(colorBox);
+            item.appendChild(label);
+            
+            item.onclick = () => {
+                const meta = positionChart.getDatasetMeta(i);
+                meta.hidden = meta.hidden === null ? !positionChart.data.datasets[i].hidden : null;
+                positionChart.update();
+                item.style.opacity = meta.hidden ? '0.5' : '1';
+                item.style.textDecoration = meta.hidden ? 'line-through' : 'none';
+            };
+            
+            legendContainer.appendChild(item);
+        });
     };
 
     const init = async () => {
