@@ -840,16 +840,18 @@ function updateSscCupStandings(fixture, results, cupData) {
         awayPoints = 1;
     }
 
-    const updateTeamStandings = (team, points) => {
+    const updateTeamStandings = (team, points, scoreFor, scoreAgainst) => {
         team.played = (team.played || 0) + 1;
         team.won = (team.won || 0) + (points === 2 ? 1 : 0);
         team.drawn = (team.drawn || 0) + (points === 1 ? 1 : 0);
         team.lost = (team.lost || 0) + (points === 0 ? 1 : 0);
         team.points = (team.points || 0) + points;
+        team.pinsFor = (team.pinsFor || 0) + scoreFor;
+        team.pinsAgainst = (team.pinsAgainst || 0) + scoreAgainst;
     };
 
-    if (homeTeam) updateTeamStandings(homeTeam, homePoints);
-    if (awayTeam) updateTeamStandings(awayTeam, awayPoints);
+    if (homeTeam) updateTeamStandings(homeTeam, homePoints, homeScore, awayScore);
+    if (awayTeam) updateTeamStandings(awayTeam, awayPoints, awayScore, homeScore);
 
     cupData[groupName] = groupData;
     return cupData;

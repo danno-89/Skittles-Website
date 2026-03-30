@@ -86,6 +86,8 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
             drawn: team.drawn ?? 0,
             lost: team.lost ?? 0,
             points: team.points ?? 0,
+            pinsFor: team.pinsFor ?? 0,
+            pinsAgainst: team.pinsAgainst ?? 0,
         }));
 
         const table = document.createElement('table');
@@ -101,15 +103,27 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                     <th class="number-col">D</th>
                     <th class="number-col">L</th>
                     <th class="pts-col number-col">Pts</th>
+                    <th class="number-col col-pins-for">F</th>
+                    <th class="number-col col-pins-against">A</th>
+                    <th class="number-col col-average">Ave</th>
                 </tr>
             </thead>
             <tbody></tbody>
         `;
         const tbody = table.querySelector('tbody');
 
-        teams.sort((a, b) => b.points - a.points || b.played - a.played || a.teamName.localeCompare(b.teamName));
+        teams.sort((a, b) => {
+            const aAve = a.played > 0 ? a.pinsFor / a.played : 0;
+            const bAve = b.played > 0 ? b.pinsFor / b.played : 0;
+            if (b.points !== a.points) return b.points - a.points;
+            if (bAve !== aAve) return bAve - aAve;
+            if (b.pinsFor !== a.pinsFor) return b.pinsFor - a.pinsFor;
+            if (b.played !== a.played) return b.played - a.played;
+            return a.teamName.localeCompare(b.teamName);
+        });
 
         teams.forEach((team, index) => {
+            const avgScore = team.played > 0 ? (team.pinsFor / team.played).toFixed(1) : '-';
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="pos-col">${index + 1}</td>
@@ -119,6 +133,9 @@ if (groupContainer && seasonFilter && groupTabsContainer) {
                 <td class="number-col">${team.drawn || '-'}</td>
                 <td class="number-col">${team.lost || '-'}</td>
                 <td class="pts-col number-col">${team.points || '-'}</td>
+                <td class="number-col col-pins-for">${team.pinsFor ? team.pinsFor.toLocaleString() : '-'}</td>
+                <td class="number-col col-pins-against">${team.pinsAgainst ? team.pinsAgainst.toLocaleString() : '-'}</td>
+                <td class="number-col col-average">${avgScore}</td>
             `;
             tbody.appendChild(row);
         });
