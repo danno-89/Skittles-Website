@@ -32,15 +32,21 @@
             </div>
 
             <div id="statistics-content" class="tab-pane active" style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch;">
+                <div style="display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch; overflow-x: auto; padding-bottom: 10px;">
                     <!-- Column 1: Main Stats (2x3) -->
                     <div id="main-stats-grid" class="stats-summary-grid" style="flex: 0 0 320px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; margin-bottom: 0;">
                         <!-- Main stat boxes will be inserted here by JavaScript -->
                     </div>
 
                     <!-- Column 2: Average Progression Graph -->
-                    <div class="stat-box" style="flex: 1; min-width: 400px; padding: 10px; display: flex; flex-direction: column; margin-bottom: 0;">
-                        <h4 style="text-align: center; margin-top: 0; color: var(--club-green); font-size: 0.9rem;">Average Progression</h4>
+                    <div class="stat-box" style="flex: 1; min-width: 400px; padding: 10px; display: flex; flex-direction: column; margin-bottom: 0; position: relative;">
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 15px;">
+                            <div style="text-align: left;">
+                                <button id="graph-toggle-btn" class="btn btn-primary" style="font-size: 0.85rem; padding: 6px 12px; display: none; margin: 0;">View: League</button>
+                            </div>
+                            <h4 id="graph-title" style="margin: 0; color: var(--club-green); font-size: 1.1rem; text-align: center;">Overall Average Progression</h4>
+                            <div></div>
+                        </div>
                         <div style="flex-grow: 1; position: relative; min-height: 300px;">
                             <canvas id="player-score-chart"></canvas>
                         </div>

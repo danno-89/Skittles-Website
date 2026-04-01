@@ -171,24 +171,82 @@ async function renderStatistics(playerId, playerName, teamId, teamName, seasonId
             playerChart.destroy();
         }
         
-        const labels = [];
-        const cumulativeAverages = [];
-        let cumulativePins = 0;
-        
-        scores.forEach((s, index) => {
-            cumulativePins += s.score;
-            cumulativeAverages.push(cumulativePins / (index + 1));
-            const d = s.date.toDate();
-            labels.push(`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`);
+        const prepareChartData = (dataScores) => {
+            let pins = 0;
+            const labels = [];
+            const averages = [];
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            dataScores.forEach((s, index) => {
+                pins += s.score;
+                if (index === 0) return; 
+                averages.push(pins / (index + 1));
+                const d = s.date.toDate();
+                labels.push(`${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear().toString().slice(-2)}`);
+            });
+            return { 
+                labels, 
+                averages, 
+                overallAvg: pins / dataScores.length 
+            };
+        };
+
+        const leagueScores = scores.filter(s => s.competitionId === 'premier-division' || s.competitionId === 'first-division');
+        const overallData = prepareChartData(scores);
+        const leagueData = leagueScores.length > 1 ? prepareChartData(leagueScores) : null;
+
+        let currentView = leagueData ? 'league' : 'overall';
+        const toggleBtn = document.getElementById('graph-toggle-btn');
+        const headerTitle = document.getElementById('graph-title');
+
+        if (leagueData && scores.length !== leagueScores.length) {
+            toggleBtn.style.display = 'block';
+        }
+
+        const updateChart = (view) => {
+            const dataSet = view === 'league' ? leagueData : overallData;
+            const titlePrefix = view === 'league' ? 'League' : 'Overall';
+            headerTitle.textContent = `${titlePrefix} Average Progression`;
+            toggleBtn.textContent = view === 'league' ? 'View: Overall' : 'View: League Only';
+            toggleBtn.className = view === 'league' ? 'btn btn-cta' : 'btn btn-primary';
+
+            const minAvg = Math.min(...dataSet.averages);
+            const maxAvg = Math.max(...dataSet.averages);
+            const yMin = Math.floor(minAvg - 1);
+            const yMax = Math.ceil(maxAvg + 1);
+
+            playerChart.data.labels = dataSet.labels;
+            playerChart.data.datasets[0].data = dataSet.averages;
+            playerChart.data.datasets[0].label = `${titlePrefix} Average`;
+            playerChart.options.scales.y.min = yMin;
+            playerChart.options.scales.y.max = yMax;
+            playerChart.update();
+        };
+
+        toggleBtn.addEventListener('click', () => {
+            currentView = currentView === 'overall' ? 'league' : 'overall';
+            updateChart(currentView);
         });
+
+        // Initialize with default view
+        const initialDataSet = currentView === 'league' ? leagueData : overallData;
+        const initialMin = Math.min(...initialDataSet.averages);
+        const initialMax = Math.max(...initialDataSet.averages);
+        
+        // Ensure UI matches the initial view
+        headerTitle.textContent = `${currentView === 'league' ? 'League' : 'Overall'} Average Progression`;
+        if (toggleBtn.style.display === 'block') {
+            toggleBtn.textContent = currentView === 'league' ? 'View: Overall' : 'View: League Only';
+            toggleBtn.className = currentView === 'league' ? 'btn btn-cta' : 'btn btn-primary';
+        }
 
         playerChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: initialDataSet.labels,
                 datasets: [{
-                    label: 'Cumulative Average',
-                    data: cumulativeAverages,
+                    label: `${currentView === 'league' ? 'League' : 'Overall'} Average`,
+                    data: initialDataSet.averages,
                     borderColor: 'hsl(120, 60%, 40%)',
                     backgroundColor: 'rgba(56, 142, 60, 0.1)',
                     borderWidth: 2,
@@ -211,8 +269,41 @@ async function renderStatistics(playerId, playerName, teamId, teamName, seasonId
                 },
                 scales: {
                     y: {
-                        beginAtZero: false,
-                        ticks: { precision: 1 }
+                        min: Math.floor(initialMin - 1),
+                        max: Math.ceil(initialMax + 1),
+                        ticks: { 
+                            precision: 0,
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Math.round(value);
+                            }
+                        },
+                        afterFit: function(axis) {
+                            axis.width = 45; // Force a fixed width for the Y axis
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            lineWidth: 1
+                        }
+                    },
+                    x: {
+                        afterFit: function(axis) {
+                            axis.height = 60; // Increased height to prevent date clipping
+                        },
+                        offset: false,
+                        ticks: {
+                            minRotation: 25, // Reduced rotation for better readability
+                            maxRotation: 25,
+                            autoSkip: true,
+                            maxTicksLimit: 12
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 25,
+                        bottom: 10 // Extra internal padding for dates
                     }
                 }
             }
