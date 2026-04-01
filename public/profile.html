@@ -24,7 +24,12 @@
         <main id="profile-form">
             <page-header>
                 <span slot="title">My Profile</span>
-                <button slot="icon" id="sign-out-btn" class="btn btn-danger">Sign Out</button>
+                <div slot="icon" style="display: flex; align-items: center;">
+                    <button id="global-edit-btn" class="btn btn-secondary" style="display: none;">Edit Profile</button>
+                    <button type="button" id="global-cancel-btn" class="btn btn-secondary" style="display: none;">Cancel</button>
+                    <button type="submit" id="global-save-btn" class="btn btn-primary" form="global-profile-form" style="display: none;">Save</button>
+                    <button id="sign-out-btn" class="btn btn-danger">Sign Out</button>
+                </div>
             </page-header>
 
             <div class="tab-bar">
@@ -38,24 +43,19 @@
 
             <div id="tab-content-container">
                 <div id="personal-details-content" class="tab-pane active">
+                    <form id="global-profile-form">
                     <div class="profile-grid">
 
-                        <!-- Public Information Card -->
-                        <div class="card-no-hover">
-                            <h2 class="heading-border">Public Information</h2>
-                            <div class="profile-details">
+                        <!-- Profile Information Card (Combined) -->
+                        <div class="card-no-hover" id="profile-info-card">
+                            <div class="heading-border" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">Profile Information</h2>
+                            </div>
+                            
+                            <!-- Display Mode -->
+                            <div id="profile-info-display" class="profile-details">
                                 <p><strong>First Name:</strong> <span id="first-name"></span></p>
                                 <p><strong>Last Name:</strong> <span id="last-name"></span></p>
-                                <p><strong>Team:</strong> <span id="team-name"></span></p>
-                                <p><strong>Division:</strong> <span id="division"></span></p>
-                                <p><strong>Role:</strong> <span id="role"></span></p>
-                            </div>
-                        </div>
-
-                        <!-- Personal Information Card -->
-                        <div class="card-no-hover">
-                            <h2 class="heading-border">Personal Information</h2>
-                            <div class="profile-details">
                                 <p><strong>Email:</strong> <span id="email"></span></p>
                                 <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
                                 <p><strong>Mobile Number:</strong> <span id="mobile-no"></span></p>
@@ -71,19 +71,174 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Edit Mode -->
+                            <div id="profile-info-edit" class="profile-details" style="display: none; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label for="edit-first-name">First Name:</label>
+                                    <input type="text" id="edit-first-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-last-name">Last Name:</label>
+                                    <input type="text" id="edit-last-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-email">Email:</label>
+                                    <input type="email" id="edit-email" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-dob">Date of Birth:</label>
+                                    <input type="date" id="edit-dob" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-mobile-no">Mobile Number:</label>
+                                    <input type="tel" id="edit-mobile-no" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-home-no">Home/Work Number:</label>
+                                    <input type="tel" id="edit-home-no" class="form-control">
+                                </div>
+                                <div class="edit-address-block" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                                    <strong>Address:</strong>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <input type="text" id="edit-address-line-1" class="form-control" placeholder="Line 1">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <input type="text" id="edit-address-line-2" class="form-control" placeholder="Line 2">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <input type="text" id="edit-address-line-3" class="form-control" placeholder="Line 3">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <input type="text" id="edit-parish" class="form-control" placeholder="Parish">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <input type="text" id="edit-postcode" class="form-control" placeholder="Postcode">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Registration Details Card -->
-                        <div class="card-no-hover">
+                        <div class="card-no-hover" id="registration-card">
                             <h2 class="heading-border">Registration Details</h2>
-                            <div class="profile-details">
+                            
+                            <!-- Display Mode -->
+                            <div id="registration-display" class="profile-details">
+                                <p><strong>Team:</strong> <span id="team-name"></span></p>
+                                <p><strong>Division:</strong> <span id="division"></span></p>
+                                <p><strong>Role:</strong> <span id="role"></span></p>
+                                <hr style="border: 0; border-top: 1px solid var(--light-grey); margin: 15px 0;">
                                 <p><strong>Registration Date:</strong> <span id="registration-date"></span></p>
                                 <p><strong>Recent Fixture:</strong> <span id="recent-fixture"></span></p>
                                 <p><strong>Registration Expiry:</strong> <span id="register-expiry"></span></p>
                                 <p><strong>Days to Expiry:</strong> <span id="days-to-expiry"></span></p>
                             </div>
+
+                            <!-- Edit Mode -->
+                            <div id="registration-edit" class="profile-details" style="display: none; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label for="edit-team">Team:</label>
+                                    <select id="edit-team" class="form-control" disabled>
+                                        <option value="">Loading teams...</option>
+                                    </select>
+                                    <small id="team-edit-help" class="form-text text-muted" style="color: var(--medium-grey); font-size: 0.85rem; margin-top: 4px; display: block;">Teams can only be changed during the off-season (July 1st - August 31st).</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-division">Division:</label>
+                                    <select id="edit-division" class="form-control" disabled>
+                                        <option value="">Select a division</option>
+                                        <option value="Men's">Men's</option>
+                                        <option value="Ladies'">Ladies'</option>
+                                    </select>
+                                    <small id="div-edit-help" class="form-text text-muted" style="color: var(--medium-grey); font-size: 0.85rem; margin-top: 4px; display: block;">Division is locked once assigned.</small>
+                                </div>
+                                <hr style="border: 0; border-top: 1px solid var(--light-grey); margin: 15px 0;">
+                                <p><strong>Registration Date:</strong> <span id="registration-date-edit"></span></p>
+                                <p><strong>Recent Fixture:</strong> <span id="recent-fixture-edit"></span></p>
+                                <p><strong>Registration Expiry:</strong> <span id="register-expiry-edit"></span></p>
+                                <p><strong>Days to Expiry:</strong> <span id="days-to-expiry-edit"></span></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Preferences Card -->
+                        <div class="card-no-hover" id="preferences-card">
+                            <div class="heading-border" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">Preferences</h2>
+                            </div>
+                            
+                            <!-- Display Mode -->
+                            <div id="preferences-display" class="profile-details">
+                                <p style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Nickname:</strong> 
+                                    <span id="display-nickname">-</span>
+                                </p>
+                                <p style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Show Mobile on Public Profile:</strong> 
+                                    <span id="display-share-mobile-text">No</span>
+                                </p>
+                                <p style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Show Home No on Public Profile:</strong> 
+                                    <span id="display-share-home-text">No</span>
+                                </p>
+                                <p style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Show Advanced Stats on Public Profile:</strong> 
+                                    <span id="display-share-advanced-stats-text">No (Coming Soon)</span>
+                                </p>
+                                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--light-grey);">
+                                    <h4 style="margin-bottom: 10px; color: var(--club-green); font-size: 1rem;">Notify me of:</h4>
+                                    <p style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>Competitions / Events:</span> 
+                                        <span id="display-consent-text">No</span>
+                                    </p>
+                                    <p style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <span>Statistics / League Standings:</span> 
+                                        <span id="display-consent-stats-text">No</span>
+                                    </p>
+                                    <p style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Monthly Round-Ups:</span> 
+                                        <span id="display-consent-roundups-text">No</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Edit Mode -->
+                            <div id="preferences-edit" class="profile-details" style="display: none; margin-top: 15px;">
+                                <div class="form-group" style="margin-bottom: 20px;">
+                                    <label for="edit-nickname">Nickname:</label>
+                                    <input type="text" id="edit-nickname" class="form-control" placeholder="">
+                                </div>
+                                <h4 style="margin-bottom: 10px; color: var(--club-green); font-size: 1rem;">Public Visibility</h4>
+                                <div class="checkbox-group" style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="share-mobile-no" style="margin: 0; width: 1.2rem; height: 1.2rem;">
+                                    <label for="share-mobile-no" style="margin: 0;">Show Mobile Number on Public Profile</label>
+                                </div>
+                                <div class="checkbox-group" style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px; opacity: 0.6;">
+                                    <input type="checkbox" id="share-home-no" style="margin: 0; width: 1.2rem; height: 1.2rem;" disabled>
+                                    <label for="share-home-no" style="margin: 0;">Show Home/Work Number on Public Profile</label>
+                                </div>
+                                <div class="checkbox-group" style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px; opacity: 0.6;">
+                                    <input type="checkbox" id="share-advanced-stats" style="margin: 0; width: 1.2rem; height: 1.2rem;" disabled>
+                                    <label for="share-advanced-stats" style="margin: 0;">Show Advanced Stats on Public Profile (Coming Soon)</label>
+                                </div>
+
+                                <h4 style="margin-bottom: 10px; color: var(--club-green); font-size: 1rem;">Notify me of:</h4>
+                                <div class="checkbox-group" style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="edit-consent" style="margin: 0; width: 1.2rem; height: 1.2rem;">
+                                    <label for="edit-consent" style="margin: 0;">Competitions / Events</label>
+                                </div>
+                                <div class="checkbox-group" style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px; opacity: 0.6;">
+                                    <input type="checkbox" id="edit-consent-stats" style="margin: 0; width: 1.2rem; height: 1.2rem;" disabled>
+                                    <label for="edit-consent-stats" style="margin: 0;">Statistics / League Standings (Coming Soon)</label>
+                                </div>
+                                <div class="checkbox-group" style="display: flex; align-items: center; gap: 8px; opacity: 0.6;">
+                                    <input type="checkbox" id="edit-consent-roundups" style="margin: 0; width: 1.2rem; height: 1.2rem;" disabled>
+                                    <label for="edit-consent-roundups" style="margin: 0;">Monthly Round-Ups (Coming Soon)</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    </form>
                 </div>
                 <div id="statistics-content" class="tab-pane">
                     <div class="stats-header">

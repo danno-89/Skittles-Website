@@ -431,6 +431,38 @@ footer a:hover {
 }
 
 /* --- Forms & Filters --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+    color: var(--charcoal);
+}
+
+.form-control, .form-group input:not([type="checkbox"]):not([type="radio"]), .form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    color: var(--charcoal);
+    background-color: var(--pure-white);
+    border: 1px solid var(--medium-grey);
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+}
+
+.form-control:focus, .form-group input:not([type="checkbox"]):not([type="radio"]):focus, .form-group select:focus {
+    outline: 0;
+    border-color: var(--club-green);
+    box-shadow: 0 0 0 0.25rem hsla(120, 100%, 20%, 0.25);
+}
+
 .form-select {
     display: block;
     min-width: 240px;

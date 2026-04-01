@@ -1,5 +1,5 @@
 import { authReady } from './auth-manager.js';
-import { db, doc, getDoc, collection, query, where, getDocs, orderBy } from './firebase.config.js';
+import { db, doc, getDoc, collection, query, where, getDocs, orderBy, updateDoc, Timestamp } from './firebase.config.js';
 
 // --- Helper Functions ---
 const formatDate = (timestamp) => {
@@ -312,9 +312,12 @@ async function displayProfileData(user, publicData, privateData) {
     if (publicData) {
         populateField('first-name', publicData.firstName);
         populateField('last-name', publicData.lastName);
+        populateField('display-nickname', publicData.nickname || '-');
         populateField('role', publicData.role);
         populateField('registration-date', formatDate(publicData.registerDate));
         populateField('recent-fixture', formatDate(publicData.recentFixture));
+        populateField('registration-date-edit', formatDate(publicData.registerDate));
+        populateField('recent-fixture-edit', formatDate(publicData.recentFixture));
         populateField('division', publicData.division);
 
         if (publicData.teamId) {
@@ -331,6 +334,8 @@ async function displayProfileData(user, publicData, privateData) {
             const daysRemaining = Math.ceil((expiryDate - new Date()) / (1000 * 3600 * 24));
             populateField('register-expiry', formatDate(publicData.registerExpiry));
             populateField('days-to-expiry', daysRemaining > 0 ? daysRemaining : 'Expired');
+            populateField('register-expiry-edit', formatDate(publicData.registerExpiry));
+            populateField('days-to-expiry-edit', daysRemaining > 0 ? daysRemaining : 'Expired');
         }
 
         await renderStatistics(publicData.publicId, `${publicData.firstName} ${publicData.lastName}`, teamId, teamNameStr);
@@ -349,8 +354,311 @@ async function displayProfileData(user, publicData, privateData) {
             populateField('postcode', privateData.address.postCode);
         }
     }
+    
+    // Set privacy flag display toggles in preferences grid
+    if (publicData) {
+        const displayMobile = document.getElementById('display-share-mobile-text');
+        const displayHome = document.getElementById('display-share-home-text');
+        if (displayMobile) displayMobile.textContent = publicData.shareMobileNo ? "Yes" : "No";
+        if (displayHome) displayHome.textContent = publicData.shareHomeNo ? "Yes" : "No";
+        
+        const displayAdvancedStats = document.getElementById('display-share-advanced-stats-text');
+        if (displayAdvancedStats) displayAdvancedStats.textContent = publicData.shareAdvancedStats ? "Yes" : "No (Coming Soon)";
+    }
+    
+    // Set private preferences
+    if (privateData) {
+        const displayConsent = document.getElementById('display-consent-text');
+        const displayConsentStats = document.getElementById('display-consent-stats-text');
+        const displayConsentRoundups = document.getElementById('display-consent-roundups-text');
+
+        if (displayConsent) displayConsent.textContent = privateData.consent ? "Yes" : "No";
+        if (displayConsentStats) displayConsentStats.textContent = privateData.consentStats ? "Yes" : "No (Coming Soon)";
+        if (displayConsentRoundups) displayConsentRoundups.textContent = privateData.consentRoundups ? "Yes" : "No (Coming Soon)";
+    }
 }
 
+
+async function setupGlobalEditProfile(user, publicData, privateData) {
+    const globalEditBtn = document.getElementById('global-edit-btn');
+    const globalCancelBtn = document.getElementById('global-cancel-btn');
+    const globalSaveBtn = document.getElementById('global-save-btn');
+    const globalForm = document.getElementById('global-profile-form');
+
+    const profileDisplay = document.getElementById('profile-info-display');
+    const profileEdit = document.getElementById('profile-info-edit');
+    const registrationDisplay = document.getElementById('registration-display');
+    const registrationEdit = document.getElementById('registration-edit');
+    const preferencesDisplay = document.getElementById('preferences-display');
+    const preferencesEdit = document.getElementById('preferences-edit');
+
+    if (!globalEditBtn || !globalForm) return;
+
+    globalEditBtn.style.display = 'inline-block';
+
+    const teamSelect = document.getElementById('edit-team');
+    const divisionSelect = document.getElementById('edit-division');
+    
+    // Check if team is editable (July 1st to August 31st)
+    const today = new Date();
+    const month = today.getMonth(); // 0 is Jan, 6 is July, 7 is Aug
+    const isOffSeason = (month === 6 || month === 7);
+
+    if (isOffSeason) {
+        teamSelect.disabled = false;
+        document.getElementById('team-edit-help').textContent = "You can change your team during the off-season.";
+        try {
+            const teamsSnapshot = await getDocs(collection(db, 'teams'));
+            const teams = [];
+            teamsSnapshot.forEach(doc => teams.push({ id: doc.id, ...doc.data() }));
+            teams.sort((a, b) => a.name.localeCompare(b.name));
+            
+            teamSelect.innerHTML = '<option value="">Select a team</option>';
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                teamSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error("Failed to load teams", err);
+            teamSelect.innerHTML = '<option value="">Error loading teams</option>';
+        }
+    } else {
+        // Just populate the current team
+        teamSelect.innerHTML = `<option value="${publicData.teamId || ''}">${document.getElementById('team-name').textContent}</option>`;
+    }
+
+    if (!publicData.division || publicData.division === 'Please select') {
+        divisionSelect.disabled = false;
+        document.getElementById('div-edit-help').textContent = "Please select your division.";
+    }
+
+    const setEditMode = (isEdit) => {
+        profileDisplay.style.display = isEdit ? 'none' : 'block';
+        registrationDisplay.style.display = isEdit ? 'none' : 'block';
+        preferencesDisplay.style.display = isEdit ? 'none' : 'block';
+        
+        profileEdit.style.display = isEdit ? 'block' : 'none';
+        registrationEdit.style.display = isEdit ? 'block' : 'none';
+        preferencesEdit.style.display = isEdit ? 'block' : 'none';
+        
+        globalEditBtn.style.display = isEdit ? 'none' : 'inline-block';
+        globalCancelBtn.style.display = isEdit ? 'inline-block' : 'none';
+        globalSaveBtn.style.display = isEdit ? 'inline-block' : 'none';
+    };
+
+    globalEditBtn.addEventListener('click', () => {
+        // Populate Public
+        document.getElementById('edit-first-name').value = publicData.firstName || '';
+        document.getElementById('edit-last-name').value = publicData.lastName || '';
+        document.getElementById('edit-nickname').value = publicData.nickname || '';
+        teamSelect.value = publicData.teamId || '';
+        divisionSelect.value = publicData.division || '';
+        document.getElementById('share-mobile-no').checked = !!publicData.shareMobileNo;
+        document.getElementById('share-home-no').checked = !!publicData.shareHomeNo;
+
+        // Populate Private
+        document.getElementById('edit-email').value = privateData.email || '';
+        document.getElementById('edit-mobile-no').value = privateData.mobileNo || '';
+        document.getElementById('edit-home-no').value = privateData.homeNo || '';
+        document.getElementById('edit-consent').checked = !!privateData.consent;
+        document.getElementById('edit-consent-stats').checked = !!privateData.consentStats;
+        document.getElementById('edit-consent-roundups').checked = !!privateData.consentRoundups;
+
+        // Toggle phone sharing visibility based on existence of numbers
+        const updatePhoneToggleState = (inputId, checkboxId) => {
+            const input = document.getElementById(inputId);
+            const checkbox = document.getElementById(checkboxId);
+            const container = checkbox.closest('.checkbox-group');
+            
+            if (!input.value.trim()) {
+                checkbox.disabled = true;
+                checkbox.checked = false;
+                if (container) container.style.opacity = '0.5';
+            } else {
+                checkbox.disabled = false;
+                if (container) container.style.opacity = '1';
+            }
+        };
+
+        const mobileInput = document.getElementById('edit-mobile-no');
+        const homeInput = document.getElementById('edit-home-no');
+
+        // Initial check
+        updatePhoneToggleState('edit-mobile-no', 'share-mobile-no');
+        updatePhoneToggleState('edit-home-no', 'share-home-no');
+
+        // Live updates
+        mobileInput.addEventListener('input', () => updatePhoneToggleState('edit-mobile-no', 'share-mobile-no'));
+        homeInput.addEventListener('input', () => updatePhoneToggleState('edit-home-no', 'share-home-no'));
+
+        if (privateData.address) {
+            document.getElementById('edit-address-line-1').value = privateData.address.line1 || '';
+            document.getElementById('edit-address-line-2').value = privateData.address.line2 || '';
+            document.getElementById('edit-address-line-3').value = privateData.address.line3 || '';
+            document.getElementById('edit-parish').value = privateData.address.parish || '';
+            document.getElementById('edit-postcode').value = privateData.address.postCode || '';
+        }
+        
+        if (privateData.dob && privateData.dob.toDate) {
+            const d = privateData.dob.toDate();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            document.getElementById('edit-dob').value = `${year}-${month}-${day}`;
+        }
+
+        setEditMode(true);
+    });
+
+    globalCancelBtn.addEventListener('click', () => {
+        setEditMode(false);
+    });
+
+    globalForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const saveBtn = document.getElementById('global-save-btn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Saving...';
+        saveBtn.disabled = true;
+
+        try {
+            // 1. Gather Private Data
+            const updatedPrivateData = {
+                ...privateData,
+                email: document.getElementById('edit-email').value,
+                mobileNo: document.getElementById('edit-mobile-no').value,
+                homeNo: document.getElementById('edit-home-no').value,
+                consent: document.getElementById('edit-consent').checked,
+                consentStats: document.getElementById('edit-consent-stats').checked,
+                consentRoundups: document.getElementById('edit-consent-roundups').checked,
+                address: {
+                    line1: document.getElementById('edit-address-line-1').value,
+                    line2: document.getElementById('edit-address-line-2').value,
+                    line3: document.getElementById('edit-address-line-3').value,
+                    parish: document.getElementById('edit-parish').value,
+                    postCode: document.getElementById('edit-postcode').value
+                }
+            };
+            const dobVal = document.getElementById('edit-dob').value;
+            if (dobVal) {
+                const [year, month, day] = dobVal.split('-');
+                const dobDate = new Date(year, month - 1, day, 12, 0, 0); 
+                updatedPrivateData.dob = Timestamp.fromDate(dobDate);
+            }
+
+            // 2. Gather Public Data
+            const updatedPublicData = {
+                firstName: document.getElementById('edit-first-name').value,
+                lastName: document.getElementById('edit-last-name').value,
+                nickname: document.getElementById('edit-nickname').value,
+                shareMobileNo: document.getElementById('share-mobile-no').checked,
+                shareHomeNo: document.getElementById('share-home-no').checked
+            };
+            if (isOffSeason) {
+                const newTeamId = teamSelect.value;
+                if (newTeamId) {
+                    updatedPublicData.teamId = newTeamId;
+                }
+            }
+            if (!publicData.division || publicData.division === 'Please select') {
+                const newDiv = divisionSelect.value;
+                if (newDiv) {
+                    updatedPublicData.division = newDiv;
+                }
+            }
+
+            // Sync private values back to public if toggles are checked
+            if (updatedPublicData.shareMobileNo && updatedPrivateData.mobileNo) {
+                updatedPublicData.mobileNo = updatedPrivateData.mobileNo;
+            } else {
+                updatedPublicData.mobileNo = null;
+            }
+            if (updatedPublicData.shareHomeNo && updatedPrivateData.homeNo) {
+                updatedPublicData.homeNo = updatedPrivateData.homeNo;
+            } else {
+                updatedPublicData.homeNo = null; 
+            }
+
+            // 3. Save to Firestore
+            const privateDocRef = doc(db, 'players_private', publicData.publicId);
+            const publicDocRef = doc(db, 'players_public', publicData.publicId);
+            
+            // Execute parallel updates
+            await Promise.all([
+                updateDoc(privateDocRef, updatedPrivateData),
+                updateDoc(publicDocRef, updatedPublicData)
+            ]);
+
+            // 4. Update Local Memory
+            Object.assign(privateData, updatedPrivateData);
+            Object.assign(publicData, updatedPublicData);
+            
+            // 5. Re-render display
+            const populateField = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value || 'N/A';
+            };
+            
+            populateField('first-name', publicData.firstName);
+            populateField('last-name', publicData.lastName);
+            populateField('display-nickname', publicData.nickname || '-');
+            if (publicData.teamId && isOffSeason) {
+                const selectedOption = teamSelect.options[teamSelect.selectedIndex];
+                if (selectedOption) populateField('team-name', selectedOption.textContent);
+            }
+            populateField('division', publicData.division);
+            
+            // Re-render display booleans
+            const displayMobile = document.getElementById('display-share-mobile-text');
+            const displayHome = document.getElementById('display-share-home-text');
+            if (displayMobile) displayMobile.textContent = publicData.shareMobileNo ? "Yes" : "No";
+            if (displayHome) displayHome.textContent = publicData.shareHomeNo ? "Yes" : "No";
+
+            const displayAdvancedStats = document.getElementById('display-share-advanced-stats-text');
+            if (displayAdvancedStats) displayAdvancedStats.textContent = publicData.shareAdvancedStats ? "Yes" : "No (Coming Soon)";
+
+            const displayConsent = document.getElementById('display-consent-text');
+            const displayConsentStats = document.getElementById('display-consent-stats-text');
+            const displayConsentRoundups = document.getElementById('display-consent-roundups-text');
+            if (displayConsent) displayConsent.textContent = privateData.consent ? "Yes" : "No";
+            if (displayConsentStats) displayConsentStats.textContent = privateData.consentStats ? "Yes" : "No (Coming Soon)";
+            if (displayConsentRoundups) displayConsentRoundups.textContent = privateData.consentRoundups ? "Yes" : "No (Coming Soon)";
+            
+            populateField('email', privateData.email);
+            populateField('dob', formatDate(privateData.dob));
+            populateField('mobile-no', privateData.mobileNo);
+            populateField('home-no', privateData.homeNo);
+            if (privateData.address) {
+                populateField('address-line-1', privateData.address.line1);
+                populateField('address-line-2', privateData.address.line2);
+                populateField('address-line-3', privateData.address.line3);
+                populateField('parish', privateData.address.parish);
+                populateField('postcode', privateData.address.postCode);
+            }
+            
+            document.getElementById('stats-player-name').textContent = `${publicData.firstName} ${publicData.lastName}`;
+
+            setEditMode(false);
+            
+            // Show brief success alert
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = 'Profile successfully updated.';
+            msgEl.style.display = 'block';
+            msgEl.className = 'success-message';
+            setTimeout(() => msgEl.style.display = 'none', 3000);
+
+        } catch (error) {
+            console.error('Error saving profile data:', error);
+            alert('Failed to save details: ' + error.message);
+        } finally {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        }
+    });
+}
 
 // --- DOMContentLoaded Listener ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -364,6 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (publicData && privateData) {
             setupTabs();
             await displayProfileData(user, publicData, privateData);
+            await setupGlobalEditProfile(user, publicData, privateData);
         } else {
             const content = document.getElementById('personal-details-content');
             content.innerHTML = `<div class="card-no-hover"><h2 class="heading-border">Profile Not Found</h2><div class="profile-details"><p>We could not find a player profile linked to your user account.</p><p>Please contact a committee member if you believe this is an error.</p></div></div>`;

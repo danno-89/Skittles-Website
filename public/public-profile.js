@@ -12,7 +12,7 @@ const formatDate = (timestamp) => {
 };
 
 // --- Statistics Functions ---
-async function fetchPlayerStats(playerId, teamId) {
+async function fetchPlayerStats(playerId, teamId, seasonId) {
     if (!teamId || !playerId) return [];
     const allScores = [];
 
@@ -27,6 +27,7 @@ async function fetchPlayerStats(playerId, teamId) {
     const processSnapshot = (snapshot, isHomeTeam) => {
         snapshot.forEach(doc => {
             const match = doc.data();
+            if (seasonId && seasonId !== 'all' && match.season !== seasonId) return;
             const teamScores = isHomeTeam ? match.homeScores : match.awayScores;
             const opponentTeamId = isHomeTeam ? match.awayTeamId : match.homeTeamId;
             const playerScore = teamScores.find(s => s.playerId === playerId);
@@ -44,6 +45,7 @@ async function fetchPlayerStats(playerId, teamId) {
                 allScores.push({ 
                     ...playerScore, 
                     date: match.scheduledDate, 
+                    season: match.season,
                     opponent: opponentTeamId, 
                     matchId: doc.id,
                     teamScore: isHomeTeam ? match.homeScore : match.awayScore,
@@ -126,39 +128,96 @@ function calculateSummaryStats(scores) {
     };
 }
 
-async function renderStatistics(playerId, playerName, teamId, teamName) {
+let playerChart = null;
+
+async function renderStatistics(playerId, playerName, teamId, teamName, seasonId) {
     document.getElementById('stats-player-name-header').textContent = playerName;
     document.getElementById('stats-team-name-header').textContent = teamName;
     
-    const scores = await fetchPlayerStats(playerId, teamId);
+    const scores = await fetchPlayerStats(playerId, teamId, seasonId);
     const summary = calculateSummaryStats(scores);
 
     const mainStatsContainer = document.getElementById('main-stats-grid');
     const streakStatsContainer = document.getElementById('streak-stats-grid');
 
     mainStatsContainer.innerHTML = `
-        <div class="stat-box"><h4>Fixtures Played</h4><p>${summary.fixturesPlayed}</p></div>
-        <div class="stat-box"><h4>Total Pins</h4><p>${summary.totalPins}</p></div>
-        <div class="stat-box"><h4>High Score</h4><p>${summary.highScore}</p></div>
-        <div class="stat-box"><h4>Overall Average</h4><p>${summary.averageScore}</p></div>
-        <div class="stat-box"><h4>League Average</h4><p>${summary.leagueAverageScore}</p></div>
-        <div class="stat-box"><h4>Spares</h4><p>${summary.totalSpares}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>Fixtures Played</h4><p>${summary.fixturesPlayed}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>Total Pins</h4><p>${summary.totalPins}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>High Score</h4><p>${summary.highScore}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>Spares</h4><p>${summary.totalSpares}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>League Average</h4><p>${summary.leagueAverageScore}</p></div>
+        <div class="stat-box" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: center;"><h4>Overall Average</h4><p>${summary.averageScore}</p></div>
     `;
 
     streakStatsContainer.innerHTML = `
-        <div class="stat-box detailed-stat">
+        <div class="stat-box detailed-stat" style="flex: 1; padding: 10px;">
             <div class="stat-main"><h4>9s</h4><p class="stat-total">${summary.nines.total}</p></div>
             <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.nines.bestStreak}</p><p><strong>Current:</strong> ${summary.nines.currentStreak}</p></div></div>
         </div>
-        <div class="stat-box detailed-stat">
+        <div class="stat-box detailed-stat" style="flex: 1; padding: 10px;">
             <div class="stat-main"><h4>8s</h4><p class="stat-total">${summary.eights.total}</p></div>
             <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.eights.bestStreak}</p><p><strong>Current:</strong> ${summary.eights.currentStreak}</p></div></div>
         </div>
-        <div class="stat-box detailed-stat">
+        <div class="stat-box detailed-stat" style="flex: 1; padding: 10px;">
             <div class="stat-main"><h4>7s</h4><p class="stat-total">${summary.sevens.total}</p></div>
             <div class="stat-streaks"><h5>Streaks</h5><div class="streaks-data"><p><strong>Best:</strong> ${summary.sevens.bestStreak}</p><p><strong>Current:</strong> ${summary.sevens.currentStreak}</p></div></div>
         </div>
     `;
+
+    // Render Chart
+    const ctx = document.getElementById('player-score-chart');
+    if (ctx) {
+        if (playerChart) {
+            playerChart.destroy();
+        }
+        
+        const labels = [];
+        const cumulativeAverages = [];
+        let cumulativePins = 0;
+        
+        scores.forEach((s, index) => {
+            cumulativePins += s.score;
+            cumulativeAverages.push(cumulativePins / (index + 1));
+            const d = s.date.toDate();
+            labels.push(`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`);
+        });
+
+        playerChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cumulative Average',
+                    data: cumulativeAverages,
+                    borderColor: 'hsl(120, 60%, 40%)',
+                    backgroundColor: 'rgba(56, 142, 60, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: 'hsl(120, 60%, 40%)',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Avg: ${context.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: { precision: 1 }
+                    }
+                }
+            }
+        });
+    }
 
     // Re-sort scores to display newest first in the table
     scores.sort((a, b) => b.date.toDate() - a.date.toDate());
@@ -254,7 +313,31 @@ async function initializePage() {
     const teamDoc = await getDoc(doc(db, 'teams', playerData.teamId));
     const teamName = teamDoc.exists() ? teamDoc.data().name : 'Unknown Team';
 
-    await renderStatistics(playerId, `${playerData.firstName} ${playerData.lastName}`, playerData.teamId, teamName);
+    // Fetch all stats to determine available seasons
+    const allScores = await fetchPlayerStats(playerId, playerData.teamId, 'all');
+    const availableSeasons = [...new Set(allScores.map(match => match.season).filter(Boolean))];
+    availableSeasons.sort((a, b) => b.localeCompare(a));
+
+    // Season Filter Setup
+    const seasonFilter = document.getElementById('season-filter');
+    
+    seasonFilter.innerHTML = '<option value="all">All Time</option>';
+    availableSeasons.forEach(season => {
+        const option = document.createElement('option');
+        option.value = season;
+        option.textContent = season;
+        seasonFilter.appendChild(option);
+    });
+
+    // Default to 2025-26 if available, else most recent, else all
+    const defaultSeason = availableSeasons.some(s => s === '2025-26') ? '2025-26' : (availableSeasons[0] || 'all');
+    seasonFilter.value = defaultSeason;
+
+    seasonFilter.addEventListener('change', async (e) => {
+        await renderStatistics(playerId, `${playerData.firstName} ${playerData.lastName}`, playerData.teamId, teamName, e.target.value);
+    });
+
+    await renderStatistics(playerId, `${playerData.firstName} ${playerData.lastName}`, playerData.teamId, teamName, defaultSeason);
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);

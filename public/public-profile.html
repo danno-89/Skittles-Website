@@ -25,15 +25,31 @@
                     <h1 id="stats-player-name-header">Player Profile</h1>
                     <span id="stats-team-name-header" class="header-team-name"></span>
                 </div>
-                <a href="player_statistics" id="back-btn" class="btn btn-primary">← Back to Player Statistics</a>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="season-filter" class="form-select" style="padding: 0.5rem; border-radius: 4px; border: 1px solid var(--medium-grey); width: auto; min-width: 150px;"></select>
+                    <a href="player_statistics" id="back-btn" class="btn btn-primary" style="white-space: nowrap; width: fit-content;">← Back to Player Statistics</a>
+                </div>
             </div>
 
-            <div id="statistics-content" class="tab-pane active">
-                <div id="main-stats-grid" class="stats-summary-grid">
-                    <!-- Main stat boxes will be inserted here by JavaScript -->
-                </div>
-                <div id="streak-stats-grid" class="stats-summary-grid">
-                    <!-- Streak stat boxes will be inserted here by JavaScript -->
+            <div id="statistics-content" class="tab-pane active" style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; flex-wrap: nowrap; gap: 20px; align-items: stretch;">
+                    <!-- Column 1: Main Stats (2x3) -->
+                    <div id="main-stats-grid" class="stats-summary-grid" style="flex: 0 0 320px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; margin-bottom: 0;">
+                        <!-- Main stat boxes will be inserted here by JavaScript -->
+                    </div>
+
+                    <!-- Column 2: Average Progression Graph -->
+                    <div class="stat-box" style="flex: 1; min-width: 400px; padding: 10px; display: flex; flex-direction: column; margin-bottom: 0;">
+                        <h4 style="text-align: center; margin-top: 0; color: var(--club-green); font-size: 0.9rem;">Average Progression</h4>
+                        <div style="flex-grow: 1; position: relative; min-height: 300px;">
+                            <canvas id="player-score-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Streak Stats (1x3) -->
+                    <div id="streak-stats-grid" class="stats-summary-grid" style="flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 0;">
+                        <!-- Streak stat boxes will be inserted here by JavaScript -->
+                    </div>
                 </div>
                 <div class="stats-results-table">
                     <!-- Detailed results table will be inserted here by JavaScript -->
@@ -43,7 +59,7 @@
     </div>
 
     <div w3-include-html="footer.html"></div>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="main.js"></script>
     <script type="module" src="firebase.config.js"></script>
     <script type="module" src="public-profile.js"></script>
