@@ -88,6 +88,14 @@ function generateSpareSlots(fixtures) {
         }
     });
 
+    // Explicitly include April 7th, 8th, and 9th
+    const explicitSpareDays = ['2026-04-07', '2026-04-08', '2026-04-09'];
+    explicitSpareDays.forEach(dateStr => {
+        if (!fixturesByDate.has(dateStr)) {
+            fixturesByDate.set(dateStr, []);
+        }
+    });
+
     const standardTimes = ['19:00', '20:00', '21:00'];
 
     fixturesByDate.forEach((dayFixtures, dateStr) => {
